@@ -59,7 +59,6 @@ func main() {
 			@<Create |box|@>
 			@<Start a message loop for |box|@>
 			@<Inform |box| to create a window@>
-			@<Inform |box| to print messages@>
 		}
 	} else {
 		@<Create the main window@>
@@ -1296,9 +1295,9 @@ f.Close()
 
 @* Linking of threads.
 
-Here we define global map of unique message identifiers on a pointer to a message and its children..
+Here we define global map of unique message identifiers on a pointer to a message and its children.
 An unique id of every message will be stored in this map.
-It will be changed in the common |boxes| gorouting, so a corresponding channel should be defined too.
+It will be changed in the common |boxes| goroutine, so a corresponding channel should be defined too.
 If we need to find children for a message by id, we should send to |idch| a channel instead of
 a pointer to a message and the children will be sent to this channel.
 If we need to remove a message from |idmap|, we should send to |idch| a |nil| like a |val|.
@@ -1694,10 +1693,12 @@ if !box.threadMode() {
 @ To stay on top of the box's window when printing we go to top for first
 100 messages, I hope it is enough to print other messages in the background without scrolling.
 @<Go to the top of window for first 100 messages@>=
-if !ontop || pcount<100 {
+if !ontop {
 	glog.V(debug).Infof("pcount: %v, ontop: %v\n", pcount, ontop)
 	@<Go to top of window |w|@>
-	ontop=true
+	if pcount>=100 {
+		ontop=true
+	}
 }
 
 
@@ -2239,7 +2240,7 @@ go func() {
 					quote=true
 					fallthrough
 				case "Reply", "Replyall":
-					if ev.Text=="Replya" {
+					if ev.Text=="Reply" {
 						args:=strings.Fields(ev.Arg)
 						for _, v:=range args {
 							if v=="all" {
@@ -2649,40 +2650,43 @@ once.Do(func() {@<Get it at once@>})
 
 @* Composing a message.
 @<Compose a message@>=
-@<Create a new message window@>
-name:=fmt.Sprintf("Amail/%s/%d/%sReply%s", @t\1@>@/
-						this.box.name, @/
-						this.id, @/
-						func()string{if quote {return "Q"}; return ""}(), @/
-						func()string{if replyall {return "all"}; return ""}()@t\2@>)
-@<Print the |name| for window |w|@>
-buf:=make([]byte, 0, 0x8000)
-buf=append(buf, fmt.Sprintf("To: %s\n", this.from)...)					
-if replyall {
-	for _, v:=range this.to {
-		buf=append(buf, fmt.Sprintf("To: %s\n", v)...)
-	}
-	for _, v:=range this.cc {
-		buf=append(buf, fmt.Sprintf("To: %s\n", v)...)
-	}	
-}
-buf=append(buf, fmt.Sprintf("Subject: %s%s\n", @t\1@>@/
-	func() string{
-		if !strings.Contains(this.subject, "Re:") {
-			return "Re: "
+{
+	@<Create a new message window@>
+	name:=fmt.Sprintf("Amail/%s/%d/%sReply%s", @t\1@>@/
+							this.box.name, @/
+							this.id, @/
+							func()string{if quote {return "Q"}; return ""}(), @/
+							func()string{if replyall {return "all"}; return ""}()@t\2@>)
+	@<Print the |name| for window |w|@>
+	buf:=make([]byte, 0, 0x8000)
+	buf=append(buf, fmt.Sprintf("To: %s\n", this.from)...)					
+	if replyall {
+		for _, v:=range this.to {
+			buf=append(buf, fmt.Sprintf("To: %s\n", v)...)
 		}
-		return ""
-	}(), @/
-	this.subject)...@t\2@>)
-if quote {
-	@<Add quoted message@>
-} else {
-	buf=append(buf, fmt.Sprintf("Include: Mail/%s/%d/raw\n", this.box.name, this.id)...)
-	@^Using of \.{Mail} is required by \.{upas/marshal}@>
+		for _, v:=range this.cc {
+			buf=append(buf, fmt.Sprintf("To: %s\n", v)...)
+		}	
+	}
+	buf=append(buf, fmt.Sprintf("Subject: %s%s\n", @t\1@>@/
+		func() string{
+			if !strings.Contains(this.subject, "Re:") {
+				return "Re: "
+			}
+			return ""
+		}(), @/
+		this.subject)...@t\2@>)
+	if quote {
+		buf=append(buf, '\n')	
+		@<Add quoted message@>
+	} else {
+		buf=append(buf, fmt.Sprintf("Include: Mail/%s/%d/raw\n", this.box.name, this.id)...)
+		@^Using of \.{Mail} is required by \.{upas/marshal}@>
+	}
+	buf=append(buf, '\n')
+	w.Write(buf)
+	@<Go to top of window |w|@>	
 }
-buf=append(buf, '\n')
-w.Write(buf)
-@<Go to top of window |w|@>	
 
 @
 @<Create a new message window@>=

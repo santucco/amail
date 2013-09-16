@@ -55,8 +55,8 @@ separated by comma.
 
 "Attach:" file places a copy of file in the message as a regular MIME attachment.
 
-When replying to a message without quoting of the message amail will always "Include:" 
-the original message; delete that line if you don't want to include it.
+When replying to a message without quoting of the message amail will always
+"Include:" the original message; delete that line if you don't want to include it.
 
 There are some known problems, for the moment most of them are addressed to mailfs,
 some to Acme:
