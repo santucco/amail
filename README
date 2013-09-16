@@ -1,17 +1,27 @@
 The amail program is a replacement of classic Acme's Mail program.
 
-Amail uses upas/nfs to parse the mailboxes. By default it shows a list of IMAP mailboxes with a number of unread messages and a total number of messages. Mailboxes can be opened by clicking by the right button on a name of mailbox.
+Amail uses upas/nfs to parse the mailboxes. 
+By default it shows a list of IMAP mailboxes with a number of unread messages 
+and a total number of messages. 
+Mailboxes can be opened by clicking by the right button on a name of mailbox.
 
-Also mailboxes can be specified like command line arguments, in this case the main window with other mailboxes won't be shown.
+Also mailboxes can be specified like command line arguments, 
+in this case the main window with other mailboxes won't be shown.
 
-By default only new messages are shown in the mailbox's window. All messages can be viewed by clicking of the middle button on ShowAll command in the tag of the mailbox's window.
-All messages are shown in a threaded mode (default) which can be switched off/on by clicking of the middle button on ShowPlain/ShowThreads.
+By default only new messages are shown in the mailbox's window. 
+All messages can be viewed by clicking of the middle button on ShowAll command 
+in the tag of the mailbox's window.
+All messages are shown in a threaded mode (default) which can be switched off/on 
+by clicking of the middle button on ShowPlain/ShowThreads.
 
-Initial view modes can be specified locally for the current mailbox or  globally for all mailboxes in the main window or via the command line. 
+Initial view modes can be specified locally for the current mailbox or 
+globally for all mailboxes in the main window or via the command line. 
 
-Viewing of messages is processing like in Mail: by clicking of the right button ona  number of message. Few messages can be selected for opening
+Viewing of messages is processing like in Mail: by clicking of the right button
+on a number of message. Few messages can be selected for opening
 
-New messages are marked by "(*)", a thread levels of a message are marked by "+". Both marks can be redefined via command line.
+New messages are marked by "(*)", a thread levels of a message are marked by "+".
+ Both marks can be redefined via command line.
 
 A mailbox's tag can contain next commands:
 - "Mail" opens a window to compose a new mail.
@@ -25,15 +35,19 @@ A mailbox's tag can contain next commands:
 - "Search" finds messages with specified text.
 
 A message's window tag can contain next commands:
-- "Q Reply all" makes a reply, with quoted source message, if "Q" and to all recipients if "Replyall" or "Reply all".
+- "Q Reply all" makes a reply, with quoted source message, 
+if "Q" and to all recipients if "Replyall" or "Reply all".
 - "Delmesg" marks the message for removing and closes the window.
 - "UnDelmesg" clears the mark for removing.
 - "Html" shows an html version of the message if any.
 - "Text" shows a text version of the message if any.
-- "Browser" saves a html version of the message and its files on a disk and plumbs a path to the message on the disk to web browser.
+- "Browser" saves a html version of the message and its files on a disk 
+and plumbs a path to the message on the disk to web browser.
 - "Save" stores the message to a specified mailbox.
 
-Like in Mail, when composing a mail message or replying to a message, the first line of the text is a list of recipients of the message, separated by comma.
+Like in Mail, when composing a mail message or replying to a message, 
+the first line of the text is a list of recipients of the message, 
+separated by comma.
 
 "To:", and "CC:", and "BCC:" lines are interpreted as usual. 
 
@@ -41,10 +55,17 @@ Like in Mail, when composing a mail message or replying to a message, the first 
 
 "Attach:" file places a copy of file in the message as a regular MIME attachment.
 
-When replying to a message without quoting of the message amail will always "Include:" the original message; delete that line if you don't want to include it.
+When replying to a message without quoting of the message amail will always "Include:" 
+the original message; delete that line if you don't want to include it.
 
-There are some known problems, for the moment most of them are addressed to mailfs, some to Acme:
-1. Quite big random access time to messages (according to the sources mailfs always find a message by sequental comporation)
-2. Mailboxes other that mbox are not refreshing (it seems mailfs doesn't make subscription on mailboxes other, that INBOX).).
-3. "Browser" command shows international messages in wrong encoding (mailfs translates the body of the message to utf-8, but doesn't change "charset" of the message to utf-8).
-4. There is a big response time after printing of a lot of text. There is no way to limit events, text insertion events take a lot of CPU on old computers.
+There are some known problems, for the moment most of them are addressed to mailfs,
+some to Acme:
+1. Quite big random access time to messages (according to the sources 
+mailfs always find a message by sequental comporation)
+2. Mailboxes other that mbox are not refreshing (it seems mailfs doesn't make 
+subscription on mailboxes other, that INBOX).).
+3. "Browser" command shows international messages in wrong encoding 
+(mailfs translates the body of the message to utf-8, but doesn't change 
+"charset" of the message to utf-8).
+4. There is a big response time after printing of a lot of text. 
+There is no way to limit events, text insertion events take a lot of CPU on old computers.
