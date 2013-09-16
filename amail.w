@@ -1122,12 +1122,14 @@ if err:=box.w.WriteAddr("#%d,#%d", ev.Begin, ev.End); err!=nil {
 to separate the name and the number. In case the name exists the message will be opened via the main loop.
 @<Open a message by number@>=
 {
-	glog.V(debug).Infof("looking a message number in '%s'\n", ev.Text)
+	glog.V(debug).Infof("looking a message number in '%s'\n", s)
 	s=strings.TrimLeft(s, levelmark+deleted)
 	f:=strings.Split(s, "/")
+	glog.V(debug).Infof("parts of message path: '%v'\n", f)
 	num:=0
 	for i, v:=range f {
-		if _, err:=fmt.Sscanf(v, "%d", &num); err==nil {
+		var err error
+		if num, err=strconv.Atoi(strings.TrimRight(v, newmark)); err==nil {
 			found=true
 			if i>0 {
 				name:=strings.Join(f[:i], "/")
