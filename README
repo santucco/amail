@@ -68,4 +68,5 @@ subscription on mailboxes other, that INBOX).).
 (mailfs translates the body of the message to utf-8, but doesn't change 
 "charset" of the message to utf-8).
 4. There is a big response time after printing of a lot of text. 
-There is no way to limit events, text insertion events take a lot of CPU on old computers.
+There is no way to limit events, text insertion events take a lot of CPU 
+on old computers.
