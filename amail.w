@@ -1244,6 +1244,7 @@ if err:=box.w.WriteCtl("addr=dot"); err!=nil {
 	glog.Errorf("can't open 'xdata' file: %s\n", err)
 } else {
 	b:=bufio.NewReader(xdata)
+	var msgs messages
 	for s, err:=b.ReadString('\n'); err==nil || err==io.EOF; s, err=b.ReadString('\n') {
 		num:=0
 		glog.V(debug).Infof("looking a message number in '%s'\n", s)
@@ -1254,8 +1255,8 @@ if err:=box.w.WriteCtl("addr=dot"); err!=nil {
 		if err==io.EOF {
 			break
 		}
-		@<Check for space in |box.rfch|@>	
 	}
+	@<Inform |box| to print |msgs|@>
 }
 
 @
@@ -1266,8 +1267,7 @@ if p, ok:=box.all.Search(num); ok {
 	}
 	box.all[p].deleted=true
 	box.deleted++
-	msg:=box.all[p]
-	@<Inform |box| to print |msg|@>
+	msgs=append(msgs, box.all[p])
 	if box.all[p].w!=nil {
 		this:=box.all[p]
 		@<Write a tag of message window@>
@@ -1631,6 +1631,16 @@ box.rfch<-&struct{seek bool; msgs messages}{false, msgs}
 	box.rfch<-&struct{seek bool; msgs messages}{true, append(messages{}, msg)}
 }
 
+@ |msgs| will be printed with setting a position for every message.
+@<Inform |box| to print |msgs|@>=
+{
+	if len(msgs)!=0 {
+		glog.V(debug).Infof("inform the '%s' mailbox to print messages with setting a position\n", box.name)
+		box.rfch<-&struct{seek bool; msgs messages}{true, msgs}
+	}
+}
+
+
 @ We need to store a current position of |src| to know a message will be started to print with.
 @<Rest of |mailbox| members@>=
 pos	int
@@ -1710,7 +1720,8 @@ if !ontop {
 
 
 @ Here the messages composing is produced. To avoid of overloading of events processing
-we print a lot of messages at a time. In case of threaded print a recursion is used.
+we print a lot of messages at a time. But if |v.seek| is set messages will be printed one
+by one, because we have to set a position for every message..
 
 @<Compose messages of the |box|@>=
 c:=0
@@ -1723,6 +1734,9 @@ for len(v.msgs)>0 && c<100 {
 	c++
 	@<Compose a header of |msg|@>
 	v.msgs=v.msgs[1:]
+	if v.seek {
+		break
+	}
 }
 pcount+=c
 
@@ -1758,13 +1772,6 @@ So we compose a list of messages and send them to reprint one by one.
 			@<Inform |box| to print |msg|@>
 		}
 	}
-}
-
-@ |box.rfch| can be overfilled and a deadlock can occur. We need to check for this situation.
-@<Check for space in |box.rfch|@>=
-if len(box.rfch)==cap(box.rfch) {
-	glog.V(debug).Infoln("too many messages are selected, skip the rest")
-	break
 }
 
 @
