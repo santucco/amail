@@ -559,6 +559,7 @@ case ev, ok:=<-ech:
 	glog.V(debug).Infof("an event from main window has been received: %v\n", ev)
 	if !ok {
 		ech=nil
+		@<Decrease the windows count@>
 		return
 	}
 	if (ev.Type&goacme.Execute)==goacme.Execute {
@@ -1080,14 +1081,15 @@ case ev, ok:=<-box.ech:
 		@<Inform |box| to print messages@>
 		continue
 	} else if (ev.Type&goacme.Look)==goacme.Look {
-		found:=false
+		@<Create |msgs|@>
 		if (ev.Type&goacme.Tag)==goacme.Tag {
 			s:=ev.Text
 			@<Open a message by number@>
 		} else {
 			@<Open selected messages@>
 		}
-		if found {
+		if len(msgs)!=0 {
+			@<Send |msgs|@>
 			continue
 		}
 	}
@@ -1109,17 +1111,13 @@ if err:=box.w.WriteAddr("#%d,#%d", ev.Begin, ev.End); err!=nil {
 		@<Open a message by number@>
 		if err==io.EOF {
 			break
-		}
-		if len(box.lch)==cap(box.lch) {
-			glog.V(debug).Infoln("too many messages are selected, skip the rest")
-			break
 		}	
 	}
 
 }		
 
 @ A message path can contain not only a number but a mailbox name too. So we have to parse an input string
-to separate the name and the number. In case the name exists the message will be opened via the main loop.
+to separate the name and the number. In any case the message will be opened via the main loop.
 @<Open a message by number@>=
 {
 	glog.V(debug).Infof("looking a message number in '%s'\n", s)
@@ -1130,37 +1128,44 @@ to separate the name and the number. In case the name exists the message will be
 	for i, v:=range f {
 		var err error
 		if num, err=strconv.Atoi(strings.TrimRight(v, newmark)); err==nil {
-			found=true
+			name:=box.name
 			if i>0 {
-				name:=strings.Join(f[:i], "/")
+				name=strings.Join(f[:i], "/")
 				glog.V(debug).Infof("the message number is '%d' in the '%s' mailbox\n", num, name)
-				@<Open window with a |num| message of the other box@>
-			} else {
-				glog.V(debug).Infof("the message number is '%d'\n", num)
-				@<Open window with a |num| message of the |box|@>
-			}
+			} 
+			@<Add a |num| message to |msgs|@>
 			break
 		}
 	} 	
 }
 
-@ A channel to open a |id| message of a |name| mailbox.
+@ A channel to open a lists of  messages for an every mailbox.
 @<Variables@>=
-lch=make(chan *struct{name string; id int}, 100)
+lch=make(chan *map[string][]int, 100)
 
 @
-@<Open window with a |num| message of the other box@>=
+@<Create |msgs|@>=
+msgs:=make(map[string][]int)
+
+@
+@<Add a |num| message to |msgs|@>=
 glog.V(debug).Infof("sending a signal to open a window with the '%d' message of the '%s' mailbox\n", num, name)
-lch<-&struct{name string; id int}{name:name, id:num}
+msgs[name]=append(msgs[name], num)
 
 @ Let's add a processing of |lch| to the main thread
 @<Process of other common channels@>=
 	case d:=<-lch:
-		name:=d.name
-		@<Looking for a |name| mailbox...@>
-		boxes[i].lch<-d.id
-		
+		if d==nil {
+			continue
+		}
+		for name, ids:=range *d {
+			@<Looking for a |name| mailbox...@>
+			boxes[i].lch<-ids
+		}
 
+@
+@<Send |msgs|@>=
+lch<-&msgs
 
 @
 @<Get a pointer |msg| to current message@>=
@@ -1968,45 +1973,41 @@ func (box *mailbox) search(str string) (msgs messages) {
 
 At first let's extend |mailbox| by a |lch| channel
 @<Rest of |mailbox| members@>=
-lch chan int
+lch chan []int
 
 @
 @<Rest of initialization of |mailbox|@>=
-lch:make(chan int, 100),
+lch:make(chan []int, 100),
 
 @ We have to extend |message| too by |*goacme.Window|
 @<Rest of |message| members@>=
 w *goacme.Window
 
-
-@
-@<Open window with a |num| message of the |box|@>=
-glog.V(debug).Infof("sending a signal to open a window with the '%d' message of the '%s' mailbox\n", num, box.name)
-box.lch<-num
-
-@ Here we will process requests to open a parcular message. If the message is new, it should be removed from |box.unread| and
+@ Here we will process requests to open messages. If the message is new, it should be removed from |box.unread| and
 its view in |box| window should be changed. The count of unread messages on the main window should be refreshed too.
 @<Processing of other box channels@>=
-case id:=<-box.lch:
-	glog.V(debug).Infof("opening a window with the '%d' message of the '%s' mailbox\n", id, box.name)
-	p, ok:=box.all.Search(id)
-	if !ok {
-		glog.V(debug).Infof("the '%d' message of the '%s' mailbox has not found\n", id, box.name)
-		continue
-	}
-	msg:=box.all[p]
-	if msg.w==nil {
-		if err:=msg.open(); err!=nil {
+case ids:=<-box.lch:
+	for _, id:=range ids {
+		glog.V(debug).Infof("opening a window with the '%d' message of the '%s' mailbox\n", id, box.name)
+		p, ok:=box.all.Search(id)
+		if !ok {
+			glog.V(debug).Infof("the '%d' message of the '%s' mailbox has not found\n", id, box.name)
 			continue
 		}
-		if msg.unread {
-			@<Remove the |n| message from |unread|@>
-			@<Refresh the message's view@>
-			@<Send |box| to refresh the main window@>
-		}
-	} else {
-		glog.V(debug).Infof("a window of the '%d' message of the '%s' already exists, just show it\n", id, box.name)
+		msg:=box.all[p]
+		if msg.w==nil {
+			if err:=msg.open(); err!=nil {
+				continue
+			}
+			if msg.unread {
+				@<Remove the |n| message from |unread|@>
+				@<Refresh the message's view@>
+				@<Send |box| to refresh the main window@>
+			}
+		} else {
+			glog.V(debug).Infof("a window of the '%d' message of the '%s' already exists, just show it\n", id, box.name)
 		msg.w.WriteCtl("dot=addr\nshow")
+		}
 	}
 	
 @

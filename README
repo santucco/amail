@@ -70,3 +70,6 @@ subscription on mailboxes other, that INBOX).).
 4. There is a big response time after printing of a lot of text. 
 There is no way to limit events, text insertion events take a lot of CPU 
 on old computers.
+5. Sometimes Acme exits with an error: 
+"acme: endofframe: No such file or directory". It happens when an output is
+producing in a hidden Acme's window (tag?)
