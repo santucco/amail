@@ -1,15 +1,16 @@
 \input header
 
 @** Introduction.
+
 \.{Amail} is a mail client for \.{Acme} - an editor/window manager/shell.
 It is supposed to be a replacement for \.{Mail} - the classic mail client for \.{Acme}.
 
 For years I was being a user of \.{Opera} - a web browser with a mail client.
 But a quality of the web browser of \.{Opera} was becoming low from a version to a version,
-so I decided to change the web brower to a \.{Chromium}, but I haven't found a mail client for my requirements.
+so I decided to change the web brower to a \.{Chromium}, but I didn't find a mail client for my requirements.
 
 Few years ago I saw \.{Acme} and found it is very simple, but powerful and extremely extensible.
-Yes, it is not perfect (nothing is perfect), but it is good enough, and I'm using it like a programming environment
+Yes, it is not perfect (nothing is perfect), but it is good enough, and I use it like a programming environment
 (instead of \.{Emacs}).
 I had known about \.{Mail} - a mail client for \.{Acme}, and a time to try it has come.
 
@@ -19,12 +20,12 @@ I have found \.{Mail} has some disadvantages (at least for me):
 \yskip\item{$\bullet$}it doesn't have a navigation though mailboxes
 \yskip\item{$\bullet$}it has a quite big loading time with big mailboxes.
 
-I also prefer to view some messages in \.{html}-form (if any), may be in a web browser.
+I also prefer to view some messages in \.{html}-form (if any) with a possibility to open them in a web browser.
 
 \.{Amail} is supposed to use with a conjunction with a \.{upas} - a mail filesystem supports \.{IMAP4} mail protocol.
 I'm going to save a compatibility with \.{Mail} by commands.
 
-For the moment \.{Amail} is tested on \.{Acme} from \.{Plan 9 from User Space} (http://swtch.com/plan9port/).
+For the moment \.{Amail} is working with \.{Acme} from \.{Plan 9 from User Space} (http://swtch.com/plan9port/).
 I have some doubts \.{Amail} will work in \.{Plan9} without changes.
 
 @** Implementation.
@@ -32,7 +33,6 @@ I have some doubts \.{Amail} will work in \.{Plan9} without changes.
 @i license
 import (
 	@<Imports@>
-	"time"
 )@#
 
 type (
@@ -97,7 +97,7 @@ wch chan int=make(chan int, 100)
 wcount int
 
 @ When |wcount==0|, the program quits.
-@<Process of other common channels@>=
+@<Processing of other common channels@>=
 	case i:=<-wch:
 		wcount+=i
 		if wcount==0 {
@@ -144,7 +144,7 @@ skipboxes	[]string
 	flag.StringVar(&newmark, "newmark", "(*)", "mark of new messages")
 	flag.Usage=func() {
 		fmt.Fprintf(os.Stderr, "Mail client for Acme programming environment\n")
-		fmt.Fprintf(os.Stderr, "Usage: %s [options][<mailbox>]\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Usage: %s [options] [<mailbox 1>]...[<mailbox N>]\n", os.Args[0])
 		fmt.Fprintln(os.Stderr, "Options:")
 		flag.PrintDefaults()
 	}
@@ -444,7 +444,7 @@ for {
 			@<Looking for a |name| mailbox...@>
 			glog.V(debug).Infof("sending '%d' to delete from the '%s' mailbox\n", d.id, boxes[i].name)
 			boxes[i].dch<-d.id
-		@<Process of other common channels@>
+		@<Processing of other common channels@>
 	}
 }
 
@@ -577,6 +577,7 @@ case ev, ok:=<-ech:
 				mw.Close()
 				mw=nil
 				@<Exit!@>
+				return
 			case "debug":
 				debug=0
 				continue
@@ -684,7 +685,7 @@ To avoid of unresponding main window the counting is made in |default| branch of
 	for i:=len(fs)-1; i>=0; {
 		select {
 			@<On exit?@>
-			@<Processing of other box channels@>	
+			@<Processing of other |box| channels@>	
 			default:
 				d:=fs[i]
 				i--
@@ -853,13 +854,13 @@ func(box *mailbox) loop() {
 	for {
 		select {
 			@<On exit?@>
-			@<Processing of other box channels@>
+			@<Processing of other |box| channels@>
 		}
 	}
 }
 
 @ Here new and deleted messages of |box| are processed.
-@<Processing of other box channels@>=
+@<Processing of other |box| channels@>=
 case id:=<-box.mch:
 	glog.V(debug).Infof("'%d' should be added to the '%s' mailbox\n", id, box.name)
 	msg, new, err:=box.newMessage(id)
@@ -871,13 +872,19 @@ case id:=<-box.mch:
 	}
 	box.total++
 	@<Add |msg| to |all|@>
-	@<Inform |box| to print |msg|@>
+	if box.threadMode() {
+		@<Get root of |msg|@>
+		var msgs messages
+		src:=append(messages{}, msg)
+		@<Make a full thread in |msgs| with |msg| like a root@>
+		@<Inform |box| to print |msgs|@>
+	} else {
+		@<Inform |box| to print |msg|@>
+	}
 	@<Send |box| to refresh the main window@>
 case id:=<-box.dch:
 	glog.V(debug).Infof("'%d' should be deleted from the '%s' mailbox\n", id, box.name)
 	@<Delete a message with |id|@>
-	@<Check for a clean state of the |box|'s window@>
-	@<Send |box| to refresh the main window@>
 
 @ |deleted| points out the message is marked to delete.
 @<Rest of |message| members@>=
@@ -901,24 +908,25 @@ deleted bool
 
 @
 @<Delete a message with |id|@>=
-box.deleteMessage(id)
+if i, ok:=box.all.Search(id); ok {
+	msgs:=append(messages{}, box.all[i])
+	@<Delete a message at position |i|@>	
+	@<Send deleted |msgs|@>
+}
 
-@
-@c
-func (box *mailbox) deleteMessage(id int) {
-	glog.V(debug).Infof("deleting the '%d' message from the '%s' mailbox\n", id, box.name)
-	box.unread.DeleteById(id)
-	if msg, ok:=box.all.DeleteById(id); ok {
+@ Here we delete a message from |box.all| and |box.unread|, decrease |total| and |deleted| counts,
+send the message id to clean a thread links and send a signal to refresh the main window.
+@<Delete a message at position |i|@>=
+{
+	if msg, ok:=box.all.Delete(i); ok {
+		glog.V(debug).Infof("deleting the '%d' message from the '%s' mailbox\n", msg.id, box.name)
+		box.unread.DeleteById(msg.id)
 		box.total--
 		if msg.deleted {
 			box.deleted--
 		}
-		@<Get |children| for |msg|@>
 		@<Clean up |msg|@>
-		@<Remove the message@>
-		if box.threadMode() {
-			@<Refresh children@>
-		}
+		@<Send |box| to refresh the main window@>
 	}
 }
 
@@ -966,7 +974,7 @@ glog.V(debug).Infof("inform the '%s' mailbox to create a window\n", box.name)
 box.cch<-true
 
 @ Here we are waiting for a signal to create |box|'s window and create it.
-@<Processing of other box channels@>=
+@<Processing of other |box| channels@>=
 case <-box.cch:
 	glog.V(debug).Infof("a signal to create the '%s' mailbox window has been received\n", box.name)
 	if box.w==nil {
@@ -1002,7 +1010,7 @@ if box.ech, err=box.w.EventChannel(0, goacme.Mouse, goacme.Look|goacme.Execute);
 thread bool
 
 @ Processing of events from the box's window
-@<Processing of other box channels@>=
+@<Processing of other |box| channels@>=
 case ev, ok:=<-box.ech:
 	glog.V(debug).Infof("an event has been received from the '%s' mailbox window: %v\n", box.name, ev)
 	if !ok {
@@ -1153,7 +1161,7 @@ glog.V(debug).Infof("sending a signal to open a window with the '%d' message of 
 msgs[name]=append(msgs[name], num)
 
 @ Let's add a processing of |lch| to the main thread
-@<Process of other common channels@>=
+@<Processing of other common channels@>=
 	case d:=<-lch:
 		if d==nil {
 			continue
@@ -1199,12 +1207,17 @@ deleted="(deleted)-"
 glog.V(debug).Infof("compose a header of the '%d' message of the '%s' mailbox\n", msg.id, box.name)
 buf=append(buf, fmt.Sprintf("%s%s%d%s/\t%s\t%s\n\t%s\n", @t\1@>@/
 	func() string{if msg.deleted {return deleted};return ""}(), @/
-	func() string{if msg.box.name!=box.name {return fmt.Sprintf("%s/", msg.box.name)};return ""}(), @/
+	func() string{if msg.box!=box {return fmt.Sprintf("%s/", msg.box.name)};return ""}(), @/
 	msg.id, @/
 	func() string{if msg.unread {return newmark};return ""}(), @/
 	msg.from, @/
 	msg.date, @/
 	msg.subject )...@t\2@>)
+
+
+@
+@<Imports@>=
+	"time"
 
 @
 @<Rest of |message| members@>=
@@ -1256,7 +1269,7 @@ if err:=box.w.WriteCtl("addr=dot"); err!=nil {
 			break
 		}
 	}
-	@<Inform |box| to print |msgs|@>
+	@<Refresh |msgs|@>
 }
 
 @
@@ -1274,7 +1287,8 @@ if p, ok:=box.all.Search(num); ok {
 	}
 }
 
-@ Here is processing a final deletion of messages from \.{mailfs}
+@ Here is processing a final deletion of messages from \.{mailfs}. Any message could be printed in
+other mailboxes in threads, so we collect messages in |msgs| and send |msgs| to all mailboxes.
 @<Delete messages@>=
 f, err:=box.fid.Walk("ctl")
 if err==nil {
@@ -1284,21 +1298,68 @@ if err!=nil {
 	glog.Errorf("can't open 'ctl': %v\n", err)
 	continue
 }
-for i:=0; i<len(box.all); {
+var msgs messages
+for i:=0; i<len(box.all);{
 	if !box.all[i].deleted || box.all[i].w!=nil {
 		i++
 		continue
 	}
-	id:=box.all[i].id
-	glog.V(debug).Infof("deleting of '%s/%d' from the server\n", box.name, id)
-	if _, err:=f.Write([]byte(fmt.Sprintf("delete %s %d", box.name, id))); err!=nil{
-		glog.Errorf("can't delete the '%s/%d' message from the server : %v\n", box.name, id, err)
-	}
-	@<Delete a message with |id|@>
+	msgs=append(msgs, box.all[i])
+	@<Delete a message at position |i|@>
+}
+cmd:=fmt.Sprintf("delete %s", box.name)
+for _, msg:=range msgs {
+	cmd=fmt.Sprintf("%s %d ", cmd, msg.id)
+}
+glog.V(debug).Infof("command to delete messages: '%s'\n", cmd)
+if _, err:=f.Write([]byte(cmd)); err!=nil{
+	glog.Errorf("can't delete messages: %v\n", err)
 }
 f.Close()
-@<Send |box| to refresh the main window@>
-@<Check for a clean state of the |box|'s window@>
+@<Send deleted |msgs|@>
+
+
+@ |mdch| is a channel receives slices of messages to delete.
+@<Rest of |mailbox| members@>=
+mdch	chan messages
+
+@
+@<Rest of initialization of |mailbox|@>=
+mdch:make(chan messages, 100),
+
+@ All messages from a received slice |m| will be removed from |box|'s window. In case of the thread mode 
+|children| is obtained and refreshed.
+@<Processing of other |box| channels@>=
+case m:=<-box.mdch:
+	if box.w==nil {
+		continue
+	}
+	glog.V(debug).Infof("%d messages were received to be deleted from the '%s' mailbox\n", len(m), box.name)
+	for _, msg:=range m {
+		@<Remove the message@>
+		if box.threadMode() {
+			@<Get |children| for |msg|@>
+			@<Refresh |children|@>
+		}
+	}
+	@<Check for a clean state of the |box|'s window@>
+
+@ One message can be presented in multiple boxes, so we have to delete messages from all boxes.
+|mdch| is a channel to receive signals to delete messages.
+@<Variables@>=
+mdch chan messages=make(chan messages, 100)
+ 
+@
+@<Processing of other common channels@>=
+case msgs:=<-mdch:
+	for i, _:=range boxes {
+		glog.V(debug).Infof("sending %d messages to delete in the '%s' mailbox\n", len(msgs), boxes[i].name)
+		boxes[i].mdch<-append(messages{}, msgs...)
+	}
+
+@ 
+@<Send deleted |msgs|@>=
+mdch<-msgs
 
 @* Linking of threads.
 
@@ -1338,10 +1399,10 @@ messageid string
 }
 
 @ Processing of |idch| in the main loop.
-@<Process of other common channels@>=
+@<Processing of other common channels@>=
 case v:=<-idch:
 	if v.val==nil {
-		@<Remove a message with |v.id| from |idmap|@>
+		@<Clean an entry with |v.id| from |idmap|@>
 	} else if msg, ok:=v.val.(*message); ok {
 		@<Append a message with |v.id| to |idmap|@>
 	} else if ch, ok:=v.val.(chan idmessages); ok {
@@ -1443,15 +1504,15 @@ func (this *idmessages) Delete(pos int) (*message, bool) {
 	}
 }
 
-@ When we remove a |v.id| messsge from |idmap|, we have to clean |parent| for all children
-and remove the message from the children of its parent.
-@<Remove a message with |v.id| from |idmap|@>=
+@ When we are removing a message, we have to clean an entry with |v.id| - to set |msg| to |nil|, 
+to clean |parent| for all |children| and to remove |msg| from |children| of |msg.parent|. 
+We leave an entry in |idmap| to store links of children.
+@<Clean an entry with |v.id| from |idmap|@>=
 {
 	val, ok:=idmap[v.id]
 	if !ok {
 		continue
 	}
-	delete(idmap, v.id)
 	for i, v:=range val.children {
 		glog.V(debug).Infof("clear the parent of the '%d'\n", v.id)
 		val.children[i].parent=nil
@@ -1467,6 +1528,7 @@ and remove the message from the children of its parent.
 				}
 			}
 		}
+		val.msg=nil
 	}
 }
 
@@ -1509,7 +1571,7 @@ glog.V(debug).Infof("getting children for '%s'\n", msg.messageid)
 idch<-struct{id string; val interface{}}{msg.messageid, ch}
 children:=<-ch
 
-@
+@ Here we send |msg.messageid| to |idch| with |nil| like a message pointer to clean up a thread links.
 @<Clean up |msg|@>=
 glog.V(debug).Infof("cleaning up the '%d' message\n", msg.id)
 if msg!=nil {
@@ -1526,16 +1588,25 @@ A slice of messages is sent to |rfch|, the |box|'s message loop reads the slice 
 then resend the rest to |rfch|. If we need to stop printing of messages, we drop the rest
 of a printing queue by recreation of |irfch|.
 
+@ |refresh| holds flags point out how to print |msgs|: |seek| means a position of the message should be determinated,
+|insert| means the message should be inserted if the position is not found.
+@<Types@>=
+refresh	struct {
+	seek bool
+	insert bool
+	msgs messages
+}
+
 @
 @<Rest of |mailbox| members@>=
-rfch	chan *struct{seek bool; msgs messages}
-irfch	chan *struct{seek bool; msgs messages}
+rfch	chan *refresh
+irfch	chan *refresh
 reset	bool
 
 @
 @<Rest of initialization of |mailbox|@>=
-rfch:make(chan *struct{seek bool; msgs messages}, 100), @/
-irfch:make(chan *struct{seek bool; msgs messages}, 100),
+rfch:make(chan *refresh, 100), @/
+irfch:make(chan *refresh, 100),
 
 @ |box.rfch| receives a slice of messages to be printed.
 In case of threaded messages should be printed, but linking of messages
@@ -1543,7 +1614,7 @@ still hasn't finished, the slice is ignored. Actually |box.rfch| is an external
 channel, it resend a data into |box.irfch|. If we need to stop printing,
 we just recreate |box.irfch|.
 
-@<Processing of other box channels@>=
+@<Processing of other |box| channels@>=
 case v:=<-box.rfch:
 	box.irfch<-v
 	
@@ -1586,7 +1657,7 @@ In case of the thread mode sequences of full threads should be made.
 			@<Make a full thread in |msgs| with |msg| like a root@>
 		}
 	}
-	box.rfch<-&struct{seek bool; msgs messages}{false, msgs}
+	box.rfch<-&refresh{false, true, msgs}
 }
 
 @ |msg| is added to the |msgs| list and all its children are processed.
@@ -1622,23 +1693,61 @@ func getchildren(msg *message, dst messages, src messages) (messages, messages) 
 var msgs messages
 src:=append(messages{}, msg)
 @<Make a full thread in |msgs| with |msg| like a root@>
-box.rfch<-&struct{seek bool; msgs messages}{false, msgs}
+box.rfch<-&refresh{false, false, msgs}
 
 @ Only |msg| should be printed.
 @<Inform |box| to print |msg|@>=
 {
 	glog.V(debug).Infof("inform the '%s' mailbox to print a message '%d'\n", box.name, msg.id)
-	box.rfch<-&struct{seek bool; msgs messages}{true, append(messages{}, msg)}
+	box.rfch<-&refresh{true, true, append(messages{}, msg)}
 }
 
-@ |msgs| will be printed with setting a position for every message.
+@
 @<Inform |box| to print |msgs|@>=
 {
+	glog.V(debug).Infof("inform the '%s' mailbox to print messages '%d'\n", box.name)
+	box.rfch<-&refresh{true, true, msgs}
+}
+
+@ Only |msg| should be refreshed.
+@<Refresh |msg|@>=
+{
+	glog.V(debug).Infof("refresh a message '%d'\n",msg.id)
+	mrfch<-&refresh{true, false, append(messages{}, msg)}
+}
+
+@ |msgs| will be refreshed in |box| window with setting a position for every message 
+if is found.
+@<Inform |box| to refresh |msgs|@>=
+{
 	if len(msgs)!=0 {
-		glog.V(debug).Infof("inform the '%s' mailbox to print messages with setting a position\n", box.name)
-		box.rfch<-&struct{seek bool; msgs messages}{true, msgs}
+		glog.V(debug).Infof("inform the '%s' mailbox to refresh messages\n", box.name, msg.id)
+		box.rfch<-&refresh{true, false, msgs}
 	}
 }
+
+@ |msgs| will be refresh with setting a position for every message if is found.
+@<Refresh |msgs|@>=
+{
+	if len(msgs)!=0 {
+		glog.V(debug).Infoln("refresh messages\n")
+		mrfch<-&refresh{true, false, msgs}
+	}
+}
+
+@ One message can be presented in multiple boxes, so we have to refresh messages in all boxes.
+|mrfch| is a channel to receive signals to refresh messages.
+@<Variables@>=
+mrfch chan *refresh=make(chan *refresh)
+ 
+@
+@<Processing of other common channels@>=
+case r:=<-mrfch:
+	for i, _:=range boxes {
+		glog.V(debug).Infof("sending messages to refresh in the '%s' mailbox\n", boxes[i].name)
+		boxes[i].rfch<-&refresh{r.seek, r.insert, append(messages{}, r.msgs...)}
+	}
+
 
 
 @ We need to store a current position of |src| to know a message will be started to print with.
@@ -1659,7 +1768,7 @@ if !box.threadMode() {
 		glog.V(debug).Infof("inform the '%s' mailbox to print the last %d messages\n", box.name, len(src)-box.pos)
 		msgs:=append(messages{}, src[box.pos:len(src)]...)
 		box.pos=len(src)
-		box.rfch<-&struct{seek bool; msgs messages}{false, msgs}		
+		box.rfch<-&refresh{false, true, msgs}		
 	}
 }
 
@@ -1671,7 +1780,7 @@ if !box.threadMode() {
 		glog.V(debug).Infof("inform the '%s' mailbox to print the last %d messages\n", box.name, len(src)-box.pos)
 		msgs:=append(messages{}, src[box.pos:len(src)]...)
 		box.pos=len(src)
-		box.rfch<-&struct{seek bool; msgs messages}{false, msgs}		
+		box.rfch<-&refresh{false, true, msgs}		
 	}
 }
 
@@ -1700,11 +1809,15 @@ if !box.threadMode() {
 		glog.Errorf("can't write to 'data' file of the '%s' messgebox: %v\n", box.name, err)
 	}
 	@<Go to the top of window for first 100 messages@>		
-	if len(v.msgs)>0 {
-		box.rfch<-&struct{seek bool; msgs messages}{v.seek, v.msgs}
-	} else {
-		@<Check for a clean state of the |box|'s window@>
-	}
+	@<Send a rest of |msgs|@>
+}
+
+@
+@<Send a rest of |msgs|@>=
+if len(v.msgs)>0 {
+	box.rfch<-&refresh{v.seek, v.insert, v.msgs}
+} else {
+	@<Check for a clean state of the |box|'s window@>
 }
 
 @ To stay on top of the box's window when printing we go to top for first
@@ -1745,7 +1858,7 @@ pcount+=c
 {
 	glog.V(debug).Infof("clean window-specific stuff of the '%s' mailbox\n", box.name)
 	close(box.irfch)
-	box.irfch=make(chan *struct{seek bool; msgs messages}, 100)
+	box.irfch=make(chan *refresh, 100)
 	pcount=0
 	ontop=false
 }
@@ -1759,8 +1872,8 @@ pcount+=c
 }
 
 @ In case deleted message has children we should refresh views of these children.
-So we compose a list of messages and send them to reprint one by one.
-@<Refresh children@>=
+So we compose a list of messages and send them to refresh.
+@<Refresh |children|@>=
 {
 	if len(children)!=0 {
 		var msgs messages
@@ -1768,9 +1881,7 @@ So we compose a list of messages and send them to reprint one by one.
 		for _, msg:=range children {
 			@<Make a full thread in |msgs| with |msg| like a root@>		
 		}
-		for _, msg:=range msgs {
-			@<Inform |box| to print |msg|@>
-		}
+		@<Inform |box| to refresh |msgs|@>
 	}
 }
 
@@ -1856,19 +1967,20 @@ func clean(w *goacme.Window){
 	}
 }
 
-@ For the first we try to find the message itself. If the message is new, we should
+@ For the first we try to find the message itself. If the message is new and |v.insert| is set, we should
 find its neighbours and set address according to the position.
 @<Trying to find a place for |msg| in the |box| window@>=
 @<Determine of |src|@>
-addr:=fmt.Sprintf("0/^[%s]*(%s)?%s%d(%s)?\\/.*\\n\t.*\\n/",  @t\1@>@/
-			escape(levelmark), @/
-			escape(deleted), @/
-			func() string { if box.name!=msg.box.name {return msg.box.name+"/"}; return ""}(), @/
-			msg.id, @/
-			escape(newmark))
-glog.V(debug).Infoln("refreshed message addr:", addr)
+@<Compose |addr|@>
+glog.V(debug).Infof("refreshed message addr: '%s'\n", addr)
 if err:=box.w.WriteAddr(addr); err!=nil {
 	glog.V(debug).Infof("the '%d' message is not found in the window\n", msg.id)
+	if !v.insert {
+		glog.V(debug).Infof("the '%d' message won't be inserted\n", msg.id)
+		v.msgs=v.msgs[1:]
+		@<Send a rest of |msgs|@>
+		continue
+	}
 	if box.threadMode() {
 		@<Set a position for a threaded message@>
 	} else if p, ok:=src.Search(msg.id); !ok {
@@ -1891,6 +2003,15 @@ if err:=box.w.WriteAddr(addr); err!=nil {
 	}
 }
 
+@
+@<Compose |addr|@>=
+addr:=fmt.Sprintf("0/^[%s]*(%s)?%s%d(%s)?\\/.*\\n\t.*\\n/",  @t\1@>@/
+			escape(levelmark), @/
+			escape(deleted), @/
+			func() string { if box!=msg.box {return escape(msg.box.name+"/")}; return ""}(), @/
+			msg.id, @/
+			escape(newmark)@t\2@>)
+
 @ If |msg| has a parent, it should be printed after last child of the thread.
 In case of |msg| is only child of |msg.parent|, |msg| will be printed after |msg.parent|.
 If |msg| has no parent, it will be printed on top of the window.
@@ -1902,7 +2023,7 @@ if msg.parent!=nil {
 	found:=false
 	for !found {
 		@<Get |children| for |msg|@>
-		if children==nil {
+		if len(children)==0 {
 			break
 		}
 		for i, v:=range children {
@@ -1918,7 +2039,7 @@ if msg.parent!=nil {
 	if err:=box.w.WriteAddr("0/^[%s]*%s%s%d(%s)?\\/.*\\n\t.*\\n/+#0", @t\1@>@/
 			escape(levelmark), @/
 			func() string { if msg.deleted {return escape(deleted)}; return ""}(), @/
-			func() string { if box.name!=msg.box.name {return msg.box.name+"/"}; return ""}(), @/
+			func() string { if box!=msg.box {return escape(msg.box.name+"/")}; return ""}(), @/
 			msg.id, @/
 			escape(newmark) @t\2@>); err!=nil {
 		glog.V(debug).Infof("can't write to 'addr': %s\n", err)
@@ -1936,10 +2057,11 @@ if msg.parent!=nil {
 	name:=fmt.Sprintf("Amail/%s/Search(%s)", box.name, strings.Replace(ev.Arg, " ", "␣", -1))
 	w:=box.w
 	box.thread=false
-	box.shownew=true
+	box.shownew=false
+	box.showthreads=false
 	@<Print the |name| for window |w|@>
 	glog.V(debug).Infof("len of msgs: %v\n", len(msgs))
-	box.rfch<-&struct{seek bool; msgs messages}{false, msgs}
+	box.rfch<-&refresh{false, true, msgs}
 }
 	
 @
@@ -1991,9 +2113,11 @@ lch:make(chan []int, 100),
 w *goacme.Window
 
 @ Here we will process requests to open messages. If the message is new, it should be removed from |box.unread| and
-its view in |box| window should be changed. The count of unread messages on the main window should be refreshed too.
-@<Processing of other box channels@>=
+its view in all windows should be changed. The count of unread messages on the main window should be refreshed too.
+We accumulate messages with changed status in |msgs| and refresh them after all messages are opened.
+@<Processing of other |box| channels@>=
 case ids:=<-box.lch:
+	var msgs messages
 	for _, id:=range ids {
 		glog.V(debug).Infof("opening a window with the '%d' message of the '%s' mailbox\n", id, box.name)
 		p, ok:=box.all.Search(id)
@@ -2007,76 +2131,62 @@ case ids:=<-box.lch:
 				continue
 			}
 			if msg.unread {
-				@<Remove the |n| message from |unread|@>
+				@<Remove |id| message from |unread|@>
 				@<Refresh the message's view@>
 				@<Send |box| to refresh the main window@>
 			}
 		} else {
 			glog.V(debug).Infof("a window of the '%d' message of the '%s' already exists, just show it\n", id, box.name)
-		msg.w.WriteCtl("dot=addr\nshow")
+			msg.w.WriteCtl("dot=addr\nshow")
 		}
 	}
+	@<Refresh |msgs|@>
 	
 @
-@<Remove the |n| message from |unread|@>=
+@<Remove |id| message from |unread|@>=
 msg.unread=false
 box.unread.DeleteById(id)
 
-@
+@ In case of viewing new messages only we have to remove the message from window.
+Also |msg| has to be added to |msgs| to refresh the message's view in other windows.
 @<Refresh the message's view@>=
-if box.thread || !box.shownew {
-	@<Remove the |newmark| from the message@>
-} else {
+if !box.thread && box.shownew {
 	@<Remove the message@>
+	@<Check for a clean state of the |box|'s window@>
 }
-@<Check for a clean state of the |box|'s window@>
+msgs=append(msgs, msg)
+
 
 
 @
 @<Check for a clean state of the |box|'s window@>=
-glog.V(debug).Infof("box.deleted:%d\n", box.deleted)
-if box.deleted==0 {
-	w:=box.w
+{
+	glog.V(debug).Infof("box.deleted:%d\n", box.deleted)
 	@<Write a tag of |box| window@>
-	@<Set window |w| to clean state@>
-} else {
 	w:=box.w
-	@<Write a tag of |box| window@>
-	@<Set window |w| to dirty state@>
-}
-
-@
-@<Remove the |newmark| from the message@>=
-if box.w!=nil {
-	glog.V(debug).Infof("removing the '%s' newmark from the '%d' message\n", newmark, id)
-	addr:=fmt.Sprintf("-/^[%s]*(%s)?%d/", escape(levelmark), escape(deleted), id)
-	if err:=box.w.WriteAddr(addr); err!=nil {
-		glog.Errorf("can't write '%s' to 'addr': %s\n", addr, err)
-	} else if err:=box.w.WriteAddr("/%s/", escape(newmark)); err!=nil {
-		glog.Errorf("can't write to 'addr': %s\n", err)
-	} else if data, err:=box.w.File("data"); err !=nil {
-		glog.Errorf("can't open 'data' file of the box '%s': %s\n", box.name, err)
-	} else if _, err:=data.Write([]byte{}); err!=nil {
-		glog.Errorf("can't write to 'data' file of the box '%s': %s\n", box.name, err)
+	if box.deleted==0 {
+		@<Set window |w| to clean state@>
+	} else {
+		@<Set window |w| to dirty state@>
 	}
 }
 
-@ Here we remove a message with |id| from |box|'s window.
+@ Here we remove a message |msg| from |box|'s window.
 @<Remove the message@>=
-box.removeMessage(id)
+box.removeMessage(msg)
+
 
 @
 @c
-func (box *mailbox) removeMessage(id int){
+func (box *mailbox) removeMessage(msg *message){
 	if box.w==nil {
 		return
 	}
-	glog.V(debug).Infof("removing the '%d' message\n", id)
-	addr:=fmt.Sprintf("-/^[%s]*(%s)?%d(%s)?\\//", escape(levelmark), escape(deleted), id, escape(newmark))
+	glog.V(debug).Infof("removing the '%d' message of the '%s' mailbox from the '%s' mailbox\n", @t\1@>@/
+		msg.id, msg.box.name, box.name @t\2@>)
+	@<Compose |addr|@>
 	if err:=box.w.WriteAddr(addr); err!=nil {
 		glog.V(debug).Infof("can't write '%s' to 'addr': %s\n", addr, err)
-	} else if err:=box.w.WriteAddr(".,./.*\\n(\t.*\\n)*/"); err!=nil {
-		glog.Errorf("can't write to 'addr': %s\n", err)
 	} else if data, err:=box.w.File("data"); err !=nil {
 		glog.Errorf("can't open 'data' file of the box '%s': %s\n", box.name, err)
 	} else if _, err:=data.Write([]byte{}); err!=nil {
@@ -2212,9 +2322,8 @@ go func() {
 						this.w.Del(true)
 						this.w.Close()
 						this.w=nil
-						box:=this.box
 						msg:=this
-						@<Inform |box| to print |msg|@>
+						@<Refresh |msg|@>
 						return
 					}
 					continue
@@ -2223,9 +2332,8 @@ go func() {
 						this.deleted=false
 						this.box.deleted--
 						@<Write a tag of message window@>
-						box:=this.box
 						msg:=this
-						@<Inform |box| to print |msg|@>
+						@<Refresh |msg|@>
 					}
 					continue
 				case "Text":
@@ -2357,7 +2465,7 @@ message body to the window. Then we fill |buf| with command to obtain contents o
 	@<Get |home| enviroment variable@>
 	for _, v:= range this.files {
 		buf=append(buf, fmt.Sprintf("\n===> %s (%s)\n", v.path, v.mimetype)...)
-		buf=append(buf, fmt.Sprintf("\t9p read %s/%s/%d/%sbody > %s/%s\n", srv, this.box.name, this.id, v.path, home, v.name)...)
+		buf=append(buf, fmt.Sprintf("\t9p read %s/%s/%d/%sbody > '%s/%s'\n", srv, this.box.name, this.id, v.path, home, v.name)...)
 	}
 }
 
@@ -2378,35 +2486,40 @@ func (this *message) bodyPath(bfid *client.Fid, path string) error {
 			if len(this.text)==0 {
 				this.text=path+"body"
 				glog.V(debug).Infof("a path for a text body of the '%d' message: '%s'\n", this.id, t)
+				return nil
 			}	
 		case "text/html":
 			if len(this.html)==0 {
 				this.html=path+"body"
 				glog.V(debug).Infof("a path for a html body of the '%d' message: '%s'\n", this.id, t)
+				return nil
 			}
 		case "multipart/mixed",
 			"multipart/alternative",
 			"multipart/related",
-			"multipart/signed":
+			"multipart/signed",
+			"multipart/report":
 			for c:=1;;c++ {
 				if err=this.bodyPath(bfid, fmt.Sprintf("%s%d/", path, c)); err!=nil {
 					break
 				}
 			}
-		default:
-			glog.V(debug).Infof("trying to read '%d/%sfilename'\n", this.id, path)
-			if n, err:=readString(bfid, path+"filename"); err==nil && len(n)>0 {
-				f:=&file{name:n, mimetype:t, path:path,}
-				if cid, ok:=this.getCID(path); ok {
-					this.cids[cid]=f
-				}
-				this.files=append(this.files, f)
-			}
+			return nil
+	}
+	glog.V(debug).Infof("trying to read '%d/%sfilename'\n", this.id, path)
+	if n, err:=readString(bfid, path+"filename"); err==nil {
+		f:=&file{name:n, mimetype:t, path:path,}
+		if len(n)==0 {
+			f.name="attachment"
+		} else if cid, ok:=this.getCID(path); ok {
+			this.cids[cid]=f
+		}
+		this.files=append(this.files, f)
 	}
 	return nil
 }	
 
-@ |getCID| parses |"mimeheader"| takes |"Content-ID"| identifier for |path|
+@ |getCID| parses |"mimeheader"| and takes |"Content-ID"| identifier for |path|
 @c
 func (this *message) getCID(path string) (string, bool) {
 	src:=fmt.Sprintf("%d/%smimeheader", this.id, path)
