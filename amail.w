@@ -268,7 +268,7 @@ func (this mailboxes) Swap(i, j int) {
 	this[j]=t
 } @#
 
-@ Here we open the root of mailfs, read all directory names and send names of directories in |bch|
+@ Here we open the root of mailfs
 @<Init root of \.{mailfs}@>=
 	glog.V(debug).Infoln("initialization of root of mailfs")
 	var err error
@@ -280,7 +280,7 @@ func (this mailboxes) Swap(i, j int) {
 	defer rfid.Close()
 
 
-@
+@ Here we read all directory names.
 @<Enumerating of mailboxes@>=
 {
 	glog.V(debug).Infoln("enumerating of mailboxes")
@@ -299,7 +299,7 @@ func (this mailboxes) Swap(i, j int) {
 	glog.V(debug).Infoln("enumerating of mailboxes is done")
 }
 
-@
+@ Names of directories are sent in |bch|
 @<Add a mailbox with |name|@>=
 glog.V(debug).Infof("send a mailbox '%s' to put in the list\n", name)
 bch<-name
@@ -356,7 +356,7 @@ func (this *mailbox) newMessage(id int) (msg *message, unread bool, err error) {
 "code.google.com/p/goplan9/plan9"
 
 @ Here a subscription on \.{plumber} messages is made. The messages is checked for |filetype=="mail"| and
-|"mailtype"| exists. In case a new mail message we send a name of a mailbox an an id of the message in |mch|,
+|"mailtype"| are existing. In case a new mail message we send a name of a mailbox an an id of the message in |mch|,
 in case of a mail message is deleted - in |dch|.
 @<Subscribe on notifications about new messages@>=
 {
@@ -378,7 +378,7 @@ in case of a mail message is deleted - in |dch|.
 							if !ok {
 								glog.Warningln("it seems plumber has finished")
 								sch=nil
-								continue
+								return
 							}
 							glog.V(debug).Infof("a plumbing message has been received: %v\n", m)
 							if m.Attr["filetype"]!="mail" {
@@ -424,12 +424,7 @@ glog.V(debug).Infoln("process events are specific for the list of mailboxes")
 for {
 	select {
 		@<On exit?@>
-		case name, ok:=<-bch:
-			if !ok {
-				bch=nil
-				@<Send a signal to refresh all mailboxes@>
-				continue
-			}
+		case name:=<-bch:
 			@<Continue if the box |name| should be skiped@>
 			@<Create |box|@>
 			@<Send a signal to refresh all mailboxes@>
@@ -452,7 +447,7 @@ for {
 @ This is a message loop for main window. It reads and processes messages from different channels.
 
 A pointer to a mailbox |b| is received from |rfch|. In case |b==nil| we should print a state of all mailboxes
-of state of a particular mailbox |b| otherwise.
+or state of |b| otherwise.
 @<Start a main message loop@>=
 go func() {
 	glog.V(debug).Infoln("Start a main message loop")
@@ -553,7 +548,7 @@ if mw!=nil {
 
 
 @ Let's add processing of evens from the main window.
-Here events from the main window will be processed.
+Here events from the main window are processed.
 @<Processing of other channels@>=
 case ev, ok:=<-ech:
 	glog.V(debug).Infof("an event from main window has been received: %v\n", ev)
@@ -596,6 +591,7 @@ case ev, ok:=<-ech:
 		if len(ev.Arg)>0 {
 			name+=" "+ev.Arg
 		}
+		name=strings.TrimSpace(name)
 		if i, ok:=boxes.Search(name); ok {
 			box:=boxes[i]	
 			@<Inform |box| to create a window@>
@@ -759,22 +755,6 @@ if i:=sort.SearchStrings(skipboxes, name); i!=len(skipboxes) && skipboxes[i]==na
 	continue
 }
 
-@ A few methods have to be implemented for |messages| to have an ability to sort of them in reverse order
-@c
-func (this messages) Len() int {
-	return len(this)
-} @#
-
-func (this messages) Less(i, j int) bool {
-	return this[i].id > this[j].id
-} @#
-
-func (this messages) Swap(i, j int) {
-	t:=this[i]
-	this[i]=this[j]
-	this[j]=t
-} @#
-
 @ |messages.Search| finds a message with |id| and returns a position of the message in the list and |true| or
 a position where the message can be inserted and |false|
 @c
@@ -807,7 +787,6 @@ func (this *messages) SearchInsert(msg *message) (int, bool){
 	return pos, true
 }
 
-@
 @ |messages.Delete| deletes a message at |pos| position and returns
 a pointer to the message is removed and |true| if the message is deleted,
 |false| otherwise
@@ -821,7 +800,6 @@ func (this *messages) Delete(pos int) (*message, bool) {
 	return msg, true
 }
 
-@
 @ |messages.DeleteById| deletes a message with |id| and returns
 a pointer to the message is removed and |true| if the message is deleted,
 |false| otherwise
@@ -2696,13 +2674,14 @@ func (this *message) fixFile(dir string) error {
 				break
 			}
 			e++
-			cid:=s[p+b+5:b+e]
+			glog.V(debug).Infof("len(s): %v, p: %v, b: %v, e: %v\n", len(s), p, b, e)
+			cid:=s[b+5:b+e]
 			glog.V(debug).Infof("cid: %s\n", cid)
 			if f, ok:=this.cids[cid]; ok {
 				glog.V(debug).Infof("found a cid: %s, replace '%s' by '%s'\n", cid, s[b+1:b+e], f.name )
 				s=strings.Replace(s, s[b+1:b+e], f.name, 1)
 			} else {
-				p=e
+				p=b+e
 			}
 		}		
 		df.Write([]byte(s))
