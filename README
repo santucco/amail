@@ -43,6 +43,10 @@ if "Q" and to all recipients if "Replyall" or "Reply all".
 - "Text" shows a text version of the message if any.
 - "Browser" saves a html version of the message and its files on a disk 
 and plumbs a path to the message on the disk to web browser.
+- "Up" opens a parent message
+- "Down" opens a first child message
+- "Prev" opens a previous message on the same level of a thread
+- "Next" opens a next  message on the same level of a thread
 - "Save" stores the message to a specified mailbox.
 
 Like in Mail, when composing a mail message or replying to a message, 

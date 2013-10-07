@@ -1120,16 +1120,16 @@ to separate the name and the number. In any case the message will be opened via 
 	s=strings.TrimLeft(s, levelmark+deleted)
 	f:=strings.Split(s, "/")
 	glog.V(debug).Infof("parts of message path: '%v'\n", f)
-	num:=0
+	id:=0
 	for i, v:=range f {
 		var err error
-		if num, err=strconv.Atoi(strings.TrimRight(v, newmark)); err==nil {
+		if id, err=strconv.Atoi(strings.TrimRight(v, newmark)); err==nil {
 			name:=box.name
 			if i>0 {
 				name=strings.Join(f[:i], "/")
-				glog.V(debug).Infof("the message number is '%d' in the '%s' mailbox\n", num, name)
+				glog.V(debug).Infof("the message number is '%d' in the '%s' mailbox\n", id, name)
 			} 
-			@<Add a |num| message to |msgs|@>
+			@<Add a |id| message to |msgs|@>
 			break
 		}
 	} 	
@@ -1144,9 +1144,9 @@ lch=make(chan *map[string][]int, 100)
 msgs:=make(map[string][]int)
 
 @
-@<Add a |num| message to |msgs|@>=
-glog.V(debug).Infof("sending a signal to open a window with the '%d' message of the '%s' mailbox\n", num, name)
-msgs[name]=append(msgs[name], num)
+@<Add a |id| message to |msgs|@>=
+glog.V(debug).Infof("sending a signal to open a window with the '%d' message of the '%s' mailbox\n", id, name)
+msgs[name]=append(msgs[name], id)
 
 @ Let's add a processing of |lch| to the main thread
 @<Processing of other common channels@>=
@@ -1270,7 +1270,7 @@ if p, ok:=box.all.Search(num); ok {
 	box.deleted++
 	msgs=append(msgs, box.all[p])
 	if box.all[p].w!=nil {
-		this:=box.all[p]
+		msg:=box.all[p]
 		@<Write a tag of message window@>
 	}
 }
@@ -2118,7 +2118,7 @@ func (box *mailbox) search(str string) (msgs messages) {
 	return
 }
 
-@* Showing of a message.
+@* Viewing of a message.
 
 At first let's extend |mailbox| by a |lch| channel
 @<Rest of |mailbox| members@>=
@@ -2251,29 +2251,28 @@ func split(s string) (strs []string) {
 
 @ |open| opens a message in a separated window.
 @c
-func (this *message) open() (err error) {
-	glog.V(debug).Infof("open: trying to open '%d' directory\n", this.id)
-	bfid, err:=this.box.fid.Walk(fmt.Sprintf("%d", this.id))
+func (msg *message) open() (err error) {
+	glog.V(debug).Infof("open: trying to open '%d' directory\n", msg.id)
+	bfid, err:=msg.box.fid.Walk(fmt.Sprintf("%d", msg.id))
 	if err!=nil {
-		glog.Errorf("can't walk to '%s/%d': %v\n", this.box.name, this.id, err)
+		glog.Errorf("can't walk to '%s/%d': %v\n", msg.box.name, msg.id, err)
 		return err	
 	}
 	defer bfid.Close()
-	if this.w==nil {
-		if this.w, err=goacme.New(); err!=nil {
+	if msg.w==nil {
+		if msg.w, err=goacme.New(); err!=nil {
 			glog.Errorf("can't create a window: %v\n", err)
 			return err
 		}
-		msg:=this
 		@<Start a goroutine to process events from the message's window@>
 	} else {
-		@<Clean |this.w| window@>
+		@<Clean |msg.w| window@>
 	}
 	buf:=make([]byte, 0, 0x8000)
 	@<Compose a header of the message@>
 	@<Compose a body of the message@>
-	w:=this.w
-	name:=fmt.Sprintf("Amail/%s/%d", this.box.name, this.id)
+	w:=msg.w
+	name:=fmt.Sprintf("Amail/%s/%d", msg.box.name, msg.id)
 	@<Print the |name| for window |w|@>
 	@<Write a tag of message window@>
 	w.Write(buf)
@@ -2284,24 +2283,98 @@ func (this *message) open() (err error) {
 
 @
 @<Write a tag of message window@>=
-this.writeTag()
+msg.writeTag()
+
+@
+@<Get a previous |pmsg|@>=
+pmsg:=msg.prev()
 
 @
 @c
-func (this *message) writeTag() {
-	glog.V(debug).Infof("writing a tag of the '%d' message's window\n", this.id)
-	if err:=writeTag(this.w, fmt.Sprintf(" Q Reply all %s %s%sSave ", @t\1@>@/
-		func() string {if this.deleted {return "UnDelmesg"} else {return "Delmesg"}}(),
+func (this *message) prev() (pmsg *message) {
+	if this.parent==nil {
+		return
+	}
+	msg:=this.parent
+	@<Get |children| for |msg|@>
+	if len(children)!=0 {
+		return
+	}
+	for _, v:=range children {
+		if v==this {
+			break
+		}
+		pmsg=v
+	}
+	return 
+}
+
+@
+@<Get a next |nmsg|@>=
+nmsg:=msg.next()
+
+@
+@c
+func (this *message) next() (nmsg *message) {
+	if this.parent==nil {
+		return
+	}
+	msg:=this.parent
+	@<Get |children| for |msg|@>
+	if len(children)==0 {
+		return
+	}
+	for i:=0; i<len(children); i++ {
+		if children[i]!=this {
+			continue
+		}
+		i++
+		if i<len(children) {
+			nmsg=children[i]
+		}
+		break
+	}
+	return
+}
+
+@
+@c
+func (msg *message) writeTag() {
+	glog.V(debug).Infof("writing a tag of the '%d' message's window\n", msg.id)
+	if err:=writeTag(msg.w, fmt.Sprintf(" Q Reply all %s %s%s%s%s%s%sSave ", @t\1@>@/
+		func() string {if msg.deleted {return "UnDelmesg"} else {return "Delmesg"}}(),
 		func() string {
-			if len(this.text)==0 || len(this.html)==0 {
+			if len(msg.text)==0 || len(msg.html)==0 {
 				return ""
-			} else if this.showhtml {
+			} else if msg.showhtml {
 				return "Text "
 			} else {
 				return "Html "
 			}
 		}(), @/
-		func() string {if len(this.html)!=0 {return "Browser "}; return ""}()) @t\2@>)
+		func() string {if len(msg.html)!=0 {return "Browser "}; return ""}(), @/
+		func() string {if msg.parent!=nil {return "Up "}; return ""}(), @/ 
+		func() string { 
+			@<Get |children| for |msg|@>
+			if len(children)!=0 {
+				return "Down "
+			}
+			return ""
+		}(), @/ 
+		func() string { 
+			@<Get a previous |pmsg|@>
+			if pmsg!=nil {
+				return "Prev "
+			}
+			return ""
+		}(), @/ 
+		func() string {
+			@<Get a next |nmsg|@>
+			if nmsg!=nil {
+				return "Next "
+			}
+			return ""
+		}() @t\2@>));
 		err!=nil {
 		glog.Errorf("can't set a tag of the message window: %v", err)
 	}
@@ -2310,20 +2383,20 @@ func (this *message) writeTag() {
 @
 @<Compose a header of the message@>=
 {
-	glog.V(debug).Infof("composing a header of the '%d' message\n", this.id)
+	glog.V(debug).Infof("composing a header of the '%d' message\n", msg.id)
 	buf=append(buf, fmt.Sprintf("From: %s\nDate: %s\nTo: %s\n%sSubject: %s\n\n\n", @t\1@>@/
-		this.from, this.date, strings.Join(this.to, ", "), @/
-		func() string{if len(this.cc)!=0{return fmt.Sprintf("CC: %s\n", strings.Join(this.cc, ", "))};return ""}(), @/
-		this.subject)...@t\2@>)
+		msg.from, msg.date, strings.Join(msg.to, ", "), @/
+		func() string{if len(msg.cc)!=0{return fmt.Sprintf("CC: %s\n", strings.Join(msg.cc, ", "))};return ""}(), @/
+		msg.subject)...@t\2@>)
 }
 
 @
 @<Start a goroutine to process events from the message's window@>=
 go func() {
-	glog.V(debug).Infof("starting a goroutine to process events from the '%d' message's window\n", this.id)
-	for ev, err:=this.w.ReadEvent(); err==nil; ev, err=this.w.ReadEvent() {
+	glog.V(debug).Infof("starting a goroutine to process events from the '%d' message's window\n", msg.id)
+	for ev, err:=msg.w.ReadEvent(); err==nil; ev, err=msg.w.ReadEvent() {
 		if ev.Origin!=goacme.Mouse {
-			this.w.UnreadEvent(ev)
+			msg.w.UnreadEvent(ev)
 			continue
 		}
 		quote:=false
@@ -2331,41 +2404,39 @@ go func() {
 		if (ev.Type&goacme.Execute)==goacme.Execute {
 			switch ev.Text {
 				case "Del":
-					this.w.UnreadEvent(ev)
-					this.w.Close()
-					this.w=nil
+					msg.w.UnreadEvent(ev)
+					msg.w.Close()
+					msg.w=nil
 					return
 				case "Delmesg":
-					if !this.deleted {
-						this.deleted=true
-						this.box.deleted++
-						this.w.Del(true)
-						this.w.Close()
-						this.w=nil
-						msg:=this
+					if !msg.deleted {
+						msg.deleted=true
+						msg.box.deleted++
+						msg.w.Del(true)
+						msg.w.Close()
+						msg.w=nil
 						@<Refresh |msg|@>
 						return
 					}
 					continue
 				case "UnDelmesg":
-					if this.deleted {
-						this.deleted=false
-						this.box.deleted--
+					if msg.deleted {
+						msg.deleted=false
+						msg.box.deleted--
 						@<Write a tag of message window@>
-						msg:=this
 						@<Refresh |msg|@>
 					}
 					continue
 				case "Text":
-					if len(this.text)!=0 && len(this.html)!=0 {
-						this.showhtml=false
-						this.open()
+					if len(msg.text)!=0 && len(msg.html)!=0 {
+						msg.showhtml=false
+						msg.open()
 					}
 					continue
 				case "Html":
-					if len(this.text)!=0 && len(this.html)!=0 {
-						this.showhtml=true
-						this.open()
+					if len(msg.text)!=0 && len(msg.html)!=0 {
+						msg.showhtml=true
+						msg.open()
 					}
 					continue
 				case "Browser":
@@ -2390,18 +2461,57 @@ go func() {
 					}
 					@<Compose a message@>
 					continue
+				case "Up":
+					if msg.parent!=nil {
+						@<Create |msgs|@>
+						name:=msg.parent.box.name
+						id:=msg.parent.id
+						@<Add a |id| message to |msgs|@>
+						@<Send |msgs|@>
+					}
+					continue
+				case "Down":
+					@<Get |children| for |msg|@>
+					if len(children)!=0 {
+						@<Create |msgs|@>
+						name:=children[0].box.name
+						id:=children[0].id
+						@<Add a |id| message to |msgs|@>
+						@<Send |msgs|@>
+					}
+					continue
+				case "Prev":
+					@<Get a previous |pmsg|@>
+					if pmsg!=nil {
+						@<Create |msgs|@>
+						name:=pmsg.box.name
+						id:=pmsg.id
+						@<Add a |id| message to |msgs|@>
+						@<Send |msgs|@>
+					}
+					continue
+				case "Next":
+					@<Get a next |nmsg|@>
+					if nmsg!=nil {
+						@<Create |msgs|@>
+						name:=nmsg.box.name
+						id:=nmsg.id
+						@<Add a |id| message to |msgs|@>
+						@<Send |msgs|@>
+					}
+					continue
 			}
 		} else if (ev.Type&goacme.Look)==goacme.Look  {
 		}
-		this.w.UnreadEvent(ev)		
+		msg.w.UnreadEvent(ev)		
 
 	}
 }()
 
 @
-@<Clean |this.w| window@>=
-glog.V(debug).Infof("clean the '%s/%d' message's window\n", this.box.name, this.id )
-clean(this.w)
+@<Clean |msg.w| window@>=
+glog.V(debug).Infof("clean the '%s/%d' message's window\n", msg.box.name, msg.id )
+clean(msg.w)
 
 @
 @<Imports@>=
@@ -2442,27 +2552,27 @@ In case of the html variant we print |buf| and start a pipe of external programs
 message body to the window. Then we fill |buf| with command to obtain contents of |files|.
 @<Compose a body of the message@>=
 {
-	if len(this.text)==0 && len(this.html)==0 {
-		if err=this.bodyPath(bfid, ""); err!=nil {
-			glog.Errorf("can't ged a body path of '%d': %v\n", this.id, err)
+	if len(msg.text)==0 && len(msg.html)==0 {
+		if err=msg.bodyPath(bfid, ""); err!=nil {
+			glog.Errorf("can't ged a body path of '%d': %v\n", msg.id, err)
 		}
 		glog.V(debug).Infof("paths for bodies of the '%d' message have been found: text-'%s', html-'%s'\n",
-							this.id, this.text, this.html)
+							msg.id, msg.text, msg.html)
 		
 	}
-	if len(this.text)!=0 && !this.showhtml {
-		glog.V(debug).Infof("using a path for a text body of the '%d' message: '%s'\n", this.id, this.text)
-		if buf, err=readAll(bfid, this.text, buf); err!=nil {
-			glog.Errorf("can't read '%s': %v\n", this.text, err)
+	if len(msg.text)!=0 && !msg.showhtml {
+		glog.V(debug).Infof("using a path for a text body of the '%d' message: '%s'\n", msg.id, msg.text)
+		if buf, err=readAll(bfid, msg.text, buf); err!=nil {
+			glog.Errorf("can't read '%s': %v\n", msg.text, err)
 			return
 		}
-	} else if len(this.html)!=0 {
-		glog.V(debug).Infof("using a path for a html body of the '%d' message: '%s'\n", this.id, this.html)
-		this.w.Write(buf)
+	} else if len(msg.html)!=0 {
+		glog.V(debug).Infof("using a path for a html body of the '%d' message: '%s'\n", msg.id, msg.html)
+		msg.w.Write(buf)
 		buf=nil
-		c1:=exec.Command("9p", "read", fmt.Sprintf("%s/%s/%d/%s", srv, this.box.name, this.id, this.html))
+		c1:=exec.Command("9p", "read", fmt.Sprintf("%s/%s/%d/%s", srv, msg.box.name, msg.id, msg.html))
 		c2:=exec.Command( "htmlfmt", "-cutf-8")
-		c2.Stdout, _=this.w.File("body")
+		c2.Stdout, _=msg.w.File("body")
 		c2.Stdin, err=c1.StdoutPipe()
 		if err!=nil {
 			glog.Errorf("can't get a stdout pipe: %v\n", err)
@@ -2483,16 +2593,16 @@ message body to the window. Then we fill |buf| with command to obtain contents o
 		}
 	}
 	@<Get |home| enviroment variable@>
-	for _, v:= range this.files {
+	for _, v:= range msg.files {
 		buf=append(buf, fmt.Sprintf("\n===> %s (%s)\n", v.path, v.mimetype)...)
-		buf=append(buf, fmt.Sprintf("\t9p read %s/%s/%d/%sbody > '%s/%s'\n", srv, this.box.name, this.id, v.path, home, v.name)...)
+		buf=append(buf, fmt.Sprintf("\t9p read %s/%s/%d/%sbody > '%s/%s'\n", srv, msg.box.name, msg.id, v.path, home, v.name)...)
 	}
 }
 
 @ |bodyPath| recursively looks for parts of the message to determine text and html variants of the message and attached files.
 @c
-func (this *message) bodyPath(bfid *client.Fid, path string) error {
-	glog.V(debug).Infof("getting a path for a body of the '%d' message\n", this.id)
+func (msg *message) bodyPath(bfid *client.Fid, path string) error {
+	glog.V(debug).Infof("getting a path for a body of the '%d' message\n", msg.id)
 	t, err:=readString(bfid, path+"type")
 	if err!=nil {
 		return err
@@ -2503,15 +2613,15 @@ func (this *message) bodyPath(bfid *client.Fid, path string) error {
 			"text/plain",
 			"text/richtext",
 			"text/tab-separated-values":
-			if len(this.text)==0 {
-				this.text=path+"body"
-				glog.V(debug).Infof("a path for a text body of the '%d' message: '%s'\n", this.id, t)
+			if len(msg.text)==0 {
+				msg.text=path+"body"
+				glog.V(debug).Infof("a path for a text body of the '%d' message: '%s'\n", msg.id, t)
 				return nil
 			}	
 		case "text/html":
-			if len(this.html)==0 {
-				this.html=path+"body"
-				glog.V(debug).Infof("a path for a html body of the '%d' message: '%s'\n", this.id, t)
+			if len(msg.html)==0 {
+				msg.html=path+"body"
+				glog.V(debug).Infof("a path for a html body of the '%d' message: '%s'\n", msg.id, t)
 				return nil
 			}
 		case "multipart/mixed",
@@ -2520,31 +2630,31 @@ func (this *message) bodyPath(bfid *client.Fid, path string) error {
 			"multipart/signed",
 			"multipart/report":
 			for c:=1;;c++ {
-				if err=this.bodyPath(bfid, fmt.Sprintf("%s%d/", path, c)); err!=nil {
+				if err=msg.bodyPath(bfid, fmt.Sprintf("%s%d/", path, c)); err!=nil {
 					break
 				}
 			}
 			return nil
 	}
-	glog.V(debug).Infof("trying to read '%d/%sfilename'\n", this.id, path)
+	glog.V(debug).Infof("trying to read '%d/%sfilename'\n", msg.id, path)
 	if n, err:=readString(bfid, path+"filename"); err==nil {
 		f:=&file{name:n, mimetype:t, path:path,}
 		if len(n)==0 {
 			f.name="attachment"
-		} else if cid, ok:=this.getCID(path); ok {
-			this.cids[cid]=f
+		} else if cid, ok:=msg.getCID(path); ok {
+			msg.cids[cid]=f
 		}
-		this.files=append(this.files, f)
+		msg.files=append(msg.files, f)
 	}
 	return nil
 }	
 
 @ |getCID| parses |"mimeheader"| and takes |"Content-ID"| identifier for |path|
 @c
-func (this *message) getCID(path string) (string, bool) {
-	src:=fmt.Sprintf("%d/%smimeheader", this.id, path)
+func (msg *message) getCID(path string) (string, bool) {
+	src:=fmt.Sprintf("%d/%smimeheader", msg.id, path)
 	glog.V(debug).Infof("getting of cids for path '%s'\n", src)
-	fid, err:=this.box.fid.Walk(src)
+	fid, err:=msg.box.fid.Walk(src)
 	if err==nil {
 		err=fid.Open(plan9.OREAD)
 	}
@@ -2639,23 +2749,23 @@ to help a browser to find the images.
 @<Save stuff on disk and plumb a message to a web browser@>=
 {
 	@<Get current |user|@>
-	dir:=fmt.Sprintf("%s/amail-%s/%s/%d", os.TempDir(), cuser, this.box.name, this.id)
+	dir:=fmt.Sprintf("%s/amail-%s/%s/%d", os.TempDir(), cuser, msg.box.name, msg.id)
 	if err:=os.MkdirAll(dir, 0700); err!=nil {
 		glog.Errorf("can't create a directory '%s': %v\n", dir, err)
 		continue
 	}
 
-	if len(this.files)==0 {
-		if err:=saveFile(fmt.Sprintf("%s/%s/%d/%s", srv, this.box.name, this.id, this.html),
-						fmt.Sprintf("%s/%d.html", dir, this.id)); err !=nil {
+	if len(msg.files)==0 {
+		if err:=saveFile(fmt.Sprintf("%s/%s/%d/%s", srv, msg.box.name, msg.id, msg.html),
+						fmt.Sprintf("%s/%d.html", dir, msg.id)); err !=nil {
 			continue
 		}
 	} else {
-		if err:=this.fixFile(dir); err !=nil {
+		if err:=msg.fixFile(dir); err !=nil {
 			continue
 		}
-		for _, v:=range this.files {
- 			saveFile(fmt.Sprintf("%s/%s/%d/%s/body", srv, this.box.name, this.id, v.path),
+		for _, v:=range msg.files {
+ 			saveFile(fmt.Sprintf("%s/%s/%d/%s/body", srv, msg.box.name, msg.id, v.path),
  						fmt.Sprintf("%s/%s", dir, v.name))
 		}
 		
@@ -2663,8 +2773,8 @@ to help a browser to find the images.
 
 	if p, err:=goplumb.Open("send", plan9.OWRITE); err!=nil {
 		glog.Errorf("can't open plumbing port 'send': %v\n", err)
-	} else if err:=p.SendText("amail", "web", dir, fmt.Sprintf("file://%s/%d.html", dir, this.id)); err!=nil {
-		glog.Errorf("can't plumb a message '%s': %v\n", fmt.Sprintf("file://%s/%d.html", dir, this.id), err)
+	} else if err:=p.SendText("amail", "web", dir, fmt.Sprintf("file://%s/%d.html", dir, msg.id)); err!=nil {
+		glog.Errorf("can't plumb a message '%s': %v\n", fmt.Sprintf("file://%s/%d.html", dir, msg.id), err)
 	}
 }
 
@@ -2688,16 +2798,16 @@ func saveFile(src, dst string) error {
 
 @ |fixFile| reads the message body  and replaces all |"cid"| on corresponding cids.
 @c
-func (this *message) fixFile(dir string) error {
-	src:=fmt.Sprintf("%d/%s", this.id, this.html)
-	dst:=fmt.Sprintf("%s/%d.html", dir, this.id)
+func (msg *message) fixFile(dir string) error {
+	src:=fmt.Sprintf("%d/%s", msg.id, msg.html)
+	dst:=fmt.Sprintf("%s/%d.html", dir, msg.id)
 	df, err:=os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err!=nil {
 		glog.Errorf("can't create a file '%s': %v\n", dst, err)
 		return err
 	}
 	defer df.Close()
-	fid, err:=this.box.fid.Walk(src)
+	fid, err:=msg.box.fid.Walk(src)
 	if err==nil {
 		err=fid.Open(plan9.OREAD)
 	}
@@ -2719,7 +2829,7 @@ func (this *message) fixFile(dir string) error {
 			glog.V(debug).Infof("len(s): %v, p: %v, b: %v, e: %v\n", len(s), p, b, e)
 			cid:=s[b+5:b+e]
 			glog.V(debug).Infof("cid: %s\n", cid)
-			if f, ok:=this.cids[cid]; ok {
+			if f, ok:=msg.cids[cid]; ok {
 				glog.V(debug).Infof("found a cid: %s, replace '%s' by '%s'\n", cid, s[b+1:b+e], f.name )
 				s=strings.Replace(s, s[b+1:b+e], f.name, 1)
 			} else {
@@ -2773,7 +2883,7 @@ once.Do(func() {@<Get it at once@>})
 	if len(ev.Arg)==0 {
 		continue
 	}
-	f, err:=this.box.fid.Walk("ctl")
+	f, err:=msg.box.fid.Walk("ctl")
 	if err==nil {
 		err=f.Open(plan9.OWRITE)
 	}
@@ -2783,7 +2893,7 @@ once.Do(func() {@<Get it at once@>})
 	}
 	bs:=strings.Fields(ev.Arg)
 	for _, v:=range bs {
-		s:=fmt.Sprintf("save %s %d/", v, this.id)
+		s:=fmt.Sprintf("save %s %d/", v, msg.id)
 		if _, err:=f.Write([]byte(s)); err!=nil {
 			glog.Errorf("can't write '%s' to 'ctl': %v\n", s, err)
 		}
@@ -2797,34 +2907,34 @@ once.Do(func() {@<Get it at once@>})
 {
 	@<Create a new message window@>
 	name:=fmt.Sprintf("Amail/%s/%d/%sReply%s", @t\1@>@/
-							this.box.name, @/
-							this.id, @/
+							msg.box.name, @/
+							msg.id, @/
 							func()string{if quote {return "Q"}; return ""}(), @/
 							func()string{if replyall {return "all"}; return ""}()@t\2@>)
 	@<Print the |name| for window |w|@>
 	buf:=make([]byte, 0, 0x8000)
-	buf=append(buf, fmt.Sprintf("To: %s\n", this.from)...)					
+	buf=append(buf, fmt.Sprintf("To: %s\n", msg.from)...)					
 	if replyall {
-		for _, v:=range this.to {
+		for _, v:=range msg.to {
 			buf=append(buf, fmt.Sprintf("To: %s\n", v)...)
 		}
-		for _, v:=range this.cc {
+		for _, v:=range msg.cc {
 			buf=append(buf, fmt.Sprintf("To: %s\n", v)...)
 		}	
 	}
 	buf=append(buf, fmt.Sprintf("Subject: %s%s\n", @t\1@>@/
 		func() string{
-			if !strings.Contains(this.subject, "Re:") {
+			if !strings.Contains(msg.subject, "Re:") {
 				return "Re: "
 			}
 			return ""
 		}(), @/
-		this.subject)...@t\2@>)
+		msg.subject)...@t\2@>)
 	if quote {
 		buf=append(buf, '\n')	
 		@<Add quoted message@>
 	} else {
-		buf=append(buf, fmt.Sprintf("Include: Mail/%s/%d/raw\n", this.box.name, this.id)...)
+		buf=append(buf, fmt.Sprintf("Include: Mail/%s/%d/raw\n", msg.box.name, msg.id)...)
 		@^Using of \.{Mail} is required by \.{upas/marshal}@>
 	}
 	buf=append(buf, '\n')
@@ -2869,19 +2979,19 @@ go func(msg *message) {
 
 @
 @<Add quoted message@>=	
-if len(this.text)!=0 {
-	fn:=fmt.Sprintf("%d/%s", this.id, this.text)
-	f, err:=this.box.fid.Walk(fn)
+if len(msg.text)!=0 {
+	fn:=fmt.Sprintf("%d/%s", msg.id, msg.text)
+	f, err:=msg.box.fid.Walk(fn)
 	if err==nil {
 		err=f.Open(plan9.OREAD)
 	}
 	if err!=nil {
-		glog.Errorf("can't open '%s/%s/%s': %v\n", srv, this.box.name, fn)
+		glog.Errorf("can't open '%s/%s/%s': %v\n", srv, msg.box.name, fn)
 		continue
 	}
 	@<Quote a message@>
 	f.Close()
-} else if len(this.html)!=0 {
+} else if len(msg.html)!=0 {
 	@<Quote a html message@>
 }
 
@@ -2901,7 +3011,7 @@ if len(this.text)!=0 {
 @ To quote the html message we start a pipe of external programs |"9p"| and |"htmlfmt"| and read an output of |"htmlfmt"|
 @<Quote a html message@>=
 {
-	c1:=exec.Command("9p", "read", fmt.Sprintf("%s/%s/%d/%s", srv, this.box.name, this.id, this.html))
+	c1:=exec.Command("9p", "read", fmt.Sprintf("%s/%s/%d/%s", srv, msg.box.name, msg.id, msg.html))
 	c2:=exec.Command( "htmlfmt", "-cutf-8")
 	f, err:=c2.StdoutPipe()
 	if err!=nil {
