@@ -837,7 +837,10 @@ func(box *mailbox) loop() {
 	}
 }
 
-@ Here new and deleted messages of |box| are processed.
+@ Here new messages of |box| are processed.
+If |box| shows a particular thread the message should be printed only if it is in the thread.
+Also the message should be printed in other boxes with the thread.
+A new message can be in a thread so we have to send 
 @<Processing of other |box| channels@>=
 case id:=<-box.mch:
 	glog.V(debug).Infof("'%d' should be added to the '%s' mailbox\n", id, box.name)
@@ -850,16 +853,23 @@ case id:=<-box.mch:
 	}
 	box.total++
 	@<Add |msg| to |all|@>
-	if box.threadMode() {
-		@<Get root of |msg|@>
-		var msgs messages
-		src:=append(messages{}, msg)
-		@<Make a full thread in |msgs| with |msg| like a root@>
-		@<Inform |box| to print |msgs|@>
-	} else {
-		@<Inform |box| to print |msg|@>
+	@<Print |msg| at exact positon@>
+	if !box.thread {
+		if box.threadMode() {
+			@<Get root of |msg|@>
+			var msgs messages
+			src:=append(messages{}, msg)
+			@<Make a full thread in |msgs| with |msg| like a root@>
+			@<Inform |box| to print |msgs|@>
+		} else {
+			@<Inform |box| to print |msg|@>
+		}
 	}
 	@<Send |box| to refresh the main window@>
+	
+	
+@ Here deleted messages of |box| are processed.
+@<Processing of other |box| channels@>=	
 case id:=<-box.dch:
 	glog.V(debug).Infof("'%d' should be deleted from the '%s' mailbox\n", id, box.name)
 	@<Delete a message with |id|@>
@@ -1314,7 +1324,7 @@ case m:=<-box.mdch:
 	}
 	glog.V(debug).Infof("%d messages were received to be deleted from the '%s' mailbox\n", len(m), box.name)
 	for _, msg:=range m {
-		@<Remove the message@>
+		@<Erase the message@>
 		if box.threadMode() {
 			@<Get |children| for |msg|@>
 			@<Refresh |children|@>
@@ -1355,7 +1365,7 @@ idmessages []*message
 @
 @<Variables@>=
 idmap=make(map[string]*struct{msg *message; children idmessages})
-idch=make(chan struct{id string; val interface{}}, 100)
+idch=make(chan struct{id string; val interface{}})
 
 @
 @<Rest of |message| members@>=
@@ -1566,14 +1576,24 @@ A slice of messages is sent to |rfch|, the |box|'s message loop reads the slice 
 then resend the rest to |rfch|. If we need to stop printing of messages, we drop the rest
 of a printing queue by recreation of |irfch|.
 
-@ |refresh| holds flags point out how to print |msgs|: |seek| means a position of the message should be determinated,
-|insert| means the message should be inserted if the position is not found.
+@ |refresh| holds flags point out how to print |msgs|: 
 @<Types@>=
+refreshFlags int
+
 refresh	struct {
-	seek bool
-	insert bool
+	flags refreshFlags
 	msgs messages
 }
+
+@ |seek| means a position of the message should be determinated,
+|insert| means the message should be inserted if the position is not found,
+|exact| means the message should be inserted only if its exact position is found.
+@<Constants@>=
+const (
+	seek refreshFlags=1<<iota
+	insert refreshFlags=1<<iota
+	exact refreshFlags=1<<iota
+)
 
 @
 @<Rest of |mailbox| members@>=
@@ -1635,7 +1655,7 @@ In case of the thread mode sequences of full threads should be made.
 			@<Make a full thread in |msgs| with |msg| like a root@>
 		}
 	}
-	box.rfch<-&refresh{false, true, msgs}
+	box.rfch<-&refresh{0, msgs}
 }
 
 @ |msg| is added to the |msgs| list and all its children are processed.
@@ -1671,27 +1691,27 @@ func getchildren(msg *message, dst messages, src messages) (messages, messages) 
 var msgs messages
 src:=append(messages{}, msg)
 @<Make a full thread in |msgs| with |msg| like a root@>
-box.rfch<-&refresh{false, false, msgs}
+box.rfch<-&refresh{0, msgs}
 
 @ Only |msg| should be printed.
 @<Inform |box| to print |msg|@>=
 {
 	glog.V(debug).Infof("inform the '%s' mailbox to print a message '%d'\n", box.name, msg.id)
-	box.rfch<-&refresh{true, true, append(messages{}, msg)}
+	box.rfch<-&refresh{seek|insert, append(messages{}, msg)}
 }
 
 @
 @<Inform |box| to print |msgs|@>=
 {
-	glog.V(debug).Infof("inform the '%s' mailbox to print messages '%d'\n", box.name)
-	box.rfch<-&refresh{true, true, msgs}
+	glog.V(debug).Infof("inform the '%s' mailbox to print messages\n", box.name)
+	box.rfch<-&refresh{seek|insert, msgs}
 }
 
 @ Only |msg| should be refreshed.
 @<Refresh |msg|@>=
 {
 	glog.V(debug).Infof("refresh a message '%d'\n",msg.id)
-	mrfch<-&refresh{true, false, append(messages{}, msg)}
+	mrfch<-&refresh{seek, append(messages{}, msg)}
 }
 
 @ |msgs| will be refreshed in |box| window with setting a position for every message 
@@ -1700,7 +1720,7 @@ if is found.
 {
 	if len(msgs)!=0 {
 		glog.V(debug).Infof("inform the '%s' mailbox to refresh messages\n", box.name, msg.id)
-		box.rfch<-&refresh{true, false, msgs}
+		box.rfch<-&refresh{seek, msgs}
 	}
 }
 
@@ -1709,8 +1729,15 @@ if is found.
 {
 	if len(msgs)!=0 {
 		glog.V(debug).Infoln("refresh messages\n")
-		mrfch<-&refresh{true, false, msgs}
+		mrfch<-&refresh{seek, msgs}
 	}
+}
+
+@ |msg| will be printed only if the exact position is found.
+@<Print |msg| at exact positon@>=
+{
+	glog.V(debug).Infof("print '%s/%d' at exact position\n", box.name, msg.id)
+	mrfch<-&refresh{seek|insert|exact, append(messages{}, msg)}
 }
 
 @ One message can be presented in multiple boxes, so we have to refresh messages in all boxes.
@@ -1723,7 +1750,7 @@ mrfch chan *refresh=make(chan *refresh)
 case r:=<-mrfch:
 	for i, _:=range boxes {
 		glog.V(debug).Infof("sending messages to refresh in the '%s' mailbox\n", boxes[i].name)
-		boxes[i].rfch<-&refresh{r.seek, r.insert, append(messages{}, r.msgs...)}
+		boxes[i].rfch<-&refresh{r.flags, append(messages{}, r.msgs...)}
 	}
 
 
@@ -1746,7 +1773,7 @@ if !box.threadMode() {
 		glog.V(debug).Infof("inform the '%s' mailbox to print the last %d messages\n", box.name, len(src)-box.pos)
 		msgs:=append(messages{}, src[box.pos:len(src)]...)
 		box.pos=len(src)
-		box.rfch<-&refresh{false, true, msgs}		
+		box.rfch<-&refresh{0, msgs}		
 	}
 }
 
@@ -1758,20 +1785,20 @@ if !box.threadMode() {
 		glog.V(debug).Infof("inform the '%s' mailbox to print the last %d messages\n", box.name, len(src)-box.pos)
 		msgs:=append(messages{}, src[box.pos:len(src)]...)
 		box.pos=len(src)
-		box.rfch<-&refresh{false, true, msgs}		
+		box.rfch<-&refresh{0, msgs}		
 	}
 }
 
 @
 @<Print messages from |v.msgs|@>=
 {
-	glog.V(debug).Infof("printing of messages of the '%s' mailbox from v.msgs, len(v.msgs): %d, with seeking a position: %v\n", box.name, len(v.msgs), v.seek)
+	glog.V(debug).Infof("printing of messages of the '%s' mailbox from v.msgs, len(v.msgs): %d, with flags: %v\n", box.name, len(v.msgs), v.flags)
 	f, err:=box.w.File("data")
 	if err!=nil {
 		glog.Errorf("can't open 'data' file of the '%s' messgebox: %v\n", box.name, err)
 		continue
 	}
-	if v.seek {
+	if (v.flags&seek)==seek {
 		@<Write a tag of |box| window@>
 		msg:=v.msgs[0]
 		@<Trying to find a place for |msg| in the |box| window@>
@@ -1793,7 +1820,7 @@ if !box.threadMode() {
 @
 @<Send a rest of |msgs|@>=
 if len(v.msgs)>0 {
-	box.rfch<-&refresh{v.seek, v.insert, v.msgs}
+	box.rfch<-&refresh{v.flags, v.msgs}
 } else {
 	@<Check for a clean state of the |box|'s window@>
 }
@@ -1811,7 +1838,7 @@ if !ontop {
 
 
 @ Here the messages composing is produced. To avoid of overloading of events processing
-we print a lot of messages at a time. But if |v.seek| is set messages will be printed one
+we print a lot of messages at a time. But if |seek| is set in |v.flags| messages will be printed one
 by one, because we have to set a position for every message..
 
 @<Compose messages of the |box|@>=
@@ -1825,7 +1852,7 @@ for len(v.msgs)>0 && c<100 {
 	c++
 	@<Compose a header of |msg|@>
 	v.msgs=v.msgs[1:]
-	if v.seek {
+	if (v.flags&seek)==seek {
 		break
 	}
 }
@@ -1850,14 +1877,19 @@ pcount+=c
 }
 
 @ In case deleted message has children we should refresh views of these children.
-So we compose a list of messages and send them to refresh.
+So we compose a list of messages and send them to refresh. But if a child is not belonged to |box| 
+we have to erase it instead of refreshing.
 @<Refresh |children|@>=
 {
 	if len(children)!=0 {
 		var msgs messages
 		var src messages
 		for _, msg:=range children {
-			@<Make a full thread in |msgs| with |msg| like a root@>		
+			if msg.box!=box {
+				@<Erase the message@>
+			} else {
+				@<Make a full thread in |msgs| with |msg| like a root@>
+			}	
 		}
 		@<Inform |box| to refresh |msgs|@>
 	}
@@ -1945,7 +1977,7 @@ func clean(w *goacme.Window){
 	}
 }
 
-@ For the first we try to find the message itself. If the message is new and |v.insert| is set, we should
+@ For the first we try to find the message itself. If the message is new and |insert| is set in |v.flags|, we should
 find its neighbours and set address according to the position.
 @<Trying to find a place for |msg| in the |box| window@>=
 @<Determine of |src|@>
@@ -1953,11 +1985,8 @@ find its neighbours and set address according to the position.
 glog.V(debug).Infof("refreshed message addr: '%s'\n", addr)
 if err:=box.w.WriteAddr(addr); err!=nil {
 	glog.V(debug).Infof("the '%d' message is not found in the window\n", msg.id)
-	if !v.insert {
-		glog.V(debug).Infof("the '%d' message won't be inserted\n", msg.id)
-		v.msgs=v.msgs[1:]
-		@<Send a rest of |msgs|@>
-		continue
+	if (v.flags&insert)==0 {
+		@<Skip current message@>
 	}
 	if box.threadMode() {
 		@<Set a position for a threaded message@>
@@ -1982,6 +2011,14 @@ if err:=box.w.WriteAddr(addr); err!=nil {
 }
 
 @
+@<Skip current message@>=
+glog.V(debug).Infof("the '%d' message won't be inserted\n", v.msgs[0].id)
+v.msgs=v.msgs[1:]
+@<Send a rest of |msgs|@>
+continue
+
+
+@
 @<Compose |addr|@>=
 addr:=fmt.Sprintf("0/^[%s]*(%s)?%s%d(%s)?\\/.*\\n\t.*\\n/",  @t\1@>@/
 			escape(levelmark), @/
@@ -1992,7 +2029,7 @@ addr:=fmt.Sprintf("0/^[%s]*(%s)?%s%d(%s)?\\/.*\\n\t.*\\n/",  @t\1@>@/
 
 @ If |msg| has a parent, it should be printed after last child of the thread.
 In case of |msg| is only child of |msg.parent|, |msg| will be printed after |msg.parent|.
-If |msg| has no parent, it will be printed on top of the window.
+If |msg| has no parent and |exact| is not set in |v.flags| it will be printed on top of the window.
 @<Set a position for a threaded message@>=
 if msg.parent!=nil {
 	glog.V(debug).Infof("msg '%d' has a parent, looking for a position to print\n", msg.id)
@@ -2021,7 +2058,12 @@ if msg.parent!=nil {
 			msg.id, @/
 			escape(newmark) @t\2@>); err!=nil {
 		glog.V(debug).Infof("can't write to 'addr': %s\n", err)
+		if (v.flags&exact)==exact {
+			@<Skip current message@>
+		}
 	} 	
+} else if (v.flags&exact)==exact {
+	@<Skip current message@>
 } else if err:=box.w.WriteAddr("#0-"); err!=nil {
 	glog.Errorf("can't write to 'addr' file: %s\n", err)
 }
@@ -2039,7 +2081,7 @@ if msg.parent!=nil {
 	box.showthreads=false
 	@<Print the |name| for window |w|@>
 	glog.V(debug).Infof("len of msgs: %v\n", len(msgs))
-	box.rfch<-&refresh{false, true, msgs}
+	box.rfch<-&refresh{0, msgs}
 }
 	
 @
@@ -2129,7 +2171,7 @@ box.unread.DeleteById(id)
 Also |msg| has to be added to |msgs| to refresh the message's view in other windows.
 @<Refresh the message's view@>=
 if !box.thread && box.shownew {
-	@<Remove the message@>
+	@<Erase the message@>
 	@<Check for a clean state of the |box|'s window@>
 }
 msgs=append(msgs, msg)
@@ -2150,13 +2192,13 @@ msgs=append(msgs, msg)
 }
 
 @ Here we remove a message |msg| from |box|'s window.
-@<Remove the message@>=
-box.removeMessage(msg)
+@<Erase the message@>=
+box.eraseMessage(msg)
 
 
 @
 @c
-func (box *mailbox) removeMessage(msg *message){
+func (box *mailbox) eraseMessage(msg *message){
 	if box.w==nil {
 		return
 	}
