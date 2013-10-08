@@ -1053,6 +1053,9 @@ case ev, ok:=<-box.ech:
 			case "Delmesg":
 				@<Mark to delete messages@>
 				continue
+			case "UnDelmesg":
+				@<Unmark messages@>
+				continue
 			case "Put":
 				@<Delete messages@>
 				continue
@@ -1081,12 +1084,12 @@ case ev, ok:=<-box.ech:
 		@<Create |msgs|@>
 		if (ev.Type&goacme.Tag)==goacme.Tag {
 			s:=ev.Text
-			@<Open a message by number@>
+			@<Read a message number@>
 		} else {
 			@<Open selected messages@>
 		}
 		if len(msgs)!=0 {
-			@<Send |msgs|@>
+			@<Send |msgs| to |lch|@>
 			continue
 		}
 	}
@@ -1100,22 +1103,27 @@ of the |box|'s window and then symbols will be read from |"xdata"| file.
 glog.V(debug).Infof("event: %v\n", ev)
 if err:=box.w.WriteAddr("#%d,#%d", ev.Begin, ev.End); err!=nil {
 	glog.Errorf("can't write to 'addr': %s\n", err)
-} else  if xdata, err:=box.w.File("xdata"); err!=nil {
+} else 
+	@<Read message numbers@>
+
+@
+@<Read message numbers@>=
+if xdata, err:=box.w.File("xdata"); err!=nil {
 	glog.Errorf("can't open 'xdata' file: %s\n", err)
 } else {
 	b:=bufio.NewReader(xdata)
 	for s, err:=b.ReadString('\n'); err==nil || err==io.EOF; s, err=b.ReadString('\n') {
-		@<Open a message by number@>
+		@<Read a message number@>
 		if err==io.EOF {
 			break
 		}	
 	}
-
 }		
+
 
 @ A message path can contain not only a number but a mailbox name too. So we have to parse an input string
 to separate the name and the number. In any case the message will be opened via the main loop.
-@<Open a message by number@>=
+@<Read a message number@>=
 {
 	glog.V(debug).Infof("looking a message number in '%s'\n", s)
 	s=strings.TrimLeft(s, levelmark+deleted)
@@ -1150,7 +1158,7 @@ msgs:=make(msgmap)
 
 @
 @<Add a |id| message to |msgs|@>=
-glog.V(debug).Infof("sending a signal to open a window with the '%d' message of the '%s' mailbox\n", id, name)
+glog.V(debug).Infof("adding the '%d' of the '%s' mailbox\n", id, name)
 msgs[name]=append(msgs[name], id)
 
 @ Let's add a processing of |lch| to the main thread
@@ -1165,7 +1173,7 @@ msgs[name]=append(msgs[name], id)
 		}
 
 @
-@<Send |msgs|@>=
+@<Send |msgs| to |lch|@>=
 lch<-&msgs
 
 @
@@ -1244,30 +1252,93 @@ w.WriteCtl("dot=addr\nshow")
 
 @
 @<Mark to delete messages@>=
+@<Create |msgs|@>
 if err:=box.w.WriteCtl("addr=dot"); err!=nil {
 	glog.Errorf("can't write to 'ctl': %s\n", err)
-} else  if xdata, err:=box.w.File("xdata"); err!=nil {
-	glog.Errorf("can't open 'xdata' file: %s\n", err)
-} else {
-	b:=bufio.NewReader(xdata)
-	var msgs messages
-	for s, err:=b.ReadString('\n'); err==nil || err==io.EOF; s, err=b.ReadString('\n') {
-		num:=0
-		glog.V(debug).Infof("looking a message number in '%s'\n", s)
-		if _, err:=fmt.Sscanf(strings.TrimLeft(s, levelmark+deleted), "%d", &num); err==nil {
-			glog.V(debug).Infof("the message number is '%d'\n", num)
-			@<Mark to delete |num| message@>
-		}
-		if err==io.EOF {
-			break
-		}
-	}
-	@<Refresh |msgs|@>
+} else 
+	@<Read message numbers@>
+if len(msgs)!=0 {
+	@<Send |msgs| to |markch|@>
+	continue
 }
 
 @
-@<Mark to delete |num| message@>=
-if p, ok:=box.all.Search(num); ok {
+@<Unmark messages@>=
+@<Create |msgs|@>
+if err:=box.w.WriteCtl("addr=dot"); err!=nil {
+	glog.Errorf("can't write to 'ctl': %s\n", err)
+} else 
+	@<Read message numbers@>
+if len(msgs)!=0 {
+	@<Send |msgs| to |unmarkch|@>
+	continue
+}
+
+
+@ Channels to mark/unmark a lists of messages for deletion in an every mailbox.
+@<Variables@>=
+markch=make(chan *msgmap, 100)
+unmarkch=make(chan *msgmap, 100)
+
+@ Let's add a processing of |markch| and |unmarkch| to the main thread
+@<Processing of other common channels@>=
+	case d:=<-markch:
+		if d==nil {
+			continue
+		}
+		for name, ids:=range *d {
+			@<Looking for a |name| mailbox...@>
+			boxes[i].markch<-ids
+		}
+	case d:=<-unmarkch:
+		if d==nil {
+			continue
+		}
+		for name, ids:=range *d {
+			@<Looking for a |name| mailbox...@>
+			boxes[i].unmarkch<-ids
+		}
+		
+
+@
+@<Send |msgs| to |markch|@>=
+glog.V(debug).Infoln("sending messages to mark for deletion")
+markch<-&msgs
+
+@
+@<Send |msgs| to |unmarkch|@>=
+glog.V(debug).Infoln("sending messages to unmark for deletion")
+unmarkch<-&msgs
+
+
+@ |markch| and |unmark| are channels receive slices of messages to mark/unmark for deletion.
+@<Rest of |mailbox| members@>=
+markch		chan []int
+unmarkch	chan []int
+
+@
+@<Rest of initialization of |mailbox|@>=
+markch:make(chan []int, 100),
+unmarkch:make(chan []int, 100),
+
+@
+@<Processing of other |box| channels@>=
+case ids:=<-box.markch:
+	var msgs messages
+	for _, id:=range ids {
+		@<Mark to delete |id| message@>
+	}
+	@<Refresh |msgs|@>
+case ids:=<-box.unmarkch:
+	var msgs messages
+	for _, id:=range ids {
+		@<Unmark to delete |id| message@>
+	}
+	@<Refresh |msgs|@>	
+
+@
+@<Mark to delete |id| message@>=
+if p, ok:=box.all.Search(id); ok {
 	if box.all[p].deleted {
 		continue
 	}
@@ -1278,6 +1349,24 @@ if p, ok:=box.all.Search(num); ok {
 		msg:=box.all[p]
 		@<Write a tag of message window@>
 	}
+	glog.V(debug).Infof("the '%v' message is marked for deletion\n", id)
+}
+
+@
+@<Unmark to delete |id| message@>=
+if p, ok:=box.all.Search(id); ok {
+	if !box.all[p].deleted {
+		continue
+	}
+	box.all[p].deleted=false
+	box.deleted--
+	msgs=append(msgs, box.all[p])
+	if box.all[p].w!=nil {
+		msg:=box.all[p]
+		@<Write a tag of message window@>
+	}
+	glog.V(debug).Infof("the '%v' message is unmarked for deletion\n", id)
+
 }
 
 @ Here is processing a final deletion of messages from \.{mailfs}. Any message could be printed in
@@ -1947,10 +2036,16 @@ w:=box.w
 @
 @<Write a tag of |box| window@>=
 glog.V(debug).Infof("write a tag of the '%s' mailbox's window\n", box.name)
-if err:=writeTag(box.w, fmt.Sprintf(" %sMail Delmesg %s%s %s Search ", @t\1@>@/
+if err:=writeTag(box.w, fmt.Sprintf(" %sMail Delmesg %s%s%s %s Search ", @t\1@>@/
 	func() string {
 		if box.deleted>0 {
 			return "Put "
+		}
+		return ""
+	}(), @/
+	func() string {
+		if box.deleted>0 {
+			return "UnDelmesg "
 		}
 		return ""
 	}(), @/
@@ -2086,7 +2181,7 @@ if msg.parent!=nil {
 	name:=fmt.Sprintf("Amail/%s/Search(%s)", box.name, strings.Replace(ev.Arg, " ", "␣", -1))
 	w:=box.w
 	box.thread=false
-	box.shownew=false
+	box.shownew=true
 	box.showthreads=false
 	@<Print the |name| for window |w|@>
 	glog.V(debug).Infof("len of msgs: %v\n", len(msgs))
@@ -2306,9 +2401,6 @@ func (this *message) prev() (pmsg *message) {
 	}
 	msg:=this.parent
 	@<Get |children| for |msg|@>
-	if len(children)!=0 {
-		return
-	}
 	for _, v:=range children {
 		if v==this {
 			break
@@ -2330,9 +2422,6 @@ func (this *message) next() (nmsg *message) {
 	}
 	msg:=this.parent
 	@<Get |children| for |msg|@>
-	if len(children)==0 {
-		return
-	}
 	for i:=0; i<len(children); i++ {
 		if children[i]!=this {
 			continue
@@ -2476,7 +2565,7 @@ go func() {
 						name:=msg.parent.box.name
 						id:=msg.parent.id
 						@<Add a |id| message to |msgs|@>
-						@<Send |msgs|@>
+						@<Send |msgs| to |lch|@>
 					}
 					continue
 				case "Down":
@@ -2486,7 +2575,7 @@ go func() {
 						name:=children[0].box.name
 						id:=children[0].id
 						@<Add a |id| message to |msgs|@>
-						@<Send |msgs|@>
+						@<Send |msgs| to |lch|@>
 					}
 					continue
 				case "Prev":
@@ -2496,7 +2585,7 @@ go func() {
 						name:=pmsg.box.name
 						id:=pmsg.id
 						@<Add a |id| message to |msgs|@>
-						@<Send |msgs|@>
+						@<Send |msgs| to |lch|@>
 					}
 					continue
 				case "Next":
@@ -2506,7 +2595,7 @@ go func() {
 						name:=nmsg.box.name
 						id:=nmsg.id
 						@<Add a |id| message to |msgs|@>
-						@<Send |msgs|@>
+						@<Send |msgs| to |lch|@>
 					}
 					continue
 			}
