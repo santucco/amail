@@ -53,6 +53,7 @@ func main() {
 	@<Try to open \.{mailfs}@>
 	@<Subscribe on notifications about new messages@>
 	@<Init root of \.{mailfs}@>
+	@<Start a collector of message identifiers@>
 	if len(flag.Args())>0 {
 		@<Start a main message loop@>
 		for _, name:=range flag.Args() {
@@ -1135,13 +1136,17 @@ to separate the name and the number. In any case the message will be opened via 
 	} 	
 }
 
+@
+@<Types@>=
+msgmap map[string][]int
+
 @ A channel to open a lists of  messages for an every mailbox.
 @<Variables@>=
-lch=make(chan *map[string][]int, 100)
+lch=make(chan *msgmap, 100)
 
 @
 @<Create |msgs|@>=
-msgs:=make(map[string][]int)
+msgs:=make(msgmap)
 
 @
 @<Add a |id| message to |msgs|@>=
@@ -1386,16 +1391,23 @@ messageid string
 	}
 }
 
-@ Processing of |idch| in the main loop.
-@<Processing of other common channels@>=
-case v:=<-idch:
-	if v.val==nil {
-		@<Clean an entry with |v.id| from |idmap|@>
-	} else if msg, ok:=v.val.(*message); ok {
-		@<Append a message with |v.id| to |idmap|@>
-	} else if ch, ok:=v.val.(chan idmessages); ok {
-		@<Send |children|@>
+@ Processing of |idch| in a separated goroutine..
+@<Start a collector of message identifiers@>=
+go func() {
+	for {
+		select {
+			@<On exit?@>
+			case v:=<-idch:
+				if v.val==nil {
+					@<Clean an entry with |v.id| from |idmap|@>
+				} else if msg, ok:=v.val.(*message); ok {
+					@<Append a message with |v.id| to |idmap|@>
+				} else if ch, ok:=v.val.(chan idmessages); ok {
+					@<Send |children|@>
+				}
+		}
 	}
+}()
 
 @
 @<Rest of |message| members@>=
@@ -1719,7 +1731,7 @@ if is found.
 @<Inform |box| to refresh |msgs|@>=
 {
 	if len(msgs)!=0 {
-		glog.V(debug).Infof("inform the '%s' mailbox to refresh messages\n", box.name, msg.id)
+		glog.V(debug).Infof("inform the '%s' mailbox to refresh messages\n", box.name)
 		box.rfch<-&refresh{seek, msgs}
 	}
 }
@@ -2000,13 +2012,13 @@ if err:=box.w.WriteAddr(addr); err!=nil {
 		if err:=box.w.WriteAddr("$"); err!=nil {
 			glog.Errorf("can't write to 'addr' file: %s\n", err)
 		}
-	} else if err:=box.w.WriteAddr("0/^[%s]*%s%s%d(%s)?\\/.*\\n\t.*\\n/+#0", @t\1@>@/
-			escape(levelmark), @/
-			func() string { if src[p-1].deleted {return escape(deleted)}; return ""}(), @/
-			func() string { if box.name!=src[p-1].box.name {return src[p-1].box.name+"/"}; return ""}(), @/
-			src[p-1].id, @/
-			escape(newmark) @t\2@>); err!=nil {
-		glog.V(debug).Infof("can't write to 'addr': %s\n", err)
+	} else {
+		msg:=src[p-1]
+		@<Compose |addr|@>
+		addr+="+#0"
+		if err:=box.w.WriteAddr(addr); err!=nil {
+			glog.V(debug).Infof("can't write to '%s' to 'addr': %v\n", addr, err)
+		}
 	}
 }
 
@@ -2051,17 +2063,14 @@ if msg.parent!=nil {
 			msg=v
 		}
 	}
-	if err:=box.w.WriteAddr("0/^[%s]*%s%s%d(%s)?\\/.*\\n\t.*\\n/+#0", @t\1@>@/
-			escape(levelmark), @/
-			func() string { if msg.deleted {return escape(deleted)}; return ""}(), @/
-			func() string { if box!=msg.box {return escape(msg.box.name+"/")}; return ""}(), @/
-			msg.id, @/
-			escape(newmark) @t\2@>); err!=nil {
-		glog.V(debug).Infof("can't write to 'addr': %s\n", err)
+	@<Compose |addr|@>
+	addr+="+#0"
+	if err:=box.w.WriteAddr(addr); err!=nil {
+		glog.V(debug).Infof("can't write '%s' to 'addr': %s\n", addr, err)
 		if (v.flags&exact)==exact {
 			@<Skip current message@>
 		}
-	} 	
+	}
 } else if (v.flags&exact)==exact {
 	@<Skip current message@>
 } else if err:=box.w.WriteAddr("#0-"); err!=nil {
