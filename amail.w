@@ -451,7 +451,7 @@ A pointer to a mailbox |b| is received from |rfch|. In case |b==nil| we should p
 or state of |b| otherwise.
 @<Start a main message loop@>=
 go func() {
-	glog.V(debug).Infoln("Start a main message loop")
+	glog.V(debug).Infoln("start a main message loop")
 	defer glog.V(debug).Infoln("main message loop is done")
 	for {
 		select {
@@ -529,13 +529,14 @@ if ech, err=mw.EventChannel(0, goacme.Mouse, goacme.Look|goacme.Execute); err!=n
 @
 @<Constants@>=
 const mailboxfmt="%-30s\t%10d\t%10d\n"
+const wholefile="0,$"
 
 @ Here we clean up the main window and print states of all mailboxes.
 @<Print all mailboxes@>=
 if mw!=nil {
 	glog.V(debug).Infoln("printing of the mailboxes")
-	if err:=mw.WriteAddr("0,$"); err!=nil {
-		glog.Errorf("can't write to 'addr' file: %s\n", err)
+	if err:=mw.WriteAddr(wholefile); err!=nil {
+		glog.Errorf("can't write '%s' to 'addr' file: %s\n", wholefile, err)
 	} else if data, err:=mw.File("data"); err!=nil {
 		glog.Errorf("can't open 'data' file: %s\n", err)
 	} else {
@@ -1246,7 +1247,7 @@ if strings.HasPrefix(s, "subject ") {
 
 @
 @<Go to top of window |w|@>=
-glog.V(debug).Infoln("Go to top of the window")
+glog.V(debug).Infoln("go to top of the window")
 w.WriteAddr("#0")
 w.WriteCtl("dot=addr\nshow")
 
@@ -1447,7 +1448,7 @@ mdch<-msgs
 
 Here we define global map of unique message identifiers on a pointer to a message and its children.
 An unique id of every message will be stored in this map.
-It will be changed in the common |boxes| goroutine, so a corresponding channel should be defined too.
+It will be changed in a separated goroutine, so a corresponding channel should be defined too.
 If we need to find children for a message by id, we should send to |idch| a channel instead of
 a pointer to a message and the children will be sent to this channel.
 If we need to remove a message from |idmap|, we should send to |idch| a |nil| like a |val|.
@@ -1564,7 +1565,8 @@ func (this *idmessages) Delete(pos int) (*message, bool) {
 	return msg, true
 }
 
-@
+@ If an entry with |v.id| doesn't exist, we create a new one, otherwise we have to check if |val.msg| is nil,
+that means |msg| is not a duplicate.
 @<Append a message with |v.id| to |idmap|@>=
 {
 	glog.V(debug).Infof("appending a '%s' message to idmap\n", v.id)
@@ -1572,22 +1574,26 @@ func (this *idmessages) Delete(pos int) (*message, bool) {
 		glog.V(debug).Infof("'%s' message  doesn't exist, creating\n", v.id)
 		idmap[v.id]=&struct{msg *message; children idmessages}{msg, nil}
 	} else {
+		if val.msg!=nil {
+			continue
+		}
 		glog.V(debug).Infof("'%s' message exists, reseting\n", v.id)
 		val.msg=msg
 		for i, _:=range val.children {
+			glog.V(debug).Infof("setting '%s' like a parent of '%s'\n", msg.messageid, val.children[i].messageid)
 			val.children[i].parent=msg
 		}
-		idmap[v.id]=val
 	}	
 	if len(msg.inreplyto)==0 {
 		continue
 	}
 	if val, ok:=idmap[msg.inreplyto]; !ok {
-		glog.V(debug).Infof("'%s' message  doesn't exist, creating\n", msg.inreplyto)
+		glog.V(debug).Infof("'%s' message (parent of '%s') doesn't exist, creating\n", msg.inreplyto, msg.messageid)
 		idmap[msg.inreplyto]=&struct{msg *message; children idmessages}{nil, append(idmessages{}, msg)}	
 	} else {
-		glog.V(debug).Infof("'%s' message exists, appending a child\n", msg.inreplyto)
-		if _, ok:=val.children.SearchInsert(msg); ok {
+		glog.V(debug).Infof("'%s' message exists, appending the '%s' like a child\n", msg.inreplyto, msg.messageid)
+		if _, ok:=val.children.SearchInsert(msg); ok && val.msg!=nil {
+			glog.V(debug).Infof("setting '%s' like a parent of '%s'\n", val.msg.messageid, msg.messageid)
 			msg.parent=val.msg
 		}
 	}
@@ -1595,7 +1601,7 @@ func (this *idmessages) Delete(pos int) (*message, bool) {
 
 @ When we are removing a message, we have to clean an entry with |v.id| - to set |msg| to |nil|, 
 to clean |parent| for all |children| and to remove |msg| from |children| of |msg.parent|. 
-We leave an entry in |idmap| to store links of children.
+We leave a non-empty entry in |idmap| to store links of children.
 @<Clean an entry with |v.id| from |idmap|@>=
 {
 	val, ok:=idmap[v.id]
@@ -1618,6 +1624,9 @@ We leave an entry in |idmap| to store links of children.
 			}
 		}
 		val.msg=nil
+	}
+	if len(val.children)==0 {
+		delete(idmap, v.id)
 	}
 }
 
@@ -1891,6 +1900,10 @@ if !box.threadMode() {
 }
 
 @
+@<Constants@>=
+const eof="$"
+
+@
 @<Print messages from |v.msgs|@>=
 {
 	glog.V(debug).Infof("printing of messages of the '%s' mailbox from v.msgs, len(v.msgs): %d, with flags: %v\n", box.name, len(v.msgs), v.flags)
@@ -1903,8 +1916,8 @@ if !box.threadMode() {
 		@<Write a tag of |box| window@>
 		msg:=v.msgs[0]
 		@<Trying to find a place for |msg| in the |box| window@>
-	} else if err:=box.w.WriteAddr("$"); err!=nil {
-		glog.Errorf("can't write to 'addr' file: %s\n", err)
+	} else if err:=box.w.WriteAddr(eof); err!=nil {
+		glog.Errorf("can't write '%s' to 'addr' file: %s\n", eof, err)
 		continue
 	}
 	w:=box.w
@@ -1946,7 +1959,7 @@ by one, because we have to set a position for every message..
 c:=0
 for len(v.msgs)>0 && c<100 {
 	msg:=v.msgs[0]
-	glog.V(debug).Infof("printing of message with id: %v\n", msg.id)
+	glog.V(debug).Infof("printing of '%s/%d' message with in the '%s' mailbox\n", msg.box.name, msg.id, box.name)
 	if box.threadMode() {
 		@<Add the thread level marks@>
 	}
@@ -2075,8 +2088,8 @@ clean(box.w)
 @
 @c
 func clean(w *goacme.Window){
-	if err:=w.WriteAddr("0,$"); err!=nil {
-		glog.Errorf("can't write to 'addr' file: %s\n", err)
+	if err:=w.WriteAddr(wholefile); err!=nil {
+		glog.Errorf("can't write '%s' to 'addr' file: %s\n", wholefile, err)
 	} else if data, err:=w.File("data"); err!=nil {
 		glog.Errorf("can't open 'data' file: %s\n", err)
 	} else if _, err:=data.Write([]byte("")); err!=nil {
@@ -2084,42 +2097,47 @@ func clean(w *goacme.Window){
 	}
 }
 
+@
+@<Constants@>=
+const bof="#0-"
+const eol="+#0"
+
 @ For the first we try to find the message itself. If the message is new and |insert| is set in |v.flags|, we should
 find its neighbours and set address according to the position.
 @<Trying to find a place for |msg| in the |box| window@>=
 @<Determine of |src|@>
 @<Compose |addr|@>
-glog.V(debug).Infof("refreshed message addr: '%s'\n", addr)
+glog.V(debug).Infof("composed message addr '%s' in the '%s' mailbox\n", addr, box.name)
 if err:=box.w.WriteAddr(addr); err!=nil {
-	glog.V(debug).Infof("the '%d' message is not found in the window\n", msg.id)
+	glog.V(debug).Infof("the '%d' message is not found in the window of the '%s' mailbox\n", msg.id, box.name)
 	if (v.flags&insert)==0 {
 		@<Skip current message@>
 	}
 	if box.threadMode() {
 		@<Set a position for a threaded message@>
 	} else if p, ok:=src.Search(msg.id); !ok {
-		glog.V(debug).Infof("the '%d' message is not found\n", msg.id)
+		glog.V(debug).Infof("the '%d' message is not found in  the '%s' mailbox's window\n", msg.id, box.name)
 	} else if p==0 {
-		if err:=box.w.WriteAddr("#0-"); err!=nil {
-			glog.Errorf("can't write to 'addr' file: %s\n", err)
+		if err:=box.w.WriteAddr(bof); err!=nil {
+			glog.Errorf("can't write '%s' to 'addr' file of the '%s' mailbox's window: %s\n", bof, box.name,err)
 		}
 	} else if p==len(src)-1 {
-		if err:=box.w.WriteAddr("$"); err!=nil {
-			glog.Errorf("can't write to 'addr' file: %s\n", err)
+		if err:=box.w.WriteAddr(eof); err!=nil {
+			glog.Errorf("can't write '%s' to 'addr' file of the '%s' mailbox's window: %s\n", eof, box.name, err)
 		}
 	} else {
 		msg:=src[p-1]
 		@<Compose |addr|@>
-		addr+="+#0"
+		addr+=eol
 		if err:=box.w.WriteAddr(addr); err!=nil {
-			glog.V(debug).Infof("can't write to '%s' to 'addr': %v\n", addr, err)
+			glog.V(debug).Infof("can't write '%s' to 'addr' of the '%s' mailbox's window: %v\n", addr, box.name, err)
 		}
 	}
 }
 
 @
 @<Skip current message@>=
-glog.V(debug).Infof("the '%d' message won't be inserted\n", v.msgs[0].id)
+glog.V(debug).Infof("the '%d' message won't be inserted in the '%s' mailbox's window\n", v.msgs[0].id, box.name)
 v.msgs=v.msgs[1:]
 @<Send a rest of |msgs|@>
 continue
@@ -2127,7 +2145,7 @@ continue
 
 @
 @<Compose |addr|@>=
-addr:=fmt.Sprintf("0/^[%s]*(%s)?%s%d(%s)?\\/.*\\n\t.*\\n/",  @t\1@>@/
+addr:=fmt.Sprintf("0/^[%s]*(%s)?%s%d(%s)?\\/.*\\n.*\\n/",  @t\1@>@/
 			escape(levelmark), @/
 			escape(deleted), @/
 			func() string { if box!=msg.box {return escape(msg.box.name+"/")}; return ""}(), @/
@@ -2141,7 +2159,7 @@ If |msg| has no parent and |exact| is not set in |v.flags| it will be printed on
 if msg.parent!=nil {
 	glog.V(debug).Infof("msg '%d' has a parent, looking for a position to print\n", msg.id)
 	m:=msg
-	msg:=m.parent
+	msg=m.parent
 	found:=false
 	for !found {
 		@<Get |children| for |msg|@>
@@ -2158,18 +2176,19 @@ if msg.parent!=nil {
 			msg=v
 		}
 	}
+	glog.V(debug).Infof("the '%d' message will be printed after the '%d' message\n", m.id, msg.id)
 	@<Compose |addr|@>
-	addr+="+#0"
+	addr+=eol
 	if err:=box.w.WriteAddr(addr); err!=nil {
-		glog.V(debug).Infof("can't write '%s' to 'addr': %s\n", addr, err)
+		glog.V(debug).Infof("can't write '%s' to 'addr' of the '%s' mailbox's window: %v\n", addr, box.name, err)
 		if (v.flags&exact)==exact {
 			@<Skip current message@>
 		}
 	}
 } else if (v.flags&exact)==exact {
 	@<Skip current message@>
-} else if err:=box.w.WriteAddr("#0-"); err!=nil {
-	glog.Errorf("can't write to 'addr' file: %s\n", err)
+} else if err:=box.w.WriteAddr(bof); err!=nil {
+	glog.Errorf("can't write '%s' to 'addr' file of the '%s' mailbox's window: %v\n", bof, box.name, err)
 }
 
 @
@@ -2251,13 +2270,13 @@ case ids:=<-box.lch:
 		}
 		msg:=box.all[p]
 		if msg.w==nil {
-			if err:=msg.open(); err!=nil {
-				continue
-			}
 			if msg.unread {
 				@<Remove |id| message from |unread|@>
 				@<Refresh the message's view@>
 				@<Send |box| to refresh the main window@>
+			}
+			if err:=msg.open(); err!=nil {
+				continue
 			}
 		} else {
 			glog.V(debug).Infof("a window of the '%d' message of the '%s' already exists, just show it\n", id, box.name)
@@ -2310,7 +2329,7 @@ func (box *mailbox) eraseMessage(msg *message){
 		msg.id, msg.box.name, box.name @t\2@>)
 	@<Compose |addr|@>
 	if err:=box.w.WriteAddr(addr); err!=nil {
-		glog.V(debug).Infof("can't write '%s' to 'addr': %s\n", addr, err)
+		glog.V(debug).Infof("can't write '%s' to 'addr' of the '%s' mailbox's window: %v\n", addr, box.name, err)
 	} else if data, err:=box.w.File("data"); err !=nil {
 		glog.Errorf("can't open 'data' file of the box '%s': %s\n", box.name, err)
 	} else if _, err:=data.Write([]byte{}); err!=nil {
@@ -3144,7 +3163,7 @@ If |msg!=nil|, it will be added like a message is replied.
 {
 	@<Get |plan9dir| from enviroment variable@>
 	w.Seek(0, 0)
-	w.WriteAddr("0,$")
+	w.WriteAddr(wholefile)
 	ff, _:=w.File("xdata")
 	b:=bufio.NewReader(ff)
 	var to, cc, bcc, attach, include []string

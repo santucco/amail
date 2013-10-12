@@ -26,6 +26,7 @@ New messages are marked by "(*)", a thread levels of a message are marked by "+"
 A mailbox's tag can contain next commands:
 - "Mail" opens a window to compose a new mail.
 - "Delmesg" marks messages for removing, messages have to be selected explicitely.
+- "UnDelmesg" cleans removing marks, messages have to be selected explicitely.
 - "Put" removes marked messages from a server. Open messages won't be deleted.
 - "Thread" shows a thread contains a specified message.
 - "ShowAll" shows all messages.
