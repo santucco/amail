@@ -179,7 +179,7 @@ if r, _:=utf8.DecodeRuneInString(newmark); unicode.IsDigit(r) {
 
 @* Mounting of the \.{Acme} filesystem.
 @<Imports@>=
-"code.google.com/p/goplan9/plan9/client"
+"code.google.com/r/santucco-goplan9/plan9/client"
 "github.com/golang/glog"
 
 @
@@ -354,7 +354,7 @@ func (this *mailbox) newMessage(id int) (msg *message, unread bool, err error) {
 
 @<Imports@>=
 "bitbucket.org/santucco/goplumb"
-"code.google.com/p/goplan9/plan9"
+"code.google.com/r/santucco-goplan9/plan9"
 
 @ Here a subscription on \.{plumber} messages is made. The messages is checked for |filetype=="mail"| and
 |"mailtype"| are existing. In case a new mail message we send a name of a mailbox an an id of the message in |mch|,

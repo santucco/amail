@@ -78,7 +78,7 @@ package main
 
 //line amail.w:181
 
-"code.google.com/p/goplan9/plan9/client"
+"code.google.com/r/santucco-goplan9/plan9/client"
 "github.com/golang/glog"
 
 
@@ -107,7 +107,7 @@ package main
 //line amail.w:355
 
 "bitbucket.org/santucco/goplumb"
-"code.google.com/p/goplan9/plan9"
+"code.google.com/r/santucco-goplan9/plan9"
 
 
 
