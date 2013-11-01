@@ -51,7 +51,7 @@ func main() {
 	defer glog.V(debug).Infoln("main is done")
 	@<Parse command line arguments@>
 	@<Try to open \.{mailfs}@>
-	@<Subscribe on notifications about new messages@>
+	@<Subscribe on notifications of \.{plumber}@>
 	@<Init root of \.{mailfs}@>
 	@<Start a collector of message identifiers@>
 	if len(flag.Args())>0 {
@@ -356,10 +356,10 @@ func (this *mailbox) newMessage(id int) (msg *message, unread bool, err error) {
 "bitbucket.org/santucco/goplumb"
 "bitbucket.org/santucco/goplan9-clone/plan9"
 
-@ Here a subscription on \.{plumber} messages is made. The messages is checked for |filetype=="mail"| and
+@ Here a subscription on |"seemail"| port of \.{plumber} is made. The messages is checked for |filetype=="mail"| and
 |"mailtype"| are existing. In case a new mail message we send a name of a mailbox an an id of the message in |mch|,
 in case of a mail message is deleted - in |dch|.
-@<Subscribe on notifications about new messages@>=
+@<Subscribe on notifications of \.{plumber}@>=
 {
 	glog.V(debug).Infoln("trying to open 'seemail' plumbing port")
 	if sm, err:=goplumb.Open("seemail", plan9.OREAD); err!=nil {
@@ -408,6 +408,43 @@ in case of a mail message is deleted - in |dch|.
 								glog.V(debug).Infof("'%d' is a deleted message in the '%s' mailbox\n", num, b[1])
 								dch<-&struct{name string; id int}{name:b[1], id:num}
 							}
+					}
+				}
+			} ()
+		}
+	}
+}
+
+@ Here a subscription on |"sendmail"| port of \.{plumber} is made.
+@<Subscribe on notifications of \.{plumber}@>=
+{
+	glog.V(debug).Infoln("trying to open 'sendmail' plumbing port")
+	if sm, err:=goplumb.Open("sendmail", plan9.OREAD); err!=nil {
+		glog.V(debug).Infof("can't open plumb/sendmail: %s\n", err)
+	} else {
+		sch, err:=sm.MessageChannel(0)
+		if err!=nil {
+			glog.Errorf("can't get message channal for plumb/sendmail: %s\n", err)
+		} else {
+			go func() {
+				defer sm.Close()
+				defer glog.V(debug).Infoln("plumbing goroutine is done")
+				for {
+					select {
+						@<On exit?@>
+						case m, ok:=<-sch:
+							if !ok {
+								glog.Warningln("it seems plumber has finished")
+								sch=nil
+								return
+							}
+							glog.V(debug).Infof("a plumbing message has been received: %v\n", m)
+							var msg *message
+							@<Create a new message window@>
+							name:=fmt.Sprintf("Amail/New")
+							@<Print the |name| for window |w|@>
+							addr:=fmt.Sprintf("To: %s\n\n", string(m.Data))
+							w.Write([]byte(addr))
 					}
 				}
 			} ()
