@@ -170,7 +170,7 @@ package main
 /*207:*/
 
 
-//line amail.w:2817
+//line amail.w:2820
 
 "os/exec"
 
@@ -183,7 +183,7 @@ package main
 /*222:*/
 
 
-//line amail.w:3148
+//line amail.w:3151
 
 "os/user"
 
@@ -196,7 +196,7 @@ package main
 /*226:*/
 
 
-//line amail.w:3169
+//line amail.w:3172
 
 "sync"
 
@@ -458,7 +458,7 @@ cc[]string
 /*209:*/
 
 
-//line amail.w:2839
+//line amail.w:2842
 
 text string
 html string
@@ -533,7 +533,7 @@ msgs messages
 /*208:*/
 
 
-//line amail.w:2821
+//line amail.w:2824
 
 file struct{
 name string
@@ -826,7 +826,7 @@ mrfch chan*refresh= make(chan*refresh)
 /*214:*/
 
 
-//line amail.w:2985
+//line amail.w:2988
 
 home string
 
@@ -839,7 +839,7 @@ home string
 /*223:*/
 
 
-//line amail.w:3152
+//line amail.w:3155
 
 cuser string
 
@@ -852,7 +852,7 @@ cuser string
 /*227:*/
 
 
-//line amail.w:3173
+//line amail.w:3176
 
 once sync.Once
 
@@ -865,7 +865,7 @@ once sync.Once
 /*237:*/
 
 
-//line amail.w:3458
+//line amail.w:3461
 
 plan9dir string
 
@@ -1102,7 +1102,7 @@ var msg*message
 /*231:*/
 
 
-//line amail.w:3246
+//line amail.w:3249
 
 w,err:=goacme.New()
 if err!=nil{
@@ -1117,7 +1117,7 @@ glog.Errorf("can't write a tag for a new message window: %v\n",err)
 /*232:*/
 
 
-//line amail.w:3258
+//line amail.w:3261
 
 go func(msg*message){
 glog.V(debug).Infoln("starting a goroutine to process events from a composed mail window")
@@ -1138,7 +1138,7 @@ case"Post":
 /*236:*/
 
 
-//line amail.w:3345
+//line amail.w:3348
 
 {
 
@@ -1146,21 +1146,21 @@ case"Post":
 /*238:*/
 
 
-//line amail.w:3462
+//line amail.w:3465
 
 
 
 /*228:*/
 
 
-//line amail.w:3177
+//line amail.w:3180
 
 once.Do(func(){
 
 /*216:*/
 
 
-//line amail.w:2993
+//line amail.w:2996
 
 if home= os.Getenv("home");len(home)==0{
 if home= os.Getenv("HOME");len(home)==0{
@@ -1179,7 +1179,7 @@ home= "/"
 /*225:*/
 
 
-//line amail.w:3160
+//line amail.w:3163
 
 if u,err:=user.Current();err!=nil{
 glog.Errorf("can't get a name of the current user: %v\n",err)
@@ -1197,7 +1197,7 @@ cuser= u.Username
 /*239:*/
 
 
-//line amail.w:3466
+//line amail.w:3469
 
 if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
 glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
@@ -1209,7 +1209,7 @@ plan9dir= "/usr/local/plan9"
 /*:239*/
 
 
-//line amail.w:3178
+//line amail.w:3181
 })
 
 
@@ -1217,7 +1217,7 @@ plan9dir= "/usr/local/plan9"
 /*:228*/
 
 
-//line amail.w:3463
+//line amail.w:3466
 
 
 
@@ -1225,7 +1225,7 @@ plan9dir= "/usr/local/plan9"
 /*:238*/
 
 
-//line amail.w:3347
+//line amail.w:3350
 
 w.Seek(0,0)
 w.WriteAddr(wholefile)
@@ -1341,7 +1341,7 @@ w.Close()
 /*:236*/
 
 
-//line amail.w:3273
+//line amail.w:3276
 
 }
 }
@@ -1354,7 +1354,7 @@ w.UnreadEvent(ev)
 /*:232*/
 
 
-//line amail.w:3255
+//line amail.w:3258
 
 
 
@@ -3168,7 +3168,7 @@ msg= &message{id:id,box:this,
 /*210:*/
 
 
-//line amail.w:2847
+//line amail.w:2850
 
 cids:make(map[string]*file),
 
@@ -4838,7 +4838,7 @@ var msg*message
 /*231:*/
 
 
-//line amail.w:3246
+//line amail.w:3249
 
 w,err:=goacme.New()
 if err!=nil{
@@ -4853,7 +4853,7 @@ glog.Errorf("can't write a tag for a new message window: %v\n",err)
 /*232:*/
 
 
-//line amail.w:3258
+//line amail.w:3261
 
 go func(msg*message){
 glog.V(debug).Infoln("starting a goroutine to process events from a composed mail window")
@@ -4874,7 +4874,7 @@ case"Post":
 /*236:*/
 
 
-//line amail.w:3345
+//line amail.w:3348
 
 {
 
@@ -4882,21 +4882,21 @@ case"Post":
 /*238:*/
 
 
-//line amail.w:3462
+//line amail.w:3465
 
 
 
 /*228:*/
 
 
-//line amail.w:3177
+//line amail.w:3180
 
 once.Do(func(){
 
 /*216:*/
 
 
-//line amail.w:2993
+//line amail.w:2996
 
 if home= os.Getenv("home");len(home)==0{
 if home= os.Getenv("HOME");len(home)==0{
@@ -4915,7 +4915,7 @@ home= "/"
 /*225:*/
 
 
-//line amail.w:3160
+//line amail.w:3163
 
 if u,err:=user.Current();err!=nil{
 glog.Errorf("can't get a name of the current user: %v\n",err)
@@ -4933,7 +4933,7 @@ cuser= u.Username
 /*239:*/
 
 
-//line amail.w:3466
+//line amail.w:3469
 
 if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
 glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
@@ -4945,7 +4945,7 @@ plan9dir= "/usr/local/plan9"
 /*:239*/
 
 
-//line amail.w:3178
+//line amail.w:3181
 })
 
 
@@ -4953,7 +4953,7 @@ plan9dir= "/usr/local/plan9"
 /*:228*/
 
 
-//line amail.w:3463
+//line amail.w:3466
 
 
 
@@ -4961,7 +4961,7 @@ plan9dir= "/usr/local/plan9"
 /*:238*/
 
 
-//line amail.w:3347
+//line amail.w:3350
 
 w.Seek(0,0)
 w.WriteAddr(wholefile)
@@ -5077,7 +5077,7 @@ w.Close()
 /*:236*/
 
 
-//line amail.w:3273
+//line amail.w:3276
 
 }
 }
@@ -5090,7 +5090,7 @@ w.UnreadEvent(ev)
 /*:232*/
 
 
-//line amail.w:3255
+//line amail.w:3258
 
 
 
@@ -5712,7 +5712,7 @@ msg:=box.all[p]
 /*198:*/
 
 
-//line amail.w:2580
+//line amail.w:2583
 
 msg.writeTag()
 
@@ -5780,7 +5780,7 @@ msg:=box.all[p]
 /*198:*/
 
 
-//line amail.w:2580
+//line amail.w:2583
 
 msg.writeTag()
 
@@ -9206,7 +9206,7 @@ var msg*message
 /*231:*/
 
 
-//line amail.w:3246
+//line amail.w:3249
 
 w,err:=goacme.New()
 if err!=nil{
@@ -9221,7 +9221,7 @@ glog.Errorf("can't write a tag for a new message window: %v\n",err)
 /*232:*/
 
 
-//line amail.w:3258
+//line amail.w:3261
 
 go func(msg*message){
 glog.V(debug).Infoln("starting a goroutine to process events from a composed mail window")
@@ -9242,7 +9242,7 @@ case"Post":
 /*236:*/
 
 
-//line amail.w:3345
+//line amail.w:3348
 
 {
 
@@ -9250,21 +9250,21 @@ case"Post":
 /*238:*/
 
 
-//line amail.w:3462
+//line amail.w:3465
 
 
 
 /*228:*/
 
 
-//line amail.w:3177
+//line amail.w:3180
 
 once.Do(func(){
 
 /*216:*/
 
 
-//line amail.w:2993
+//line amail.w:2996
 
 if home= os.Getenv("home");len(home)==0{
 if home= os.Getenv("HOME");len(home)==0{
@@ -9283,7 +9283,7 @@ home= "/"
 /*225:*/
 
 
-//line amail.w:3160
+//line amail.w:3163
 
 if u,err:=user.Current();err!=nil{
 glog.Errorf("can't get a name of the current user: %v\n",err)
@@ -9301,7 +9301,7 @@ cuser= u.Username
 /*239:*/
 
 
-//line amail.w:3466
+//line amail.w:3469
 
 if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
 glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
@@ -9313,7 +9313,7 @@ plan9dir= "/usr/local/plan9"
 /*:239*/
 
 
-//line amail.w:3178
+//line amail.w:3181
 })
 
 
@@ -9321,7 +9321,7 @@ plan9dir= "/usr/local/plan9"
 /*:228*/
 
 
-//line amail.w:3463
+//line amail.w:3466
 
 
 
@@ -9329,7 +9329,7 @@ plan9dir= "/usr/local/plan9"
 /*:238*/
 
 
-//line amail.w:3347
+//line amail.w:3350
 
 w.Seek(0,0)
 w.WriteAddr(wholefile)
@@ -9445,7 +9445,7 @@ w.Close()
 /*:236*/
 
 
-//line amail.w:3273
+//line amail.w:3276
 
 }
 }
@@ -9458,7 +9458,7 @@ w.UnreadEvent(ev)
 /*:232*/
 
 
-//line amail.w:3255
+//line amail.w:3258
 
 
 
@@ -10080,7 +10080,7 @@ msg:=box.all[p]
 /*198:*/
 
 
-//line amail.w:2580
+//line amail.w:2583
 
 msg.writeTag()
 
@@ -10148,7 +10148,7 @@ msg:=box.all[p]
 /*198:*/
 
 
-//line amail.w:2580
+//line amail.w:2583
 
 msg.writeTag()
 
@@ -12248,17 +12248,285 @@ glog.Errorf("can't walk to '%s/%d': %v\n",msg.box.name,msg.id,err)
 return err
 }
 defer bfid.Close()
-if msg.w==nil{
+isnew:=msg.w==nil
+if isnew{
 if msg.w,err= goacme.New();err!=nil{
 glog.Errorf("can't create a window: %v\n",err)
 return err
 }
+}else{
+
+
+/*206:*/
+
+
+//line amail.w:2815
+
+glog.V(debug).Infof("clean the '%s/%d' message's window\n",msg.box.name,msg.id)
+clean(msg.w)
+
+
+
+/*:206*/
+
+
+//line amail.w:2564
+
+}
+buf:=make([]byte,0,0x8000)
+
+
+/*204:*/
+
+
+//line amail.w:2686
+
+{
+glog.V(debug).Infof("composing a header of the '%d' message\n",msg.id)
+buf= append(buf,fmt.Sprintf("From: %s\nDate: %s\nTo: %s\n%sSubject: %s\n\n\n",
+msg.from,msg.date,strings.Join(msg.to,", "),
+func()string{if len(msg.cc)!=0{return fmt.Sprintf("CC: %s\n",strings.Join(msg.cc,", "))};return""}(),
+msg.subject)...)
+}
+
+
+
+/*:204*/
+
+
+//line amail.w:2567
+
+
+
+/*211:*/
+
+
+//line amail.w:2856
+
+{
+if len(msg.text)==0&&len(msg.html)==0{
+if err= msg.bodyPath(bfid,"");err!=nil{
+glog.Errorf("can't ged a body path of '%d': %v\n",msg.id,err)
+}
+glog.V(debug).Infof("paths for bodies of the '%d' message have been found: text-'%s', html-'%s'\n",
+msg.id,msg.text,msg.html)
+
+}
+if len(msg.text)!=0&&!msg.showhtml{
+glog.V(debug).Infof("using a path for a text body of the '%d' message: '%s'\n",msg.id,msg.text)
+if buf,err= readAll(bfid,msg.text,buf);err!=nil{
+glog.Errorf("can't read '%s': %v\n",msg.text,err)
+return
+}
+}else if len(msg.html)!=0{
+glog.V(debug).Infof("using a path for a html body of the '%d' message: '%s'\n",msg.id,msg.html)
+msg.w.Write(buf)
+buf= nil
+c1:=exec.Command("9p","read",fmt.Sprintf("%s/%s/%d/%s",srv,msg.box.name,msg.id,msg.html))
+c2:=exec.Command("htmlfmt","-cutf-8")
+c2.Stdout,_= msg.w.File("body")
+c2.Stdin,err= c1.StdoutPipe()
+if err!=nil{
+glog.Errorf("can't get a stdout pipe: %v\n",err)
+return
+}
+if err= c2.Start();err!=nil{
+glog.Errorf("can't start 'htmlfmt': %v\n",err)
+return
+}
+if err= c1.Run();err!=nil{
+glog.Errorf("can't run '9p': %v\n",err)
+c2.Wait()
+return
+}
+if err= c2.Wait();err!=nil{
+glog.Errorf("can't wait of completion 'htmlfmt': %v\n",err)
+return
+}
+}
+
+
+/*215:*/
+
+
+//line amail.w:2992
+
+
+
+/*228:*/
+
+
+//line amail.w:3180
+
+once.Do(func(){
+
+/*216:*/
+
+
+//line amail.w:2996
+
+if home= os.Getenv("home");len(home)==0{
+if home= os.Getenv("HOME");len(home)==0{
+glog.Errorln("can't get a home directory from the environment, the home is assumed '/'")
+home= "/"
+}
+}
+
+
+
+
+/*:216*/
+
+
+
+/*225:*/
+
+
+//line amail.w:3163
+
+if u,err:=user.Current();err!=nil{
+glog.Errorf("can't get a name of the current user: %v\n",err)
+}else{
+cuser= u.Username
+}
+
+
+
+
+/*:225*/
+
+
+
+/*239:*/
+
+
+//line amail.w:3469
+
+if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
+glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
+plan9dir= "/usr/local/plan9"
+}
+
+
+
+/*:239*/
+
+
+//line amail.w:3181
+})
+
+
+
+/*:228*/
+
+
+//line amail.w:2993
+
+
+
+
+/*:215*/
+
+
+//line amail.w:2898
+
+for _,v:=range msg.files{
+buf= append(buf,fmt.Sprintf("\n===> %s (%s)\n",v.path,v.mimetype)...)
+buf= append(buf,fmt.Sprintf("\t9p read %s/%s/%d/%sbody > '%s/%s'\n",srv,msg.box.name,msg.id,v.path,home,v.name)...)
+}
+}
+
+
+
+/*:211*/
+
+
+//line amail.w:2568
+
+w:=msg.w
+name:=fmt.Sprintf("Amail/%s/%d",msg.box.name,msg.id)
+
+
+/*54:*/
+
+
+//line amail.w:786
+
+glog.V(debug).Infoln("printing a name for a window")
+if err:=w.WriteCtl("name %s",strings.Replace(name," ","␣",-1));err!=nil{
+glog.Errorf("can't write to 'ctl' file: %s\n",err)
+}
+
+
+
+/*:54*/
+
+
+//line amail.w:2571
+
+
+
+/*198:*/
+
+
+//line amail.w:2583
+
+msg.writeTag()
+
+
+
+/*:198*/
+
+
+//line amail.w:2572
+
+w.Write(buf)
+
+
+/*51:*/
+
+
+//line amail.w:756
+
+if w!=nil{
+glog.V(debug).Infoln("setting the window to clean state")
+if err:=w.WriteCtl("clean");err!=nil{
+glog.Errorf("can't write to 'ctl' file: %s\n",err)
+}
+}
+
+
+
+/*:51*/
+
+
+//line amail.w:2574
+
+
+
+/*95:*/
+
+
+//line amail.w:1288
+
+glog.V(debug).Infoln("go to top of the window")
+w.WriteAddr("#0")
+w.WriteCtl("dot=addr\nshow")
+
+
+
+/*:95*/
+
+
+//line amail.w:2575
+
+if isnew{
 
 
 /*205:*/
 
 
-//line amail.w:2693
+//line amail.w:2696
 
 go func(){
 glog.V(debug).Infof("starting a goroutine to process events from the '%d' message's window\n",msg.id)
@@ -12300,7 +12568,7 @@ mrfch<-&refresh{seek,append(messages{},msg)}
 /*:153*/
 
 
-//line amail.w:2717
+//line amail.w:2720
 
 return
 }
@@ -12314,7 +12582,7 @@ msg.box.deleted--
 /*198:*/
 
 
-//line amail.w:2580
+//line amail.w:2583
 
 msg.writeTag()
 
@@ -12323,7 +12591,7 @@ msg.writeTag()
 /*:198*/
 
 
-//line amail.w:2725
+//line amail.w:2728
 
 
 
@@ -12342,7 +12610,7 @@ mrfch<-&refresh{seek,append(messages{},msg)}
 /*:153*/
 
 
-//line amail.w:2726
+//line amail.w:2729
 
 }
 continue
@@ -12364,7 +12632,7 @@ case"Browser":
 /*219:*/
 
 
-//line amail.w:3049
+//line amail.w:3052
 
 {
 
@@ -12372,21 +12640,21 @@ case"Browser":
 /*224:*/
 
 
-//line amail.w:3156
+//line amail.w:3159
 
 
 
 /*228:*/
 
 
-//line amail.w:3177
+//line amail.w:3180
 
 once.Do(func(){
 
 /*216:*/
 
 
-//line amail.w:2993
+//line amail.w:2996
 
 if home= os.Getenv("home");len(home)==0{
 if home= os.Getenv("HOME");len(home)==0{
@@ -12405,7 +12673,7 @@ home= "/"
 /*225:*/
 
 
-//line amail.w:3160
+//line amail.w:3163
 
 if u,err:=user.Current();err!=nil{
 glog.Errorf("can't get a name of the current user: %v\n",err)
@@ -12423,7 +12691,7 @@ cuser= u.Username
 /*239:*/
 
 
-//line amail.w:3466
+//line amail.w:3469
 
 if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
 glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
@@ -12435,7 +12703,7 @@ plan9dir= "/usr/local/plan9"
 /*:239*/
 
 
-//line amail.w:3178
+//line amail.w:3181
 })
 
 
@@ -12443,7 +12711,7 @@ plan9dir= "/usr/local/plan9"
 /*:228*/
 
 
-//line amail.w:3157
+//line amail.w:3160
 
 
 
@@ -12451,7 +12719,7 @@ plan9dir= "/usr/local/plan9"
 /*:224*/
 
 
-//line amail.w:3051
+//line amail.w:3054
 
 dir:=fmt.Sprintf("%s/amail-%s/%s/%d",os.TempDir(),cuser,msg.box.name,msg.id)
 if err:=os.MkdirAll(dir,0700);err!=nil{
@@ -12487,7 +12755,7 @@ glog.Errorf("can't plumb a message '%s': %v\n",fmt.Sprintf("file://%s/%d.html",d
 /*:219*/
 
 
-//line amail.w:2742
+//line amail.w:2745
 
 continue
 case"Save":
@@ -12496,7 +12764,7 @@ case"Save":
 /*229:*/
 
 
-//line amail.w:3181
+//line amail.w:3184
 
 {
 if len(ev.Arg)==0{
@@ -12526,7 +12794,7 @@ f.Close()
 /*:229*/
 
 
-//line amail.w:2745
+//line amail.w:2748
 
 continue
 case"Q":
@@ -12548,7 +12816,7 @@ replyall= true
 /*230:*/
 
 
-//line amail.w:3206
+//line amail.w:3209
 
 {
 
@@ -12556,7 +12824,7 @@ replyall= true
 /*231:*/
 
 
-//line amail.w:3246
+//line amail.w:3249
 
 w,err:=goacme.New()
 if err!=nil{
@@ -12571,7 +12839,7 @@ glog.Errorf("can't write a tag for a new message window: %v\n",err)
 /*232:*/
 
 
-//line amail.w:3258
+//line amail.w:3261
 
 go func(msg*message){
 glog.V(debug).Infoln("starting a goroutine to process events from a composed mail window")
@@ -12592,7 +12860,7 @@ case"Post":
 /*236:*/
 
 
-//line amail.w:3345
+//line amail.w:3348
 
 {
 
@@ -12600,21 +12868,21 @@ case"Post":
 /*238:*/
 
 
-//line amail.w:3462
+//line amail.w:3465
 
 
 
 /*228:*/
 
 
-//line amail.w:3177
+//line amail.w:3180
 
 once.Do(func(){
 
 /*216:*/
 
 
-//line amail.w:2993
+//line amail.w:2996
 
 if home= os.Getenv("home");len(home)==0{
 if home= os.Getenv("HOME");len(home)==0{
@@ -12633,7 +12901,7 @@ home= "/"
 /*225:*/
 
 
-//line amail.w:3160
+//line amail.w:3163
 
 if u,err:=user.Current();err!=nil{
 glog.Errorf("can't get a name of the current user: %v\n",err)
@@ -12651,7 +12919,7 @@ cuser= u.Username
 /*239:*/
 
 
-//line amail.w:3466
+//line amail.w:3469
 
 if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
 glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
@@ -12663,7 +12931,7 @@ plan9dir= "/usr/local/plan9"
 /*:239*/
 
 
-//line amail.w:3178
+//line amail.w:3181
 })
 
 
@@ -12671,7 +12939,7 @@ plan9dir= "/usr/local/plan9"
 /*:228*/
 
 
-//line amail.w:3463
+//line amail.w:3466
 
 
 
@@ -12679,7 +12947,7 @@ plan9dir= "/usr/local/plan9"
 /*:238*/
 
 
-//line amail.w:3347
+//line amail.w:3350
 
 w.Seek(0,0)
 w.WriteAddr(wholefile)
@@ -12795,7 +13063,7 @@ w.Close()
 /*:236*/
 
 
-//line amail.w:3273
+//line amail.w:3276
 
 }
 }
@@ -12808,7 +13076,7 @@ w.UnreadEvent(ev)
 /*:232*/
 
 
-//line amail.w:3255
+//line amail.w:3258
 
 
 
@@ -12816,7 +13084,7 @@ w.UnreadEvent(ev)
 /*:231*/
 
 
-//line amail.w:3208
+//line amail.w:3211
 
 name:=fmt.Sprintf("Amail/%s/%d/%sReply%s",
 msg.box.name,
@@ -12840,7 +13108,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:54*/
 
 
-//line amail.w:3214
+//line amail.w:3217
 
 buf:=make([]byte,0,0x8000)
 buf= append(buf,fmt.Sprintf("To: %s\n",msg.from)...)
@@ -12867,7 +13135,7 @@ buf= append(buf,'\n')
 /*233:*/
 
 
-//line amail.w:3281
+//line amail.w:3284
 
 if len(msg.text)!=0{
 fn:=fmt.Sprintf("%d/%s",msg.id,msg.text)
@@ -12884,7 +13152,7 @@ continue
 /*234:*/
 
 
-//line amail.w:3299
+//line amail.w:3302
 
 {
 b:=bufio.NewReader(f)
@@ -12902,7 +13170,7 @@ break
 /*:234*/
 
 
-//line amail.w:3292
+//line amail.w:3295
 
 f.Close()
 }else if len(msg.html)!=0{
@@ -12911,7 +13179,7 @@ f.Close()
 /*235:*/
 
 
-//line amail.w:3312
+//line amail.w:3315
 
 {
 c1:=exec.Command("9p","read",fmt.Sprintf("%s/%s/%d/%s",srv,msg.box.name,msg.id,msg.html))
@@ -12942,7 +13210,7 @@ continue
 /*234:*/
 
 
-//line amail.w:3299
+//line amail.w:3302
 
 {
 b:=bufio.NewReader(f)
@@ -12960,7 +13228,7 @@ break
 /*:234*/
 
 
-//line amail.w:3337
+//line amail.w:3340
 
 c1.Wait()
 c2.Wait()
@@ -12972,7 +13240,7 @@ f.(io.Closer).Close()
 /*:235*/
 
 
-//line amail.w:3295
+//line amail.w:3298
 
 }
 
@@ -12981,7 +13249,7 @@ f.(io.Closer).Close()
 /*:233*/
 
 
-//line amail.w:3235
+//line amail.w:3238
 
 }else{
 buf= append(buf,fmt.Sprintf("Include: Mail/%s/%d/raw\n",msg.box.name,msg.id)...)
@@ -13005,7 +13273,7 @@ w.WriteCtl("dot=addr\nshow")
 /*:95*/
 
 
-//line amail.w:3242
+//line amail.w:3245
 
 }
 
@@ -13014,7 +13282,7 @@ w.WriteCtl("dot=addr\nshow")
 /*:230*/
 
 
-//line amail.w:2761
+//line amail.w:2764
 
 continue
 case"Up":
@@ -13038,7 +13306,7 @@ parent= <-ch
 /*:133*/
 
 
-//line amail.w:2764
+//line amail.w:2767
 
 if parent!=nil{
 
@@ -13055,7 +13323,7 @@ msgs:=make(msgmap)
 /*:85*/
 
 
-//line amail.w:2766
+//line amail.w:2769
 
 name:=parent.box.name
 id:=parent.id
@@ -13074,7 +13342,7 @@ msgs[name]= append(msgs[name],id)
 /*:86*/
 
 
-//line amail.w:2769
+//line amail.w:2772
 
 
 
@@ -13090,7 +13358,7 @@ lch<-&msgs
 /*:88*/
 
 
-//line amail.w:2770
+//line amail.w:2773
 
 }
 continue
@@ -13115,7 +13383,7 @@ children= <-ch
 /*:131*/
 
 
-//line amail.w:2774
+//line amail.w:2777
 
 if len(children)!=0{
 
@@ -13132,7 +13400,7 @@ msgs:=make(msgmap)
 /*:85*/
 
 
-//line amail.w:2776
+//line amail.w:2779
 
 name:=children[0].box.name
 id:=children[0].id
@@ -13151,7 +13419,7 @@ msgs[name]= append(msgs[name],id)
 /*:86*/
 
 
-//line amail.w:2779
+//line amail.w:2782
 
 
 
@@ -13167,7 +13435,7 @@ lch<-&msgs
 /*:88*/
 
 
-//line amail.w:2780
+//line amail.w:2783
 
 }
 continue
@@ -13177,7 +13445,7 @@ case"Prev":
 /*199:*/
 
 
-//line amail.w:2584
+//line amail.w:2587
 
 pmsg:=msg.prev()
 
@@ -13186,7 +13454,7 @@ pmsg:=msg.prev()
 /*:199*/
 
 
-//line amail.w:2784
+//line amail.w:2787
 
 if pmsg!=nil{
 
@@ -13203,7 +13471,7 @@ msgs:=make(msgmap)
 /*:85*/
 
 
-//line amail.w:2786
+//line amail.w:2789
 
 name:=pmsg.box.name
 id:=pmsg.id
@@ -13222,7 +13490,7 @@ msgs[name]= append(msgs[name],id)
 /*:86*/
 
 
-//line amail.w:2789
+//line amail.w:2792
 
 
 
@@ -13238,7 +13506,7 @@ lch<-&msgs
 /*:88*/
 
 
-//line amail.w:2790
+//line amail.w:2793
 
 }
 continue
@@ -13248,7 +13516,7 @@ case"Next":
 /*201:*/
 
 
-//line amail.w:2607
+//line amail.w:2610
 
 nmsg:=msg.next()
 
@@ -13257,7 +13525,7 @@ nmsg:=msg.next()
 /*:201*/
 
 
-//line amail.w:2794
+//line amail.w:2797
 
 if nmsg!=nil{
 
@@ -13274,7 +13542,7 @@ msgs:=make(msgmap)
 /*:85*/
 
 
-//line amail.w:2796
+//line amail.w:2799
 
 name:=nmsg.box.name
 id:=nmsg.id
@@ -13293,7 +13561,7 @@ msgs[name]= append(msgs[name],id)
 /*:86*/
 
 
-//line amail.w:2799
+//line amail.w:2802
 
 
 
@@ -13309,7 +13577,7 @@ lch<-&msgs
 /*:88*/
 
 
-//line amail.w:2800
+//line amail.w:2803
 
 }
 continue
@@ -13326,274 +13594,9 @@ msg.w.UnreadEvent(ev)
 /*:205*/
 
 
-//line amail.w:2562
-
-}else{
-
-
-/*206:*/
-
-
-//line amail.w:2812
-
-glog.V(debug).Infof("clean the '%s/%d' message's window\n",msg.box.name,msg.id)
-clean(msg.w)
-
-
-
-/*:206*/
-
-
-//line amail.w:2564
+//line amail.w:2577
 
 }
-buf:=make([]byte,0,0x8000)
-
-
-/*204:*/
-
-
-//line amail.w:2683
-
-{
-glog.V(debug).Infof("composing a header of the '%d' message\n",msg.id)
-buf= append(buf,fmt.Sprintf("From: %s\nDate: %s\nTo: %s\n%sSubject: %s\n\n\n",
-msg.from,msg.date,strings.Join(msg.to,", "),
-func()string{if len(msg.cc)!=0{return fmt.Sprintf("CC: %s\n",strings.Join(msg.cc,", "))};return""}(),
-msg.subject)...)
-}
-
-
-
-/*:204*/
-
-
-//line amail.w:2567
-
-
-
-/*211:*/
-
-
-//line amail.w:2853
-
-{
-if len(msg.text)==0&&len(msg.html)==0{
-if err= msg.bodyPath(bfid,"");err!=nil{
-glog.Errorf("can't ged a body path of '%d': %v\n",msg.id,err)
-}
-glog.V(debug).Infof("paths for bodies of the '%d' message have been found: text-'%s', html-'%s'\n",
-msg.id,msg.text,msg.html)
-
-}
-if len(msg.text)!=0&&!msg.showhtml{
-glog.V(debug).Infof("using a path for a text body of the '%d' message: '%s'\n",msg.id,msg.text)
-if buf,err= readAll(bfid,msg.text,buf);err!=nil{
-glog.Errorf("can't read '%s': %v\n",msg.text,err)
-return
-}
-}else if len(msg.html)!=0{
-glog.V(debug).Infof("using a path for a html body of the '%d' message: '%s'\n",msg.id,msg.html)
-msg.w.Write(buf)
-buf= nil
-c1:=exec.Command("9p","read",fmt.Sprintf("%s/%s/%d/%s",srv,msg.box.name,msg.id,msg.html))
-c2:=exec.Command("htmlfmt","-cutf-8")
-c2.Stdout,_= msg.w.File("body")
-c2.Stdin,err= c1.StdoutPipe()
-if err!=nil{
-glog.Errorf("can't get a stdout pipe: %v\n",err)
-return
-}
-if err= c2.Start();err!=nil{
-glog.Errorf("can't start 'htmlfmt': %v\n",err)
-return
-}
-if err= c1.Run();err!=nil{
-glog.Errorf("can't run '9p': %v\n",err)
-c2.Wait()
-return
-}
-if err= c2.Wait();err!=nil{
-glog.Errorf("can't wait of completion 'htmlfmt': %v\n",err)
-return
-}
-}
-
-
-/*215:*/
-
-
-//line amail.w:2989
-
-
-
-/*228:*/
-
-
-//line amail.w:3177
-
-once.Do(func(){
-
-/*216:*/
-
-
-//line amail.w:2993
-
-if home= os.Getenv("home");len(home)==0{
-if home= os.Getenv("HOME");len(home)==0{
-glog.Errorln("can't get a home directory from the environment, the home is assumed '/'")
-home= "/"
-}
-}
-
-
-
-
-/*:216*/
-
-
-
-/*225:*/
-
-
-//line amail.w:3160
-
-if u,err:=user.Current();err!=nil{
-glog.Errorf("can't get a name of the current user: %v\n",err)
-}else{
-cuser= u.Username
-}
-
-
-
-
-/*:225*/
-
-
-
-/*239:*/
-
-
-//line amail.w:3466
-
-if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
-glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
-plan9dir= "/usr/local/plan9"
-}
-
-
-
-/*:239*/
-
-
-//line amail.w:3178
-})
-
-
-
-/*:228*/
-
-
-//line amail.w:2990
-
-
-
-
-/*:215*/
-
-
-//line amail.w:2895
-
-for _,v:=range msg.files{
-buf= append(buf,fmt.Sprintf("\n===> %s (%s)\n",v.path,v.mimetype)...)
-buf= append(buf,fmt.Sprintf("\t9p read %s/%s/%d/%sbody > '%s/%s'\n",srv,msg.box.name,msg.id,v.path,home,v.name)...)
-}
-}
-
-
-
-/*:211*/
-
-
-//line amail.w:2568
-
-w:=msg.w
-name:=fmt.Sprintf("Amail/%s/%d",msg.box.name,msg.id)
-
-
-/*54:*/
-
-
-//line amail.w:786
-
-glog.V(debug).Infoln("printing a name for a window")
-if err:=w.WriteCtl("name %s",strings.Replace(name," ","␣",-1));err!=nil{
-glog.Errorf("can't write to 'ctl' file: %s\n",err)
-}
-
-
-
-/*:54*/
-
-
-//line amail.w:2571
-
-
-
-/*198:*/
-
-
-//line amail.w:2580
-
-msg.writeTag()
-
-
-
-/*:198*/
-
-
-//line amail.w:2572
-
-w.Write(buf)
-
-
-/*51:*/
-
-
-//line amail.w:756
-
-if w!=nil{
-glog.V(debug).Infoln("setting the window to clean state")
-if err:=w.WriteCtl("clean");err!=nil{
-glog.Errorf("can't write to 'ctl' file: %s\n",err)
-}
-}
-
-
-
-/*:51*/
-
-
-//line amail.w:2574
-
-
-
-/*95:*/
-
-
-//line amail.w:1288
-
-glog.V(debug).Infoln("go to top of the window")
-w.WriteAddr("#0")
-w.WriteCtl("dot=addr\nshow")
-
-
-
-/*:95*/
-
-
-//line amail.w:2575
-
 return
 }
 
@@ -13606,7 +13609,7 @@ return
 /*200:*/
 
 
-//line amail.w:2588
+//line amail.w:2591
 
 func(this*message)prev()(pmsg*message){
 msg:=this
@@ -13630,7 +13633,7 @@ parent= <-ch
 /*:133*/
 
 
-//line amail.w:2591
+//line amail.w:2594
 
 if parent==nil{
 return
@@ -13656,7 +13659,7 @@ children= <-ch
 /*:131*/
 
 
-//line amail.w:2596
+//line amail.w:2599
 
 for _,v:=range children{
 if v==this{
@@ -13676,7 +13679,7 @@ return
 /*202:*/
 
 
-//line amail.w:2611
+//line amail.w:2614
 
 func(this*message)next()(nmsg*message){
 msg:=this
@@ -13700,7 +13703,7 @@ parent= <-ch
 /*:133*/
 
 
-//line amail.w:2614
+//line amail.w:2617
 
 if parent==nil{
 return
@@ -13726,7 +13729,7 @@ children= <-ch
 /*:131*/
 
 
-//line amail.w:2619
+//line amail.w:2622
 
 for i:=0;i<len(children);i++{
 if children[i]!=this{
@@ -13750,7 +13753,7 @@ return
 /*203:*/
 
 
-//line amail.w:2634
+//line amail.w:2637
 
 func(msg*message)writeTag(){
 glog.V(debug).Infof("writing a tag of the '%d' message's window\n",msg.id)
@@ -13787,7 +13790,7 @@ parent= <-ch
 /*:133*/
 
 
-//line amail.w:2650
+//line amail.w:2653
 
 if parent!=nil{
 return"Up "
@@ -13815,7 +13818,7 @@ children= <-ch
 /*:131*/
 
 
-//line amail.w:2657
+//line amail.w:2660
 
 if len(children)!=0{
 return"Down "
@@ -13828,7 +13831,7 @@ func()string{
 /*199:*/
 
 
-//line amail.w:2584
+//line amail.w:2587
 
 pmsg:=msg.prev()
 
@@ -13837,7 +13840,7 @@ pmsg:=msg.prev()
 /*:199*/
 
 
-//line amail.w:2664
+//line amail.w:2667
 
 if pmsg!=nil{
 return"Prev "
@@ -13850,7 +13853,7 @@ func()string{
 /*201:*/
 
 
-//line amail.w:2607
+//line amail.w:2610
 
 nmsg:=msg.next()
 
@@ -13859,7 +13862,7 @@ nmsg:=msg.next()
 /*:201*/
 
 
-//line amail.w:2671
+//line amail.w:2674
 
 if nmsg!=nil{
 return"Next "
@@ -13880,7 +13883,7 @@ glog.Errorf("can't set a tag of the message window: %v",err)
 /*212:*/
 
 
-//line amail.w:2903
+//line amail.w:2906
 
 func(msg*message)bodyPath(bfid*client.Fid,path string)error{
 glog.V(debug).Infof("getting a path for a body of the '%d' message\n",msg.id)
@@ -13939,7 +13942,7 @@ return nil
 /*213:*/
 
 
-//line amail.w:2953
+//line amail.w:2956
 
 func(msg*message)getCID(path string)(string,bool){
 src:=fmt.Sprintf("%d/%smimeheader",msg.id,path)
@@ -13980,7 +13983,7 @@ return"",false
 /*217:*/
 
 
-//line amail.w:3003
+//line amail.w:3006
 
 func readString(pfid*client.Fid,name string)(str string,err error){
 glog.V(debug).Infof("readString: trying to open '%s'\n",name)
@@ -14008,7 +14011,7 @@ return str,nil
 /*218:*/
 
 
-//line amail.w:3022
+//line amail.w:3025
 
 func readAll(pfid*client.Fid,name string,buf[]byte)([]byte,error){
 glog.V(debug).Infof("readAll: trying to open '%s'\n",name)
@@ -14041,7 +14044,7 @@ return buf,nil
 /*220:*/
 
 
-//line amail.w:3082
+//line amail.w:3085
 
 func saveFile(src,dst string)error{
 var err error
@@ -14068,7 +14071,7 @@ return err
 /*221:*/
 
 
-//line amail.w:3100
+//line amail.w:3103
 
 func(msg*message)fixFile(dir string)error{
 src:=fmt.Sprintf("%d/%s",msg.id,msg.html)

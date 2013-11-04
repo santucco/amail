@@ -2554,12 +2554,12 @@ func (msg *message) open() (err error) {
 		return err	
 	}
 	defer bfid.Close()
-	if msg.w==nil {
+	isnew:=msg.w==nil
+	if isnew {
 		if msg.w, err=goacme.New(); err!=nil {
 			glog.Errorf("can't create a window: %v\n", err)
 			return err
 		}
-		@<Start a goroutine to process events from the message's window@>
 	} else {
 		@<Clean |msg.w| window@>
 	}
@@ -2573,6 +2573,9 @@ func (msg *message) open() (err error) {
 	w.Write(buf)
 	@<Set window |w| to clean state@>
 	@<Go to top of window |w|@>
+	if isnew {
+		@<Start a goroutine to process events from the message's window@>
+	}
 	return
 }
 
