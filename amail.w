@@ -3034,12 +3034,15 @@ func readAll(pfid *client.Fid, name string, buf []byte) ([]byte, error) {
 	}
 	defer f.Close()
 	b:=bufio.NewReader(f)
-	for s, err:=b.ReadString('\n'); err==nil; s, err=b.ReadString('\n') {
+	for s, err:=b.ReadString('\n'); err==nil||err==io.EOF; s, err=b.ReadString('\n') {
 		if strings.HasSuffix(s, "\r\n") {
 			s=strings.TrimRight(s, "\r\n")
 			s+="\n"
 		}
 		buf=append(buf, s...)
+		if err==io.EOF {
+			break
+		}
 	}
 	return buf, nil
 }
