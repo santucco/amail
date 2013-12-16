@@ -583,6 +583,7 @@ if mw!=nil {
 	}
 	w:=mw
 	@<Set window |w| to clean state@>
+	@<Go to top of window |w|@>
 }
 
 
@@ -683,6 +684,7 @@ if mw!=nil {
 	}
 	w:=mw
 	@<Set window |w| to clean state@>
+	@<Go to top of window |w|@>
 }
 
 @
