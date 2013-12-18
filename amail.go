@@ -2207,7 +2207,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 
 //line amail.w:558
 
-if ech,err= mw.EventChannel(0,goacme.Mouse,goacme.Look|goacme.Execute);err!=nil{
+if ech,err= mw.EventChannel(0,goacme.Look|goacme.Execute);err!=nil{
 glog.Errorf("can't open an event channel of the window %v\n",err)
 os.Exit(1)
 }
@@ -3884,7 +3884,7 @@ if box.w,err= goacme.New();err!=nil{
 glog.Errorf("can't create a window: %v\n",err)
 os.Exit(1)
 }
-if box.ech,err= box.w.EventChannel(0,goacme.Mouse,goacme.Look|goacme.Execute);err!=nil{
+if box.ech,err= box.w.EventChannel(0,goacme.Look|goacme.Execute);err!=nil{
 glog.Errorf("can't open an event channel of the window %v\n",err)
 os.Exit(1)
 }
@@ -8252,7 +8252,7 @@ if box.w,err= goacme.New();err!=nil{
 glog.Errorf("can't create a window: %v\n",err)
 os.Exit(1)
 }
-if box.ech,err= box.w.EventChannel(0,goacme.Mouse,goacme.Look|goacme.Execute);err!=nil{
+if box.ech,err= box.w.EventChannel(0,goacme.Look|goacme.Execute);err!=nil{
 glog.Errorf("can't open an event channel of the window %v\n",err)
 os.Exit(1)
 }
