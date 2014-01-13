@@ -1061,9 +1061,15 @@ case ev, ok:=<-box.ech:
 				box.thread=false
 				box.shownew=true
 			case "ShowAll":
+				if box.showthreads && !counted {
+					continue
+				}
 				box.thread=false
 				box.shownew=false
 			case "ShowThreads":
+				if !counted {
+					continue
+				}
 				box.showthreads=true
 				if box.shownew==true {
 					@<Write a tag of |box| window@>
@@ -1076,6 +1082,9 @@ case ev, ok:=<-box.ech:
 					continue
 				}
 			case "Thread":
+				if !counted {
+					continue
+				}
 				var msg *message
 				if len(ev.Arg)==0 {
 					@<Get a pointer |msg| to current message@>
@@ -2224,36 +2233,65 @@ w:=box.w
 
 @
 @<Write a tag of |box| window@>=
-glog.V(debug).Infof("write a tag of the '%s' mailbox's window\n", box.name)
-if err:=writeTag(box.w, fmt.Sprintf(" %sMail Delmesg %s%s%s %s Search ", @t\1@>@/
-	func() string {
-		if box.deleted>0 {
-			return "Put "
-		}
-		return ""
-	}(), @/
-	func() string {
-		if box.deleted>0 {
-			return "UnDelmesg "
-		}
-		return ""
-	}(), @/
-	func() string {
-		if box.thread {
-			if box.shownew {
-				return "ShowNew "
-			} else {
-				return "ShowAll "
+box.writeTag(counted)
+
+@
+@c
+func (box *mailbox) writeTag(counted bool) {
+	glog.V(debug).Infof("write a tag of the '%s' mailbox's window\n", box.name)
+	if err:=writeTag(box.w, fmt.Sprintf(" %sMail %s%s%s%s%sSearch ", @t\1@>@/
+		func() string {
+			if box.deleted>0 {
+				return "Put "
 			}
-		} else if box.shownew || !box.showthreads {
-			return "Thread "
-		}
-		return ""
-	}(), @/
-	func() string {if box.shownew {return "ShowAll"} else {return "ShowNew"}}(), @/
-	func() string {if box.showthreads {return "ShowPlain"} else {return "ShowThreads"}}()) @t\2@>)
-	err!=nil {
-	glog.Errorf("can't set a tag of the '%s' box's window: %v\n", box.name, err)
+			return ""
+		}(), @/
+		func() string {
+			if len(box.all)>0 {
+				return "Delmesg "
+			}
+			return ""
+		}(), @/
+		func() string {
+			if box.deleted>0 {
+				return "UnDelmesg "
+			}
+			return ""
+		}(), @/
+		func() string {
+			if box.thread {
+				if box.shownew {
+					return "ShowNew "
+				} else {
+					return "ShowAll "
+				}
+			} else if counted && (box.shownew || !box.showthreads) {
+				return "Thread "
+			}
+			return ""
+		}(), @/
+		func() string {
+			if box.showthreads && !counted {
+				return ""
+			}
+			if box.shownew {
+				return "ShowAll "
+			} else {
+				return "ShowNew "
+			}
+		}(), @/
+		func() string {
+			if box.showthreads {
+				return "ShowPlain "
+			} else if counted {
+				return "ShowThreads "
+			} else {
+				return ""
+			}
+		}()) @t\2@>)
+		err!=nil {
+		glog.Errorf("can't set a tag of the '%s' box's window: %v\n", box.name, err)
+	}
 }
 
 @
