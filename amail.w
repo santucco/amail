@@ -1932,6 +1932,8 @@ In case of the thread mode sequences of full threads should be made.
 			glog.V(debug).Infof("root of thread: '%s/%d'\n", msg.box.name, msg.id)
 			@<Make a full thread in |msgs| with |msg| like a root@>
 		}
+	} else {
+		@<Set |pos| of |box|@>
 	}
 	box.rfch<-&refresh{0, msgs}
 }
@@ -2043,15 +2045,19 @@ pos	int
 box.pos=0
 ontop=false
 
+@ We set |pos| to len of determinated |src| to avoid of printing messages twice.
+@<Set |pos| of |box|@>=
+box.pos=len(src)
+
 @ Printing during the counting process is made only for plain mode. We use |box.pos| like a position of a first
 message to print and print a number of messages is multiple of |500|
 @<Inform |box| to print counting messages@>=
 if !box.threadMode() {
 	@<Determine of |src|@>
-	if len(src)!=0 && len(src)%500==0 {
+	if len(src)!=0 && box.pos<len(src) && len(src)%500==0  {
 		glog.V(debug).Infof("inform the '%s' mailbox to print the last %d messages\n", box.name, len(src)-box.pos)
 		msgs:=append(messages{}, src[box.pos:len(src)]...)
-		box.pos=len(src)
+		@<Set |pos| of |box|@>
 		box.rfch<-&refresh{0, msgs}		
 	}
 }
@@ -2060,10 +2066,10 @@ if !box.threadMode() {
 @<Inform |box| to print the rest of counting messages@>=
 if !box.threadMode() {
 	@<Determine of |src|@>
-	if box.pos!=len(src) {
+	if box.pos<len(src) {
 		glog.V(debug).Infof("inform the '%s' mailbox to print the last %d messages\n", box.name, len(src)-box.pos)
 		msgs:=append(messages{}, src[box.pos:len(src)]...)
-		box.pos=len(src)
+		@<Set |pos| of |box|@>
 		box.rfch<-&refresh{0, msgs}		
 	}
 }
