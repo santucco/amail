@@ -3416,11 +3416,14 @@ If |msg!=nil|, it will be added like a message is replied.
 				f[i]=strings.TrimSpace(f[i])
 			}
 			switch strings.ToLower(s[:p]) {
-				case "from", "to":
+				case "to":
+					@<Get last elements of addresses@>
 					to=append(to, f...)
 				case "cc":
+					@<Get last elements of addresses@>
 					cc=append(cc, f...)
 				case "bcc":
+					@<Get last elements of addresses@>
 					bcc=append(bcc, f...)
 				case "attach":
 					attach=append(attach, f...)
@@ -3435,6 +3438,7 @@ If |msg!=nil|, it will be added like a message is replied.
 			for i, _:=range f {
 				f[i]=strings.TrimSpace(f[i])
 			}
+			@<Get last elements of addresses@>
 			to=append(to, f...)
 		}
 	}
@@ -3499,6 +3503,14 @@ If |msg!=nil|, it will be added like a message is replied.
 	w.Close()
 }
 
+@ An address can be preffered by name or alias of recipient. It has to be removed.
+@<Get last elements of addresses@>=
+for i, _:=range f {
+	f[i]=strings.TrimSpace(f[i])
+	if sf:=strings.Fields(f[i]); len(sf)>1 {
+		f[i]=strings.TrimSpace(sf[len(sf)-1])
+	}
+}
 
 
 @
