@@ -66,18 +66,18 @@ When replying to a message without quoting of the message amail will always
 There are some known problems, for the moment most of them are addressed to mailfs,
 some to Acme:
 1. Quite big random access time to messages (according to the sources
-mailfs always find a message by sequental comporation)
+mailfs always find a message by sequental comporation) (fixed in bitbucket.org/santucco/plan9port)
 2. Mailboxes other that mbox are not refreshing (it seems mailfs doesn't make
 subscription on mailboxes other, that INBOX).
 3. "Browser" command shows international messages in wrong encoding
 (mailfs translates the body of the message to utf-8, but doesn't change
-"charset" of the message to utf-8).
+"charset" of the message to utf-8). (fixed in bitbucket.org/santucco/plan9port)
 4. There is a big response time after printing of a lot of text.
 There is no way to limit events, text insertion events take a lot of CPU
-on old computers.
+on old computers. (fixed in bitbucket.org/santucco/plan9port)
 5. Sometimes Acme exits with an error:
 "acme: endofframe: No such file or directory". It happens when an output is
 producing in a hidden Acme's window (tag?)
 6. When "addr" files are written in few windows simultaneously, sometimes
 Acme returns an error "address out range". So messages cannot be refreshed or
-erased in two windows.
+erased in two windows. (fixed in bitbucket.org/santucco/plan9port)

@@ -7,7 +7,7 @@
 
 //line license:1
 
-// This file is part of Amail version 0.5
+// This file is part of Amail version 0.6
 // Author Alexander Sychev
 //
 // Copyright (c) 2013 Alexander Sychev. All rights reserved.
@@ -837,16 +837,16 @@ once sync.Once
 
 
 
-/*237:*/
+/*238:*/
 
 
-//line amail.w:3505
+//line amail.w:3517
 
 plan9dir string
 
 
 
-/*:237*/
+/*:238*/
 
 
 //line amail.w:45
@@ -1118,10 +1118,10 @@ case"Post":
 {
 
 
-/*238:*/
+/*239:*/
 
 
-//line amail.w:3509
+//line amail.w:3521
 
 
 
@@ -1169,10 +1169,10 @@ cuser= u.Username
 
 
 
-/*239:*/
+/*240:*/
 
 
-//line amail.w:3513
+//line amail.w:3525
 
 if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
 glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
@@ -1181,7 +1181,7 @@ plan9dir= "/usr/local/plan9"
 
 
 
-/*:239*/
+/*:240*/
 
 
 //line amail.w:3226
@@ -1192,12 +1192,12 @@ plan9dir= "/usr/local/plan9"
 /*:228*/
 
 
-//line amail.w:3510
+//line amail.w:3522
 
 
 
 
-/*:238*/
+/*:239*/
 
 
 //line amail.w:3395
@@ -1225,11 +1225,77 @@ for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
 }
 switch strings.ToLower(s[:p]){
-case"from","to":
+case"to":
+
+
+/*237:*/
+
+
+//line amail.w:3507
+
+for i,_:=range f{
+f[i]= strings.TrimSpace(f[i])
+if sf:=strings.Fields(f[i]);len(sf)> 1{
+f[i]= strings.TrimSpace(sf[len(sf)-1])
+}
+}
+
+
+
+
+/*:237*/
+
+
+//line amail.w:3420
+
 to= append(to,f...)
 case"cc":
+
+
+/*237:*/
+
+
+//line amail.w:3507
+
+for i,_:=range f{
+f[i]= strings.TrimSpace(f[i])
+if sf:=strings.Fields(f[i]);len(sf)> 1{
+f[i]= strings.TrimSpace(sf[len(sf)-1])
+}
+}
+
+
+
+
+/*:237*/
+
+
+//line amail.w:3423
+
 cc= append(cc,f...)
 case"bcc":
+
+
+/*237:*/
+
+
+//line amail.w:3507
+
+for i,_:=range f{
+f[i]= strings.TrimSpace(f[i])
+if sf:=strings.Fields(f[i]);len(sf)> 1{
+f[i]= strings.TrimSpace(sf[len(sf)-1])
+}
+}
+
+
+
+
+/*:237*/
+
+
+//line amail.w:3426
+
 bcc= append(bcc,f...)
 case"attach":
 attach= append(attach,f...)
@@ -1244,6 +1310,28 @@ f:=strings.Split(s,",")
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
 }
+
+
+/*237:*/
+
+
+//line amail.w:3507
+
+for i,_:=range f{
+f[i]= strings.TrimSpace(f[i])
+if sf:=strings.Fields(f[i]);len(sf)> 1{
+f[i]= strings.TrimSpace(sf[len(sf)-1])
+}
+}
+
+
+
+
+/*:237*/
+
+
+//line amail.w:3441
+
 to= append(to,f...)
 }
 }
@@ -1307,8 +1395,6 @@ c.Wait()
 w.Del(true)
 w.Close()
 }
-
-
 
 
 
@@ -4837,10 +4923,10 @@ case"Post":
 {
 
 
-/*238:*/
+/*239:*/
 
 
-//line amail.w:3509
+//line amail.w:3521
 
 
 
@@ -4888,10 +4974,10 @@ cuser= u.Username
 
 
 
-/*239:*/
+/*240:*/
 
 
-//line amail.w:3513
+//line amail.w:3525
 
 if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
 glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
@@ -4900,7 +4986,7 @@ plan9dir= "/usr/local/plan9"
 
 
 
-/*:239*/
+/*:240*/
 
 
 //line amail.w:3226
@@ -4911,12 +4997,12 @@ plan9dir= "/usr/local/plan9"
 /*:228*/
 
 
-//line amail.w:3510
+//line amail.w:3522
 
 
 
 
-/*:238*/
+/*:239*/
 
 
 //line amail.w:3395
@@ -4944,11 +5030,77 @@ for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
 }
 switch strings.ToLower(s[:p]){
-case"from","to":
+case"to":
+
+
+/*237:*/
+
+
+//line amail.w:3507
+
+for i,_:=range f{
+f[i]= strings.TrimSpace(f[i])
+if sf:=strings.Fields(f[i]);len(sf)> 1{
+f[i]= strings.TrimSpace(sf[len(sf)-1])
+}
+}
+
+
+
+
+/*:237*/
+
+
+//line amail.w:3420
+
 to= append(to,f...)
 case"cc":
+
+
+/*237:*/
+
+
+//line amail.w:3507
+
+for i,_:=range f{
+f[i]= strings.TrimSpace(f[i])
+if sf:=strings.Fields(f[i]);len(sf)> 1{
+f[i]= strings.TrimSpace(sf[len(sf)-1])
+}
+}
+
+
+
+
+/*:237*/
+
+
+//line amail.w:3423
+
 cc= append(cc,f...)
 case"bcc":
+
+
+/*237:*/
+
+
+//line amail.w:3507
+
+for i,_:=range f{
+f[i]= strings.TrimSpace(f[i])
+if sf:=strings.Fields(f[i]);len(sf)> 1{
+f[i]= strings.TrimSpace(sf[len(sf)-1])
+}
+}
+
+
+
+
+/*:237*/
+
+
+//line amail.w:3426
+
 bcc= append(bcc,f...)
 case"attach":
 attach= append(attach,f...)
@@ -4963,6 +5115,28 @@ f:=strings.Split(s,",")
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
 }
+
+
+/*237:*/
+
+
+//line amail.w:3507
+
+for i,_:=range f{
+f[i]= strings.TrimSpace(f[i])
+if sf:=strings.Fields(f[i]);len(sf)> 1{
+f[i]= strings.TrimSpace(sf[len(sf)-1])
+}
+}
+
+
+
+
+/*:237*/
+
+
+//line amail.w:3441
+
 to= append(to,f...)
 }
 }
@@ -5026,8 +5200,6 @@ c.Wait()
 w.Del(true)
 w.Close()
 }
-
-
 
 
 
@@ -8904,10 +9076,10 @@ case"Post":
 {
 
 
-/*238:*/
+/*239:*/
 
 
-//line amail.w:3509
+//line amail.w:3521
 
 
 
@@ -8955,10 +9127,10 @@ cuser= u.Username
 
 
 
-/*239:*/
+/*240:*/
 
 
-//line amail.w:3513
+//line amail.w:3525
 
 if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
 glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
@@ -8967,7 +9139,7 @@ plan9dir= "/usr/local/plan9"
 
 
 
-/*:239*/
+/*:240*/
 
 
 //line amail.w:3226
@@ -8978,12 +9150,12 @@ plan9dir= "/usr/local/plan9"
 /*:228*/
 
 
-//line amail.w:3510
+//line amail.w:3522
 
 
 
 
-/*:238*/
+/*:239*/
 
 
 //line amail.w:3395
@@ -9011,11 +9183,77 @@ for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
 }
 switch strings.ToLower(s[:p]){
-case"from","to":
+case"to":
+
+
+/*237:*/
+
+
+//line amail.w:3507
+
+for i,_:=range f{
+f[i]= strings.TrimSpace(f[i])
+if sf:=strings.Fields(f[i]);len(sf)> 1{
+f[i]= strings.TrimSpace(sf[len(sf)-1])
+}
+}
+
+
+
+
+/*:237*/
+
+
+//line amail.w:3420
+
 to= append(to,f...)
 case"cc":
+
+
+/*237:*/
+
+
+//line amail.w:3507
+
+for i,_:=range f{
+f[i]= strings.TrimSpace(f[i])
+if sf:=strings.Fields(f[i]);len(sf)> 1{
+f[i]= strings.TrimSpace(sf[len(sf)-1])
+}
+}
+
+
+
+
+/*:237*/
+
+
+//line amail.w:3423
+
 cc= append(cc,f...)
 case"bcc":
+
+
+/*237:*/
+
+
+//line amail.w:3507
+
+for i,_:=range f{
+f[i]= strings.TrimSpace(f[i])
+if sf:=strings.Fields(f[i]);len(sf)> 1{
+f[i]= strings.TrimSpace(sf[len(sf)-1])
+}
+}
+
+
+
+
+/*:237*/
+
+
+//line amail.w:3426
+
 bcc= append(bcc,f...)
 case"attach":
 attach= append(attach,f...)
@@ -9030,6 +9268,28 @@ f:=strings.Split(s,",")
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
 }
+
+
+/*237:*/
+
+
+//line amail.w:3507
+
+for i,_:=range f{
+f[i]= strings.TrimSpace(f[i])
+if sf:=strings.Fields(f[i]);len(sf)> 1{
+f[i]= strings.TrimSpace(sf[len(sf)-1])
+}
+}
+
+
+
+
+/*:237*/
+
+
+//line amail.w:3441
+
 to= append(to,f...)
 }
 }
@@ -9093,8 +9353,6 @@ c.Wait()
 w.Del(true)
 w.Close()
 }
-
-
 
 
 
@@ -11868,10 +12126,10 @@ cuser= u.Username
 
 
 
-/*239:*/
+/*240:*/
 
 
-//line amail.w:3513
+//line amail.w:3525
 
 if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
 glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
@@ -11880,7 +12138,7 @@ plan9dir= "/usr/local/plan9"
 
 
 
-/*:239*/
+/*:240*/
 
 
 //line amail.w:3226
@@ -12159,10 +12417,10 @@ cuser= u.Username
 
 
 
-/*239:*/
+/*240:*/
 
 
-//line amail.w:3513
+//line amail.w:3525
 
 if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
 glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
@@ -12171,7 +12429,7 @@ plan9dir= "/usr/local/plan9"
 
 
 
-/*:239*/
+/*:240*/
 
 
 //line amail.w:3226
@@ -12336,10 +12594,10 @@ case"Post":
 {
 
 
-/*238:*/
+/*239:*/
 
 
-//line amail.w:3509
+//line amail.w:3521
 
 
 
@@ -12387,10 +12645,10 @@ cuser= u.Username
 
 
 
-/*239:*/
+/*240:*/
 
 
-//line amail.w:3513
+//line amail.w:3525
 
 if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
 glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
@@ -12399,7 +12657,7 @@ plan9dir= "/usr/local/plan9"
 
 
 
-/*:239*/
+/*:240*/
 
 
 //line amail.w:3226
@@ -12410,12 +12668,12 @@ plan9dir= "/usr/local/plan9"
 /*:228*/
 
 
-//line amail.w:3510
+//line amail.w:3522
 
 
 
 
-/*:238*/
+/*:239*/
 
 
 //line amail.w:3395
@@ -12443,11 +12701,77 @@ for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
 }
 switch strings.ToLower(s[:p]){
-case"from","to":
+case"to":
+
+
+/*237:*/
+
+
+//line amail.w:3507
+
+for i,_:=range f{
+f[i]= strings.TrimSpace(f[i])
+if sf:=strings.Fields(f[i]);len(sf)> 1{
+f[i]= strings.TrimSpace(sf[len(sf)-1])
+}
+}
+
+
+
+
+/*:237*/
+
+
+//line amail.w:3420
+
 to= append(to,f...)
 case"cc":
+
+
+/*237:*/
+
+
+//line amail.w:3507
+
+for i,_:=range f{
+f[i]= strings.TrimSpace(f[i])
+if sf:=strings.Fields(f[i]);len(sf)> 1{
+f[i]= strings.TrimSpace(sf[len(sf)-1])
+}
+}
+
+
+
+
+/*:237*/
+
+
+//line amail.w:3423
+
 cc= append(cc,f...)
 case"bcc":
+
+
+/*237:*/
+
+
+//line amail.w:3507
+
+for i,_:=range f{
+f[i]= strings.TrimSpace(f[i])
+if sf:=strings.Fields(f[i]);len(sf)> 1{
+f[i]= strings.TrimSpace(sf[len(sf)-1])
+}
+}
+
+
+
+
+/*:237*/
+
+
+//line amail.w:3426
+
 bcc= append(bcc,f...)
 case"attach":
 attach= append(attach,f...)
@@ -12462,6 +12786,28 @@ f:=strings.Split(s,",")
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
 }
+
+
+/*237:*/
+
+
+//line amail.w:3507
+
+for i,_:=range f{
+f[i]= strings.TrimSpace(f[i])
+if sf:=strings.Fields(f[i]);len(sf)> 1{
+f[i]= strings.TrimSpace(sf[len(sf)-1])
+}
+}
+
+
+
+
+/*:237*/
+
+
+//line amail.w:3441
+
 to= append(to,f...)
 }
 }
@@ -12525,8 +12871,6 @@ c.Wait()
 w.Del(true)
 w.Close()
 }
-
-
 
 
 
