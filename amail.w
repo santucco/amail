@@ -2791,6 +2791,10 @@ go func() {
 					continue
 				case "Q":
 					quote=true
+					if args:=strings.Fields(ev.Arg); len(args)>0 {
+						ev.Text=args[0]
+						ev.Arg=strings.Join(args, " ")
+					}
 					fallthrough
 				case "Reply", "Replyall":
 					if ev.Text=="Reply" {

@@ -170,7 +170,7 @@ package main
 /*207:*/
 
 
-//line amail.w:2862
+//line amail.w:2867
 
 "os/exec"
 
@@ -183,7 +183,7 @@ package main
 /*222:*/
 
 
-//line amail.w:3196
+//line amail.w:3201
 
 "os/user"
 
@@ -196,7 +196,7 @@ package main
 /*226:*/
 
 
-//line amail.w:3217
+//line amail.w:3222
 
 "sync"
 
@@ -458,7 +458,7 @@ cc[]string
 /*209:*/
 
 
-//line amail.w:2884
+//line amail.w:2889
 
 text string
 html string
@@ -533,7 +533,7 @@ msgs messages
 /*208:*/
 
 
-//line amail.w:2866
+//line amail.w:2871
 
 file struct{
 name string
@@ -801,7 +801,7 @@ mrfch chan*refresh= make(chan*refresh)
 /*214:*/
 
 
-//line amail.w:3030
+//line amail.w:3035
 
 home string
 
@@ -814,7 +814,7 @@ home string
 /*223:*/
 
 
-//line amail.w:3200
+//line amail.w:3205
 
 cuser string
 
@@ -827,7 +827,7 @@ cuser string
 /*227:*/
 
 
-//line amail.w:3221
+//line amail.w:3226
 
 once sync.Once
 
@@ -840,7 +840,7 @@ once sync.Once
 /*238:*/
 
 
-//line amail.w:3517
+//line amail.w:3522
 
 plan9dir string
 
@@ -1077,7 +1077,7 @@ var msg*message
 /*231:*/
 
 
-//line amail.w:3294
+//line amail.w:3299
 
 w,err:=goacme.New()
 if err!=nil{
@@ -1092,7 +1092,7 @@ glog.Errorf("can't write a tag for a new message window: %v\n",err)
 /*232:*/
 
 
-//line amail.w:3306
+//line amail.w:3311
 
 go func(msg*message){
 glog.V(debug).Infoln("starting a goroutine to process events from a composed mail window")
@@ -1113,7 +1113,7 @@ case"Post":
 /*236:*/
 
 
-//line amail.w:3393
+//line amail.w:3398
 
 {
 
@@ -1121,21 +1121,21 @@ case"Post":
 /*239:*/
 
 
-//line amail.w:3521
+//line amail.w:3526
 
 
 
 /*228:*/
 
 
-//line amail.w:3225
+//line amail.w:3230
 
 once.Do(func(){
 
 /*216:*/
 
 
-//line amail.w:3038
+//line amail.w:3043
 
 if home= os.Getenv("home");len(home)==0{
 if home= os.Getenv("HOME");len(home)==0{
@@ -1154,7 +1154,7 @@ home= "/"
 /*225:*/
 
 
-//line amail.w:3208
+//line amail.w:3213
 
 if u,err:=user.Current();err!=nil{
 glog.Errorf("can't get a name of the current user: %v\n",err)
@@ -1172,7 +1172,7 @@ cuser= u.Username
 /*240:*/
 
 
-//line amail.w:3525
+//line amail.w:3530
 
 if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
 glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
@@ -1184,7 +1184,7 @@ plan9dir= "/usr/local/plan9"
 /*:240*/
 
 
-//line amail.w:3226
+//line amail.w:3231
 })
 
 
@@ -1192,7 +1192,7 @@ plan9dir= "/usr/local/plan9"
 /*:228*/
 
 
-//line amail.w:3522
+//line amail.w:3527
 
 
 
@@ -1200,7 +1200,7 @@ plan9dir= "/usr/local/plan9"
 /*:239*/
 
 
-//line amail.w:3395
+//line amail.w:3400
 
 w.Seek(0,0)
 w.WriteAddr(wholefile)
@@ -1231,7 +1231,7 @@ case"to":
 /*237:*/
 
 
-//line amail.w:3507
+//line amail.w:3512
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -1246,7 +1246,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:237*/
 
 
-//line amail.w:3420
+//line amail.w:3425
 
 to= append(to,f...)
 case"cc":
@@ -1255,7 +1255,7 @@ case"cc":
 /*237:*/
 
 
-//line amail.w:3507
+//line amail.w:3512
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -1270,7 +1270,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:237*/
 
 
-//line amail.w:3423
+//line amail.w:3428
 
 cc= append(cc,f...)
 case"bcc":
@@ -1279,7 +1279,7 @@ case"bcc":
 /*237:*/
 
 
-//line amail.w:3507
+//line amail.w:3512
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -1294,7 +1294,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:237*/
 
 
-//line amail.w:3426
+//line amail.w:3431
 
 bcc= append(bcc,f...)
 case"attach":
@@ -1315,7 +1315,7 @@ f[i]= strings.TrimSpace(f[i])
 /*237:*/
 
 
-//line amail.w:3507
+//line amail.w:3512
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -1330,7 +1330,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:237*/
 
 
-//line amail.w:3441
+//line amail.w:3446
 
 to= append(to,f...)
 }
@@ -1401,7 +1401,7 @@ w.Close()
 /*:236*/
 
 
-//line amail.w:3321
+//line amail.w:3326
 
 }
 }
@@ -1414,7 +1414,7 @@ w.UnreadEvent(ev)
 /*:232*/
 
 
-//line amail.w:3303
+//line amail.w:3308
 
 
 
@@ -3306,7 +3306,7 @@ msg= &message{id:id,box:this,
 /*210:*/
 
 
-//line amail.w:2892
+//line amail.w:2897
 
 cids:make(map[string]*file),
 
@@ -4882,7 +4882,7 @@ var msg*message
 /*231:*/
 
 
-//line amail.w:3294
+//line amail.w:3299
 
 w,err:=goacme.New()
 if err!=nil{
@@ -4897,7 +4897,7 @@ glog.Errorf("can't write a tag for a new message window: %v\n",err)
 /*232:*/
 
 
-//line amail.w:3306
+//line amail.w:3311
 
 go func(msg*message){
 glog.V(debug).Infoln("starting a goroutine to process events from a composed mail window")
@@ -4918,7 +4918,7 @@ case"Post":
 /*236:*/
 
 
-//line amail.w:3393
+//line amail.w:3398
 
 {
 
@@ -4926,21 +4926,21 @@ case"Post":
 /*239:*/
 
 
-//line amail.w:3521
+//line amail.w:3526
 
 
 
 /*228:*/
 
 
-//line amail.w:3225
+//line amail.w:3230
 
 once.Do(func(){
 
 /*216:*/
 
 
-//line amail.w:3038
+//line amail.w:3043
 
 if home= os.Getenv("home");len(home)==0{
 if home= os.Getenv("HOME");len(home)==0{
@@ -4959,7 +4959,7 @@ home= "/"
 /*225:*/
 
 
-//line amail.w:3208
+//line amail.w:3213
 
 if u,err:=user.Current();err!=nil{
 glog.Errorf("can't get a name of the current user: %v\n",err)
@@ -4977,7 +4977,7 @@ cuser= u.Username
 /*240:*/
 
 
-//line amail.w:3525
+//line amail.w:3530
 
 if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
 glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
@@ -4989,7 +4989,7 @@ plan9dir= "/usr/local/plan9"
 /*:240*/
 
 
-//line amail.w:3226
+//line amail.w:3231
 })
 
 
@@ -4997,7 +4997,7 @@ plan9dir= "/usr/local/plan9"
 /*:228*/
 
 
-//line amail.w:3522
+//line amail.w:3527
 
 
 
@@ -5005,7 +5005,7 @@ plan9dir= "/usr/local/plan9"
 /*:239*/
 
 
-//line amail.w:3395
+//line amail.w:3400
 
 w.Seek(0,0)
 w.WriteAddr(wholefile)
@@ -5036,7 +5036,7 @@ case"to":
 /*237:*/
 
 
-//line amail.w:3507
+//line amail.w:3512
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -5051,7 +5051,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:237*/
 
 
-//line amail.w:3420
+//line amail.w:3425
 
 to= append(to,f...)
 case"cc":
@@ -5060,7 +5060,7 @@ case"cc":
 /*237:*/
 
 
-//line amail.w:3507
+//line amail.w:3512
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -5075,7 +5075,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:237*/
 
 
-//line amail.w:3423
+//line amail.w:3428
 
 cc= append(cc,f...)
 case"bcc":
@@ -5084,7 +5084,7 @@ case"bcc":
 /*237:*/
 
 
-//line amail.w:3507
+//line amail.w:3512
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -5099,7 +5099,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:237*/
 
 
-//line amail.w:3426
+//line amail.w:3431
 
 bcc= append(bcc,f...)
 case"attach":
@@ -5120,7 +5120,7 @@ f[i]= strings.TrimSpace(f[i])
 /*237:*/
 
 
-//line amail.w:3507
+//line amail.w:3512
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -5135,7 +5135,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:237*/
 
 
-//line amail.w:3441
+//line amail.w:3446
 
 to= append(to,f...)
 }
@@ -5206,7 +5206,7 @@ w.Close()
 /*:236*/
 
 
-//line amail.w:3321
+//line amail.w:3326
 
 }
 }
@@ -5219,7 +5219,7 @@ w.UnreadEvent(ev)
 /*:232*/
 
 
-//line amail.w:3303
+//line amail.w:3308
 
 
 
@@ -9035,7 +9035,7 @@ var msg*message
 /*231:*/
 
 
-//line amail.w:3294
+//line amail.w:3299
 
 w,err:=goacme.New()
 if err!=nil{
@@ -9050,7 +9050,7 @@ glog.Errorf("can't write a tag for a new message window: %v\n",err)
 /*232:*/
 
 
-//line amail.w:3306
+//line amail.w:3311
 
 go func(msg*message){
 glog.V(debug).Infoln("starting a goroutine to process events from a composed mail window")
@@ -9071,7 +9071,7 @@ case"Post":
 /*236:*/
 
 
-//line amail.w:3393
+//line amail.w:3398
 
 {
 
@@ -9079,21 +9079,21 @@ case"Post":
 /*239:*/
 
 
-//line amail.w:3521
+//line amail.w:3526
 
 
 
 /*228:*/
 
 
-//line amail.w:3225
+//line amail.w:3230
 
 once.Do(func(){
 
 /*216:*/
 
 
-//line amail.w:3038
+//line amail.w:3043
 
 if home= os.Getenv("home");len(home)==0{
 if home= os.Getenv("HOME");len(home)==0{
@@ -9112,7 +9112,7 @@ home= "/"
 /*225:*/
 
 
-//line amail.w:3208
+//line amail.w:3213
 
 if u,err:=user.Current();err!=nil{
 glog.Errorf("can't get a name of the current user: %v\n",err)
@@ -9130,7 +9130,7 @@ cuser= u.Username
 /*240:*/
 
 
-//line amail.w:3525
+//line amail.w:3530
 
 if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
 glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
@@ -9142,7 +9142,7 @@ plan9dir= "/usr/local/plan9"
 /*:240*/
 
 
-//line amail.w:3226
+//line amail.w:3231
 })
 
 
@@ -9150,7 +9150,7 @@ plan9dir= "/usr/local/plan9"
 /*:228*/
 
 
-//line amail.w:3522
+//line amail.w:3527
 
 
 
@@ -9158,7 +9158,7 @@ plan9dir= "/usr/local/plan9"
 /*:239*/
 
 
-//line amail.w:3395
+//line amail.w:3400
 
 w.Seek(0,0)
 w.WriteAddr(wholefile)
@@ -9189,7 +9189,7 @@ case"to":
 /*237:*/
 
 
-//line amail.w:3507
+//line amail.w:3512
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -9204,7 +9204,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:237*/
 
 
-//line amail.w:3420
+//line amail.w:3425
 
 to= append(to,f...)
 case"cc":
@@ -9213,7 +9213,7 @@ case"cc":
 /*237:*/
 
 
-//line amail.w:3507
+//line amail.w:3512
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -9228,7 +9228,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:237*/
 
 
-//line amail.w:3423
+//line amail.w:3428
 
 cc= append(cc,f...)
 case"bcc":
@@ -9237,7 +9237,7 @@ case"bcc":
 /*237:*/
 
 
-//line amail.w:3507
+//line amail.w:3512
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -9252,7 +9252,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:237*/
 
 
-//line amail.w:3426
+//line amail.w:3431
 
 bcc= append(bcc,f...)
 case"attach":
@@ -9273,7 +9273,7 @@ f[i]= strings.TrimSpace(f[i])
 /*237:*/
 
 
-//line amail.w:3507
+//line amail.w:3512
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -9288,7 +9288,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:237*/
 
 
-//line amail.w:3441
+//line amail.w:3446
 
 to= append(to,f...)
 }
@@ -9359,7 +9359,7 @@ w.Close()
 /*:236*/
 
 
-//line amail.w:3321
+//line amail.w:3326
 
 }
 }
@@ -9372,7 +9372,7 @@ w.UnreadEvent(ev)
 /*:232*/
 
 
-//line amail.w:3303
+//line amail.w:3308
 
 
 
@@ -11989,7 +11989,7 @@ return err
 /*206:*/
 
 
-//line amail.w:2857
+//line amail.w:2862
 
 glog.V(debug).Infof("clean the '%s/%d' message's window\n",msg.box.name,msg.id)
 clean(msg.w)
@@ -12030,7 +12030,7 @@ msg.subject)...)
 /*211:*/
 
 
-//line amail.w:2898
+//line amail.w:2903
 
 {
 if len(msg.text)==0&&len(msg.html)==0{
@@ -12078,21 +12078,21 @@ return
 /*215:*/
 
 
-//line amail.w:3034
+//line amail.w:3039
 
 
 
 /*228:*/
 
 
-//line amail.w:3225
+//line amail.w:3230
 
 once.Do(func(){
 
 /*216:*/
 
 
-//line amail.w:3038
+//line amail.w:3043
 
 if home= os.Getenv("home");len(home)==0{
 if home= os.Getenv("HOME");len(home)==0{
@@ -12111,7 +12111,7 @@ home= "/"
 /*225:*/
 
 
-//line amail.w:3208
+//line amail.w:3213
 
 if u,err:=user.Current();err!=nil{
 glog.Errorf("can't get a name of the current user: %v\n",err)
@@ -12129,7 +12129,7 @@ cuser= u.Username
 /*240:*/
 
 
-//line amail.w:3525
+//line amail.w:3530
 
 if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
 glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
@@ -12141,7 +12141,7 @@ plan9dir= "/usr/local/plan9"
 /*:240*/
 
 
-//line amail.w:3226
+//line amail.w:3231
 })
 
 
@@ -12149,7 +12149,7 @@ plan9dir= "/usr/local/plan9"
 /*:228*/
 
 
-//line amail.w:3035
+//line amail.w:3040
 
 
 
@@ -12157,7 +12157,7 @@ plan9dir= "/usr/local/plan9"
 /*:215*/
 
 
-//line amail.w:2940
+//line amail.w:2945
 
 for _,v:=range msg.files{
 buf= append(buf,fmt.Sprintf("\n===> %s (%s)\n",v.path,v.mimetype)...)
@@ -12361,7 +12361,7 @@ case"Browser":
 /*219:*/
 
 
-//line amail.w:3097
+//line amail.w:3102
 
 {
 
@@ -12369,21 +12369,21 @@ case"Browser":
 /*224:*/
 
 
-//line amail.w:3204
+//line amail.w:3209
 
 
 
 /*228:*/
 
 
-//line amail.w:3225
+//line amail.w:3230
 
 once.Do(func(){
 
 /*216:*/
 
 
-//line amail.w:3038
+//line amail.w:3043
 
 if home= os.Getenv("home");len(home)==0{
 if home= os.Getenv("HOME");len(home)==0{
@@ -12402,7 +12402,7 @@ home= "/"
 /*225:*/
 
 
-//line amail.w:3208
+//line amail.w:3213
 
 if u,err:=user.Current();err!=nil{
 glog.Errorf("can't get a name of the current user: %v\n",err)
@@ -12420,7 +12420,7 @@ cuser= u.Username
 /*240:*/
 
 
-//line amail.w:3525
+//line amail.w:3530
 
 if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
 glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
@@ -12432,7 +12432,7 @@ plan9dir= "/usr/local/plan9"
 /*:240*/
 
 
-//line amail.w:3226
+//line amail.w:3231
 })
 
 
@@ -12440,7 +12440,7 @@ plan9dir= "/usr/local/plan9"
 /*:228*/
 
 
-//line amail.w:3205
+//line amail.w:3210
 
 
 
@@ -12448,7 +12448,7 @@ plan9dir= "/usr/local/plan9"
 /*:224*/
 
 
-//line amail.w:3099
+//line amail.w:3104
 
 dir:=fmt.Sprintf("%s/amail-%s/%s/%d",os.TempDir(),cuser,msg.box.name,msg.id)
 if err:=os.MkdirAll(dir,0700);err!=nil{
@@ -12493,7 +12493,7 @@ case"Save":
 /*229:*/
 
 
-//line amail.w:3229
+//line amail.w:3234
 
 {
 if len(ev.Arg)==0{
@@ -12528,8 +12528,13 @@ f.Close()
 continue
 case"Q":
 quote= true
+if args:=strings.Fields(ev.Arg);len(args)> 0{
+ev.Text= args[0]
+ev.Arg= strings.Join(args," ")
+}
 fallthrough
 case"Reply","Replyall":
+fmt.Fprintf(os.Stderr,"ev.Text:%v\n",ev.Text)
 if ev.Text=="Reply"{
 args:=strings.Fields(ev.Arg)
 for _,v:=range args{
@@ -12545,7 +12550,7 @@ replyall= true
 /*230:*/
 
 
-//line amail.w:3254
+//line amail.w:3259
 
 {
 
@@ -12553,7 +12558,7 @@ replyall= true
 /*231:*/
 
 
-//line amail.w:3294
+//line amail.w:3299
 
 w,err:=goacme.New()
 if err!=nil{
@@ -12568,7 +12573,7 @@ glog.Errorf("can't write a tag for a new message window: %v\n",err)
 /*232:*/
 
 
-//line amail.w:3306
+//line amail.w:3311
 
 go func(msg*message){
 glog.V(debug).Infoln("starting a goroutine to process events from a composed mail window")
@@ -12589,7 +12594,7 @@ case"Post":
 /*236:*/
 
 
-//line amail.w:3393
+//line amail.w:3398
 
 {
 
@@ -12597,21 +12602,21 @@ case"Post":
 /*239:*/
 
 
-//line amail.w:3521
+//line amail.w:3526
 
 
 
 /*228:*/
 
 
-//line amail.w:3225
+//line amail.w:3230
 
 once.Do(func(){
 
 /*216:*/
 
 
-//line amail.w:3038
+//line amail.w:3043
 
 if home= os.Getenv("home");len(home)==0{
 if home= os.Getenv("HOME");len(home)==0{
@@ -12630,7 +12635,7 @@ home= "/"
 /*225:*/
 
 
-//line amail.w:3208
+//line amail.w:3213
 
 if u,err:=user.Current();err!=nil{
 glog.Errorf("can't get a name of the current user: %v\n",err)
@@ -12648,7 +12653,7 @@ cuser= u.Username
 /*240:*/
 
 
-//line amail.w:3525
+//line amail.w:3530
 
 if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
 glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
@@ -12660,7 +12665,7 @@ plan9dir= "/usr/local/plan9"
 /*:240*/
 
 
-//line amail.w:3226
+//line amail.w:3231
 })
 
 
@@ -12668,7 +12673,7 @@ plan9dir= "/usr/local/plan9"
 /*:228*/
 
 
-//line amail.w:3522
+//line amail.w:3527
 
 
 
@@ -12676,7 +12681,7 @@ plan9dir= "/usr/local/plan9"
 /*:239*/
 
 
-//line amail.w:3395
+//line amail.w:3400
 
 w.Seek(0,0)
 w.WriteAddr(wholefile)
@@ -12707,7 +12712,7 @@ case"to":
 /*237:*/
 
 
-//line amail.w:3507
+//line amail.w:3512
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -12722,7 +12727,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:237*/
 
 
-//line amail.w:3420
+//line amail.w:3425
 
 to= append(to,f...)
 case"cc":
@@ -12731,7 +12736,7 @@ case"cc":
 /*237:*/
 
 
-//line amail.w:3507
+//line amail.w:3512
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -12746,7 +12751,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:237*/
 
 
-//line amail.w:3423
+//line amail.w:3428
 
 cc= append(cc,f...)
 case"bcc":
@@ -12755,7 +12760,7 @@ case"bcc":
 /*237:*/
 
 
-//line amail.w:3507
+//line amail.w:3512
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -12770,7 +12775,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:237*/
 
 
-//line amail.w:3426
+//line amail.w:3431
 
 bcc= append(bcc,f...)
 case"attach":
@@ -12791,7 +12796,7 @@ f[i]= strings.TrimSpace(f[i])
 /*237:*/
 
 
-//line amail.w:3507
+//line amail.w:3512
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -12806,7 +12811,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:237*/
 
 
-//line amail.w:3441
+//line amail.w:3446
 
 to= append(to,f...)
 }
@@ -12877,7 +12882,7 @@ w.Close()
 /*:236*/
 
 
-//line amail.w:3321
+//line amail.w:3326
 
 }
 }
@@ -12890,7 +12895,7 @@ w.UnreadEvent(ev)
 /*:232*/
 
 
-//line amail.w:3303
+//line amail.w:3308
 
 
 
@@ -12898,7 +12903,7 @@ w.UnreadEvent(ev)
 /*:231*/
 
 
-//line amail.w:3256
+//line amail.w:3261
 
 name:=fmt.Sprintf("Amail/%s/%d/%sReply%s",
 msg.box.name,
@@ -12922,7 +12927,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:52*/
 
 
-//line amail.w:3262
+//line amail.w:3267
 
 buf:=make([]byte,0,0x8000)
 buf= append(buf,fmt.Sprintf("To: %s\n",msg.from)...)
@@ -12949,7 +12954,7 @@ buf= append(buf,'\n')
 /*233:*/
 
 
-//line amail.w:3329
+//line amail.w:3334
 
 if len(msg.text)!=0{
 fn:=fmt.Sprintf("%d/%s",msg.id,msg.text)
@@ -12966,7 +12971,7 @@ continue
 /*234:*/
 
 
-//line amail.w:3347
+//line amail.w:3352
 
 {
 b:=bufio.NewReader(f)
@@ -12984,7 +12989,7 @@ break
 /*:234*/
 
 
-//line amail.w:3340
+//line amail.w:3345
 
 f.Close()
 }else if len(msg.html)!=0{
@@ -12993,7 +12998,7 @@ f.Close()
 /*235:*/
 
 
-//line amail.w:3360
+//line amail.w:3365
 
 {
 c1:=exec.Command("9p","read",fmt.Sprintf("%s/%s/%d/%s",srv,msg.box.name,msg.id,msg.html))
@@ -13024,7 +13029,7 @@ continue
 /*234:*/
 
 
-//line amail.w:3347
+//line amail.w:3352
 
 {
 b:=bufio.NewReader(f)
@@ -13042,7 +13047,7 @@ break
 /*:234*/
 
 
-//line amail.w:3385
+//line amail.w:3390
 
 c1.Wait()
 c2.Wait()
@@ -13054,7 +13059,7 @@ f.(io.Closer).Close()
 /*:235*/
 
 
-//line amail.w:3343
+//line amail.w:3348
 
 }
 
@@ -13063,7 +13068,7 @@ f.(io.Closer).Close()
 /*:233*/
 
 
-//line amail.w:3283
+//line amail.w:3288
 
 }else{
 buf= append(buf,fmt.Sprintf("Include: Mail/%s/%d/raw\n",msg.box.name,msg.id)...)
@@ -13087,7 +13092,7 @@ w.WriteCtl("dot=addr\nshow")
 /*:93*/
 
 
-//line amail.w:3290
+//line amail.w:3295
 
 }
 
@@ -13096,7 +13101,7 @@ w.WriteCtl("dot=addr\nshow")
 /*:230*/
 
 
-//line amail.w:2806
+//line amail.w:2811
 
 continue
 case"Up":
@@ -13120,7 +13125,7 @@ parent= <-ch
 /*:131*/
 
 
-//line amail.w:2809
+//line amail.w:2814
 
 if parent!=nil{
 
@@ -13137,7 +13142,7 @@ msgs:=make(msgmap)
 /*:83*/
 
 
-//line amail.w:2811
+//line amail.w:2816
 
 name:=parent.box.name
 id:=parent.id
@@ -13156,7 +13161,7 @@ msgs[name]= append(msgs[name],id)
 /*:84*/
 
 
-//line amail.w:2814
+//line amail.w:2819
 
 
 
@@ -13172,7 +13177,7 @@ lch<-&msgs
 /*:86*/
 
 
-//line amail.w:2815
+//line amail.w:2820
 
 }
 continue
@@ -13197,7 +13202,7 @@ children= <-ch
 /*:129*/
 
 
-//line amail.w:2819
+//line amail.w:2824
 
 if len(children)!=0{
 
@@ -13214,7 +13219,7 @@ msgs:=make(msgmap)
 /*:83*/
 
 
-//line amail.w:2821
+//line amail.w:2826
 
 name:=children[0].box.name
 id:=children[0].id
@@ -13233,7 +13238,7 @@ msgs[name]= append(msgs[name],id)
 /*:84*/
 
 
-//line amail.w:2824
+//line amail.w:2829
 
 
 
@@ -13249,7 +13254,7 @@ lch<-&msgs
 /*:86*/
 
 
-//line amail.w:2825
+//line amail.w:2830
 
 }
 continue
@@ -13268,7 +13273,7 @@ pmsg:=msg.prev()
 /*:199*/
 
 
-//line amail.w:2829
+//line amail.w:2834
 
 if pmsg!=nil{
 
@@ -13285,7 +13290,7 @@ msgs:=make(msgmap)
 /*:83*/
 
 
-//line amail.w:2831
+//line amail.w:2836
 
 name:=pmsg.box.name
 id:=pmsg.id
@@ -13304,7 +13309,7 @@ msgs[name]= append(msgs[name],id)
 /*:84*/
 
 
-//line amail.w:2834
+//line amail.w:2839
 
 
 
@@ -13320,7 +13325,7 @@ lch<-&msgs
 /*:86*/
 
 
-//line amail.w:2835
+//line amail.w:2840
 
 }
 continue
@@ -13339,7 +13344,7 @@ nmsg:=msg.next()
 /*:201*/
 
 
-//line amail.w:2839
+//line amail.w:2844
 
 if nmsg!=nil{
 
@@ -13356,7 +13361,7 @@ msgs:=make(msgmap)
 /*:83*/
 
 
-//line amail.w:2841
+//line amail.w:2846
 
 name:=nmsg.box.name
 id:=nmsg.id
@@ -13375,7 +13380,7 @@ msgs[name]= append(msgs[name],id)
 /*:84*/
 
 
-//line amail.w:2844
+//line amail.w:2849
 
 
 
@@ -13391,7 +13396,7 @@ lch<-&msgs
 /*:86*/
 
 
-//line amail.w:2845
+//line amail.w:2850
 
 }
 continue
@@ -13697,7 +13702,7 @@ glog.Errorf("can't set a tag of the message window: %v",err)
 /*212:*/
 
 
-//line amail.w:2948
+//line amail.w:2953
 
 func(msg*message)bodyPath(bfid*client.Fid,path string)error{
 glog.V(debug).Infof("getting a path for a body of the '%d' message\n",msg.id)
@@ -13756,7 +13761,7 @@ return nil
 /*213:*/
 
 
-//line amail.w:2998
+//line amail.w:3003
 
 func(msg*message)getCID(path string)(string,bool){
 src:=fmt.Sprintf("%d/%smimeheader",msg.id,path)
@@ -13797,7 +13802,7 @@ return"",false
 /*217:*/
 
 
-//line amail.w:3048
+//line amail.w:3053
 
 func readString(pfid*client.Fid,name string)(str string,err error){
 glog.V(debug).Infof("readString: trying to open '%s'\n",name)
@@ -13825,7 +13830,7 @@ return str,nil
 /*218:*/
 
 
-//line amail.w:3067
+//line amail.w:3072
 
 func readAll(pfid*client.Fid,name string,buf[]byte)([]byte,error){
 glog.V(debug).Infof("readAll: trying to open '%s'\n",name)
@@ -13861,7 +13866,7 @@ return buf,nil
 /*220:*/
 
 
-//line amail.w:3130
+//line amail.w:3135
 
 func saveFile(src,dst string)error{
 var err error
@@ -13888,7 +13893,7 @@ return err
 /*221:*/
 
 
-//line amail.w:3148
+//line amail.w:3153
 
 func(msg*message)fixFile(dir string)error{
 src:=fmt.Sprintf("%d/%s",msg.id,msg.html)
