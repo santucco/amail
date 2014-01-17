@@ -3353,6 +3353,10 @@ if len(msg.text)!=0 {
 	b:=bufio.NewReader(f)
 	for s, err:=b.ReadString('\n'); err==nil || err==io.EOF; s, err=b.ReadString('\n') {
 		buf=append(buf, '>', ' ')
+		if strings.HasSuffix(s, "\r\n") {
+			s=strings.TrimRight(s, "\r\n")
+			s+="\n"
+		}
 		buf=append(buf, s...)
 		if err==io.EOF {
 			break
