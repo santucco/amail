@@ -64,7 +64,7 @@ func main() {
 	} else {
 		@<Create the main window@>
 		@<Start a main message loop@>
-		go func(){	
+		go func(){
 			@<Enumerating of mailboxes@>
 		}()
 	}
@@ -205,7 +205,7 @@ srv		string="mail"
 @<Types@>=
 mailbox struct {
 	name	string
-	@<Rest of |mailbox| members@>	
+	@<Rest of |mailbox| members@>
 }
 
 mailboxes []*mailbox
@@ -347,7 +347,7 @@ func (this *mailbox) newMessage(id int) (msg *message, unread bool, err error) {
 	}
 	msg.unread=unread
 	return
-	
+
 }
 
 @* Subscription on notifications about new messages.
@@ -400,7 +400,7 @@ in case of a mail message is deleted - in |dch|.
 							if err!=nil {
 								glog.Error(err)
 								continue
-							}						
+							}
 							if v=="new" {
 								glog.V(debug).Infof("'%d' is a new message in the '%s' mailbox\n", num, b[1])
 								mch<-&struct{name string; id int}{name:b[1], id:num}
@@ -508,7 +508,7 @@ go func() {
 @<Create |box|@>=
 glog.V(debug).Infof("creating a '%s' mailbox\n", name)
 box:=&mailbox{name:name, @<Rest of initialization of |mailbox|@>}
-boxes=append(boxes, box)	
+boxes=append(boxes, box)
 sort.Sort(boxes)
 
 @ |mailboxes.Search| finds a mailbox with |name| and returns a position of the mailbox in the list and |true| or
@@ -566,9 +566,10 @@ if ech, err=mw.EventChannel(0, goacme.Look|goacme.Execute); err!=nil {
 @
 @<Constants@>=
 const mailboxfmt="%-30s\t%10d\t%10d\n"
+const mailboxfmtprc="%-30s\t%10d\t%10d\t%d%%\n"
 const wholefile="0,$"
 
-@ Here we clean up the main window and print states of all mailboxes.
+@ Here we clean up the main window and print states of all mailboxes. 
 @<Print all mailboxes@>=
 if mw!=nil {
 	glog.V(debug).Infoln("printing of the mailboxes")
@@ -578,7 +579,13 @@ if mw!=nil {
 		glog.Errorf("can't open 'data' file: %s\n", err)
 	} else {
 		for _, v:=range boxes {
-			data.Write([]byte(fmt.Sprintf(mailboxfmt, v.name, len(v.unread), len(v.all))))
+			if v.total==len(v.all) {
+				data.Write([]byte(fmt.Sprintf(mailboxfmt, v.name, len(v.unread), len(v.all))))
+			} else if v.total!=0 && len(v.all)*100/v.total>0 {
+				data.Write([]byte(fmt.Sprintf(mailboxfmtprc, v.name, len(v.unread), len(v.all), len(v.all)*100/v.total)))
+			} else {
+				data.Write([]byte(fmt.Sprintf(mailboxfmt, v.name, 0, 0)))
+			}
 		}
 	}
 	w:=mw
@@ -633,58 +640,47 @@ case ev, ok:=<-ech:
 		}
 		name=strings.TrimSpace(name)
 		if i, ok:=boxes.Search(name); ok {
-			box:=boxes[i]	
+			box:=boxes[i]
 			@<Inform |box| to create a window@>
 			continue
 		}
 	}
 	mw.UnreadEvent(ev)
 
-	
-@ To avoid overloading of \.{Acme} let's store a name of box with count in |shown|.
 
-@<Variables@>=
-shown=make(map[string]int)
-
-@
-@<Constants@>=
-const mailboxfmtprc="%-30s\t%10d\t%10d\t%d%%\n"
-
-@ If not all messages are counted, the refresh of state of mailbox in the main window will be processed every 100 messages.
+@ If not all messages are counted, the refresh of state of mailbox in the main window will be processed every percent
+of counted messages.
 
 @<Refresh main window for a box |b|@>=
 glog.V(debug).Infof("refreshing main window for the '%s' mailbox, len(all): %d, total: %d\n", b.name, len(b.all), b.total)
 if mw!=nil {
-	if len(b.all)!=b.total {
-		if c, ok:=shown[b.name]; !ok || c<99 {
-			shown[b.name]=c+1
-			continue
-		} else {
-			shown[b.name]=0
-		}
+	if len(b.all)!=b.total && b.total/100!=0 && len(b.all)%(b.total/100)!=0 {
+		continue
 	}
-	
+
 	if err:=mw.WriteAddr("0/^%s.*\\n/", escape(b.name)); err!=nil {
 		glog.Errorf("can't write to 'addr' file: %s\n", err)
 		continue
 	}
-	
+
 	if data, err:=mw.File("data"); err !=nil {
 		glog.Errorf("can't open 'data' file: %s\n", err)
-	} else if len(b.all)!=b.total {
-		if _, err:=data.Write([]byte(fmt.Sprintf(mailboxfmtprc, b.name, len(b.unread), len(b.all), len(b.all)*100/b.total)));
+	} else if len(b.all)==b.total {
+		if _, err:=data.Write([]byte(fmt.Sprintf(mailboxfmt, b.name, len(b.unread), len(b.all))));
 			err!=nil {
 			glog.Errorf("can't write to 'data' file: %s\n", err)
 			continue
 		}
-	} else if _, err:=data.Write([]byte(fmt.Sprintf(mailboxfmt, b.name, len(b.unread), len(b.all))));
-			err!=nil {
-			glog.Errorf("can't write to 'data' file: %s\n", err)
-			continue
+		w:=mw
+		@<Set window |w| to clean state@>
+		@<Go to top of window |w|@>
+	} else if _, err:=data.Write([]byte(fmt.Sprintf(mailboxfmtprc,
+													b.name,
+													len(b.unread),
+													len(b.all),
+													len(b.all)*100/b.total)));err!=nil {
+		glog.Errorf("can't write to 'data' file: %s\n", err)
 	}
-	w:=mw
-	@<Set window |w| to clean state@>
-	@<Go to top of window |w|@>
 }
 
 @
@@ -722,7 +718,7 @@ To avoid of unresponding main window the counting is made in |default| branch of
 	for i:=len(fs)-1; i>=0; {
 		select {
 			@<On exit?@>
-			@<Processing of other |box| channels@>	
+			@<Processing of other |box| channels@>
 			default:
 				d:=fs[i]
 				i--
@@ -909,10 +905,10 @@ case id:=<-box.mch:
 		}
 	}
 	@<Send |box| to refresh the main window@>
-	
-	
+
+
 @ Here deleted messages of |box| are processed.
-@<Processing of other |box| channels@>=	
+@<Processing of other |box| channels@>=
 case id:=<-box.dch:
 	glog.V(debug).Infof("'%d' should be deleted from the '%s' mailbox\n", id, box.name)
 	@<Delete a message with |id|@>
@@ -941,7 +937,7 @@ deleted bool
 @<Delete a message with |id|@>=
 if i, ok:=box.all.Search(id); ok {
 	msgs:=append(messages{}, box.all[i])
-	@<Delete a message at position |i|@>	
+	@<Delete a message at position |i|@>
 	@<Send deleted |msgs|@>
 }
 
@@ -1019,7 +1015,7 @@ case <-box.cch:
 		glog.V(debug).Infof("a window of the '%s' mailbox already exists, just show it\n", box.name)
 		box.w.WriteCtl("dot=addr\nshow")
 	}
-	
+
 @
 @<Create a window for the box@>=
 glog.V(debug).Infof("creation a window for the '%s' mailbox\n", box.name)
@@ -1167,9 +1163,9 @@ if xdata, err:=box.w.File("xdata"); err!=nil {
 		@<Read a message number@>
 		if err==io.EOF {
 			break
-		}	
+		}
 	}
-}		
+}
 
 
 @ A message path can contain not only a number but a mailbox name too. So we have to parse an input string
@@ -1192,7 +1188,7 @@ to separate the name and the number. In any case the message will be opened via 
 			@<Add a |id| message to |msgs|@>
 			break
 		}
-	} 	
+	} 
 }
 
 @
@@ -1248,7 +1244,7 @@ if err:=box.w.WriteCtl("addr=dot"); err!=nil {
 	}
 } else {
 	glog.V(debug).Infof("can't get a current message from: %s\n", str)
-}	
+}
 
 @
 @<Variables@>=
@@ -1349,7 +1345,7 @@ unmarkch=make(chan *msgmap, 100)
 			@<Looking for a |name| mailbox...@>
 			boxes[i].unmarkch<-ids
 		}
-		
+
 
 @
 @<Send |msgs| to |markch|@>=
@@ -1385,7 +1381,7 @@ case ids:=<-box.unmarkch:
 	for _, id:=range ids {
 		@<Unmark to delete |id| message@>
 	}
-	@<Refresh |msgs|@>	
+	@<Refresh |msgs|@>
 
 @
 @<Mark to delete |id| message@>=
@@ -1481,7 +1477,7 @@ case m:=<-box.mdch:
 |mdch| is a channel to receive signals to delete messages.
 @<Variables@>=
 mdch chan messages=make(chan messages, 100)
- 
+
 @
 @<Processing of other common channels@>=
 case msgs:=<-mdch:
@@ -1666,13 +1662,13 @@ If |digest| are the same we send |false| to |ch| to inform the sender the messag
 		continue
 	}
 	ch<-true
-		
+
 	if len(v.msg.inreplyto)==0 {
 		continue
 	}
 	if pval, ok:=idmap[v.msg.inreplyto]; !ok {
 		glog.V(debug).Infof("'%s' message (parent of '%s') doesn't exist, creating\n", v.msg.inreplyto, v.msg.messageid)
-		idmap[v.msg.inreplyto]=&struct{msg *message; parent parentmsg; children idmessages}{nil, nil, append(idmessages{}, v.msg)}	
+		idmap[v.msg.inreplyto]=&struct{msg *message; parent parentmsg; children idmessages}{nil, nil, append(idmessages{}, v.msg)}
 	} else {
 		glog.V(debug).Infof("'%s' message exists, appending the '%s' like a child\n", v.msg.inreplyto, v.msg.messageid)
 		if _, ok:=pval.children.SearchInsert(v.msg); ok && pval.msg!=nil{
@@ -1902,7 +1898,7 @@ we just recreate |box.irfch|.
 @<Processing of other |box| channels@>=
 case v:=<-box.rfch:
 	box.irfch<-v
-	
+
 case v:=<-box.irfch:
 	glog.V(debug).Infof("a signal to print message of the '%s' mailbox window has been received\n", box.name)
 	if box.w==nil {
@@ -1912,7 +1908,7 @@ case v:=<-box.irfch:
 	if	box.threadMode() && !counted {
 		glog.V(debug).Infof("counting of threads of the '%s' mailbox is not finished, ignore the signal\n", box.name)
 		continue
-	}	
+	}
 	@<Print messages from |v.msgs|@>
 
 
@@ -2034,7 +2030,7 @@ if is found.
 |mrfch| is a channel to receive signals to refresh messages.
 @<Variables@>=
 mrfch chan *refresh=make(chan *refresh)
- 
+
 @
 @<Processing of other common channels@>=
 case r:=<-mrfch:
@@ -2067,7 +2063,7 @@ if !box.threadMode() {
 		glog.V(debug).Infof("inform the '%s' mailbox to print the last %d messages\n", box.name, len(src)-box.pos)
 		msgs:=append(messages{}, src[box.pos:len(src)]...)
 		@<Set |pos| of |box|@>
-		box.rfch<-&refresh{0, msgs}		
+		box.rfch<-&refresh{0, msgs}
 	}
 }
 
@@ -2079,7 +2075,7 @@ if !box.threadMode() {
 		glog.V(debug).Infof("inform the '%s' mailbox to print the last %d messages\n", box.name, len(src)-box.pos)
 		msgs:=append(messages{}, src[box.pos:len(src)]...)
 		@<Set |pos| of |box|@>
-		box.rfch<-&refresh{0, msgs}		
+		box.rfch<-&refresh{0, msgs}
 	}
 }
 
@@ -2111,7 +2107,7 @@ const eof="$"
 	if _, err:=f.Write(buf); err!=nil {
 		glog.Errorf("can't write to 'data' file of the '%s' messgebox: %v\n", box.name, err)
 	}
-	@<Go to the top of window for first 100 messages@>		
+	@<Go to the top of window for first 100 messages@>
 	@<Send a rest of |msgs|@>
 }
 
@@ -2171,7 +2167,7 @@ pcount+=c
 {
 	@<Get |level| for |msg|@>
 	for ;level>0; level--{
-		buf=append(buf, levelmark...)	
+		buf=append(buf, levelmark...)
 	}
 }
 
@@ -2188,7 +2184,7 @@ we have to erase it instead of refreshing.
 				@<Erase the message@>
 			} else {
 				@<Make a full thread in |msgs| with |msg| like a root@>
-			}	
+			}
 		}
 		@<Inform |box| to refresh |msgs|@>
 	}
@@ -2424,7 +2420,7 @@ if parent!=nil {
 	glog.V(debug).Infof("len of msgs: %v\n", len(msgs))
 	box.rfch<-&refresh{0, msgs}
 }
-	
+
 @
 @c
 func (box *mailbox) search(str string) (msgs messages) {
@@ -2502,7 +2498,7 @@ case ids:=<-box.lch:
 		}
 	}
 	@<Refresh |msgs|@>
-	
+
 @
 @<Remove |id| message from |unread|@>=
 msg.unread=false
@@ -2582,7 +2578,7 @@ func split(s string) (strs []string) {
 		if strings.Contains(v, "@@") {
 			m+=v
 			strs=append(strs, m)
-			m=""	
+			m=""
 		} else if v!="''" {
 			m+=v+" "
 		}
@@ -2597,7 +2593,7 @@ func (msg *message) open() (err error) {
 	bfid, err:=msg.box.fid.Walk(fmt.Sprintf("%d", msg.id))
 	if err!=nil {
 		glog.Errorf("can't walk to '%s/%d': %v\n", msg.box.name, msg.id, err)
-		return err	
+		return err
 	}
 	defer bfid.Close()
 	isnew:=msg.w==nil
@@ -2801,7 +2797,7 @@ go func() {
 						args:=strings.Fields(ev.Arg)
 						for _, v:=range args {
 							if v=="all" {
-								replyall=true	
+								replyall=true
 							}
 						}
 					} else if ev.Text=="Replyall" {
@@ -2852,7 +2848,7 @@ go func() {
 			}
 		} else if (ev.Type&goacme.Look)==goacme.Look  {
 		}
-		msg.w.UnreadEvent(ev)		
+		msg.w.UnreadEvent(ev)
 
 	}
 }()
@@ -2907,7 +2903,7 @@ message body to the window. Then we fill |buf| with command to obtain contents o
 		}
 		glog.V(debug).Infof("paths for bodies of the '%d' message have been found: text-'%s', html-'%s'\n",
 							msg.id, msg.text, msg.html)
-		
+
 	}
 	if len(msg.text)!=0 && !msg.showhtml {
 		glog.V(debug).Infof("using a path for a text body of the '%d' message: '%s'\n", msg.id, msg.text)
@@ -2966,7 +2962,7 @@ func (msg *message) bodyPath(bfid *client.Fid, path string) error {
 				msg.text=path+"body"
 				glog.V(debug).Infof("a path for a text body of the '%d' message: '%s'\n", msg.id, t)
 				return nil
-			}	
+			}
 		case "text/html":
 			if len(msg.html)==0 {
 				msg.html=path+"body"
@@ -2996,7 +2992,7 @@ func (msg *message) bodyPath(bfid *client.Fid, path string) error {
 		msg.files=append(msg.files, f)
 	}
 	return nil
-}	
+}
 
 @ |getCID| parses |"mimeheader"| and takes |"Content-ID"| identifier for |path|
 @c
@@ -3057,12 +3053,12 @@ func readString(pfid *client.Fid, name string) (str string, err error) {
 		err=f.Open(plan9.OREAD)
 	}
 	if err!=nil {
-		return	
+		return
 	}
 	defer f.Close()
 	str, err=bufio.NewReader(f).ReadString('\n')
 	if err!=nil && err!=io.EOF {
-		return	
+		return
 	}
 	return str, nil
 }
@@ -3120,7 +3116,7 @@ to help a browser to find the images.
  			saveFile(fmt.Sprintf("%s/%s/%d/%s/body", srv, msg.box.name, msg.id, v.path),
  						fmt.Sprintf("%s/%s", dir, v.name))
 		}
-		
+
 	}
 
 	if p, err:=goplumb.Open("send", plan9.OWRITE); err!=nil {
@@ -3187,7 +3183,7 @@ func (msg *message) fixFile(dir string) error {
 			} else {
 				p=b+e
 			}
-		}		
+		}
 		df.Write([]byte(s))
 		if err==io.EOF {
 			break
@@ -3265,14 +3261,14 @@ once.Do(func() {@<Get it at once@>})
 							func()string{if replyall {return "all"}; return ""}()@t\2@>)
 	@<Print the |name| for window |w|@>
 	buf:=make([]byte, 0, 0x8000)
-	buf=append(buf, fmt.Sprintf("To: %s\n", msg.from)...)					
+	buf=append(buf, fmt.Sprintf("To: %s\n", msg.from)...)
 	if replyall {
 		for _, v:=range msg.to {
 			buf=append(buf, fmt.Sprintf("To: %s\n", v)...)
 		}
 		for _, v:=range msg.cc {
 			buf=append(buf, fmt.Sprintf("To: %s\n", v)...)
-		}	
+		}
 	}
 	buf=append(buf, fmt.Sprintf("Subject: %s%s\n", @t\1@>@/
 		func() string{
@@ -3283,7 +3279,7 @@ once.Do(func() {@<Get it at once@>})
 		}(), @/
 		msg.subject)...@t\2@>)
 	if quote {
-		buf=append(buf, '\n')	
+		buf=append(buf, '\n')
 		@<Add quoted message@>
 	} else {
 		buf=append(buf, fmt.Sprintf("Include: Mail/%s/%d/raw\n", msg.box.name, msg.id)...)
@@ -3291,7 +3287,7 @@ once.Do(func() {@<Get it at once@>})
 	}
 	buf=append(buf, '\n')
 	w.Write(buf)
-	@<Go to top of window |w|@>	
+	@<Go to top of window |w|@>
 }
 
 @
@@ -3325,12 +3321,12 @@ go func(msg *message) {
 					@<Send the message@>
 			}
 		}
-		w.UnreadEvent(ev)		
+		w.UnreadEvent(ev)
 	}
 }(msg)
 
 @
-@<Add quoted message@>=	
+@<Add quoted message@>=
 if len(msg.text)!=0 {
 	fn:=fmt.Sprintf("%d/%s", msg.id, msg.text)
 	f, err:=msg.box.fid.Walk(fn)
@@ -3431,7 +3427,7 @@ If |msg!=nil|, it will be added like a message is replied.
 				case "include":
 					include=append(include, f...)
 				case "subject":
-					subject=fmt.Sprintf("%q", strings.TrimSpace(s[p+1:]))	
+					subject=fmt.Sprintf("%q", strings.TrimSpace(s[p+1:]))
 			}
 		} else {
 			// recipient addresses can be written without "to:"
@@ -3455,7 +3451,6 @@ If |msg!=nil|, it will be added like a message is replied.
 	for _, v:=range attach {
 		args=append(args, "-a", v)
 	}
-	
 	c:=exec.Command(plan9dir+"/bin/upas/marshal", args...)
 	p, err:=c.StdinPipe()
 	if err!=nil {
@@ -3489,7 +3484,7 @@ If |msg!=nil|, it will be added like a message is replied.
 	glog.V(debug).Infoln("bcc is written")
 	for s, err:=b.ReadString('\n'); err==nil || err==io.EOF; s, err=b.ReadString('\n') {
 		glog.V(debug).Infof("writing '%s':%v", s, err)
-		
+
 		p.Write([]byte(s))
 		if err==io.EOF {
 			p.Write([]byte("\n"))

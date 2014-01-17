@@ -36,7 +36,8 @@ IFILES= \
 TEXP?=xetex
 gcflags=-gcflags '-N -l'
 
-all: amail doc
+all: amail 
+#doc
 
 amail: amail.go
 	go build $(gcflags)
