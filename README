@@ -63,10 +63,15 @@ separated by comma.
 When replying to a message without quoting of the message amail will always
 "Include:" the original message; delete that line if you don't want to include it.
 
+A signature for new messages can be composed. Amail is looking for mailbox-specific
+signatures in '$HOME/mail/<mailbox>.signature' files and for a common signature in
+'$HOME/mail/signature' file.
+
 There are some known problems, for the moment most of them are addressed to mailfs,
 some to Acme:
 1. Quite big random access time to messages (according to the sources
-mailfs always find a message by sequental comporation) (fixed in bitbucket.org/santucco/plan9port)
+mailfs always find a message by sequental comporation) 
+(fixed in bitbucket.org/santucco/plan9port)
 2. Mailboxes other that mbox are not refreshing (it seems mailfs doesn't make
 subscription on mailboxes other, that INBOX).
 3. "Browser" command shows international messages in wrong encoding

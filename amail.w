@@ -445,6 +445,7 @@ in case of a mail message is deleted - in |dch|.
 							@<Print the |name| for window |w|@>
 							addr:=fmt.Sprintf("To: %s\n\n", string(m.Data))
 							w.Write([]byte(addr))
+							@<Append common signature@>
 					}
 				}
 			} ()
@@ -659,7 +660,7 @@ if mw!=nil {
 	}
 
 	if err:=mw.WriteAddr("0/^%s.*\\n/", escape(b.name)); err!=nil {
-		glog.Errorf("can't write to 'addr' file: %s\n", err)
+		glog.V(debug).Infof("can't write to 'addr' file: %s\n", err)
 		continue
 	}
 
@@ -1111,6 +1112,7 @@ case ev, ok:=<-box.ech:
 				@<Create a new message window@>
 				name:=fmt.Sprintf("Amail/%s/New", box.name)
 				@<Print the |name| for window |w|@>
+				@<Append |box|-specific signature@>
 				continue
 			case "Search":
 				glog.V(debug).Infof("search argument: '%s'\n", ev.Arg)
@@ -3291,7 +3293,7 @@ once.Do(func() {@<Get it at once@>})
 	}
 	buf=append(buf, '\n')
 	w.Write(buf)
-	@<Go to top of window |w|@>
+	@<Append |msg.box|-specific signature@>
 }
 
 @
@@ -3534,6 +3536,50 @@ plan9dir string
 if plan9dir=os.Getenv("PLAN9"); len(plan9dir)==0 {
 	glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
 	plan9dir="/usr/local/plan9"
+}
+
+@
+@<Append |box|-specific signature@>=
+writeSignature(w, box)
+
+@
+@<Append |msg.box|-specific signature@>=
+if msg!=nil {
+	writeSignature(w, msg.box)
+} else {
+	writeSignature(w, nil)
+}
+
+@
+@<Append common signature@>=
+writeSignature(w, nil)
+
+
+@ At first we are looking for |box|-specific signature in |$HOME/mail/<mailbox>.signature| file. 
+If the file doesn't exist, we are trying to open |$HOME/mail/<mailbox>.signature| file with common signature.
+@c
+func writeSignature(w *goacme.Window, box *mailbox) {
+	@<Get |home| enviroment variable@>
+	var f io.ReadCloser
+	var err error
+	if box!=nil {
+		f,err=os.Open(fmt.Sprintf("%s/mail/%s.signature", home, box.name))
+	}
+	if err!=nil || f==nil {
+		f,err=os.Open(fmt.Sprintf("%s/mail/signature", home))
+	}
+	if err==nil {
+		w.Write([]byte("\n"))
+		b:=bufio.NewReader(f)
+		for buf, err:=b.ReadBytes('\n'); err==nil || err==io.EOF; buf, err=b.ReadBytes('\n') {
+			w.Write(buf)
+			if err==io.EOF {
+				break
+			}
+		}
+		f.Close()
+	}
+	@<Go to top of window |w|@>
 }
 
 @** Index.
