@@ -3440,7 +3440,7 @@ If |msg!=nil|, it will be added like a message is replied.
 				case "include":
 					include=append(include, f...)
 				case "subject":
-					subject=fmt.Sprintf("%q", strings.TrimSpace(s[p+1:]))
+					subject=fmt.Sprintf("%s", strings.TrimSpace(s[p+1:]))
 			}
 		} else {
 			// recipient addresses can be written without "to:"

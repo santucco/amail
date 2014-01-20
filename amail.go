@@ -7,7 +7,7 @@
 
 //line license:1
 
-// This file is part of Amail version 0.7
+// This file is part of Amail version 0.71
 // Author Alexander Sychev
 //
 // Copyright (c) 2013 Alexander Sychev. All rights reserved.
@@ -1302,7 +1302,7 @@ attach= append(attach,f...)
 case"include":
 include= append(include,f...)
 case"subject":
-subject= fmt.Sprintf("%q",strings.TrimSpace(s[p+1:]))
+subject= fmt.Sprintf("%s",strings.TrimSpace(s[p+1:]))
 }
 }else{
 // recipient addresses can be written without "to:"
@@ -5124,7 +5124,7 @@ attach= append(attach,f...)
 case"include":
 include= append(include,f...)
 case"subject":
-subject= fmt.Sprintf("%q",strings.TrimSpace(s[p+1:]))
+subject= fmt.Sprintf("%s",strings.TrimSpace(s[p+1:]))
 }
 }else{
 // recipient addresses can be written without "to:"
@@ -9293,7 +9293,7 @@ attach= append(attach,f...)
 case"include":
 include= append(include,f...)
 case"subject":
-subject= fmt.Sprintf("%q",strings.TrimSpace(s[p+1:]))
+subject= fmt.Sprintf("%s",strings.TrimSpace(s[p+1:]))
 }
 }else{
 // recipient addresses can be written without "to:"
@@ -12831,7 +12831,7 @@ attach= append(attach,f...)
 case"include":
 include= append(include,f...)
 case"subject":
-subject= fmt.Sprintf("%q",strings.TrimSpace(s[p+1:]))
+subject= fmt.Sprintf("%s",strings.TrimSpace(s[p+1:]))
 }
 }else{
 // recipient addresses can be written without "to:"
