@@ -570,7 +570,7 @@ const mailboxfmt="%-30s\t%10d\t%10d\n"
 const mailboxfmtprc="%-30s\t%10d\t%10d\t%d%%\n"
 const wholefile="0,$"
 
-@ Here we clean up the main window and print states of all mailboxes. 
+@ Here we clean up the main window and print states of all mailboxes.
 @<Print all mailboxes@>=
 if mw!=nil {
 	glog.V(debug).Infoln("printing of the mailboxes")
@@ -880,7 +880,7 @@ func(box *mailbox) loop() {
 @ Here new messages of |box| are processed.
 If |box| shows a particular thread the message should be printed only if it is in the thread.
 Also the message should be printed in other boxes with the thread.
-A new message can be in a thread so we have to send 
+A new message can be in a thread so we have to send
 @<Processing of other |box| channels@>=
 case id:=<-box.mch:
 	glog.V(debug).Infof("'%d' should be added to the '%s' mailbox\n", id, box.name)
@@ -1114,6 +1114,9 @@ case ev, ok:=<-box.ech:
 				@<Print the |name| for window |w|@>
 				@<Append |box|-specific signature@>
 				continue
+			case "Seen":
+				@<Mark messages as seen@>
+				continue
 			case "Search":
 				glog.V(debug).Infof("search argument: '%s'\n", ev.Arg)
 				@<Search messages@>
@@ -1138,7 +1141,7 @@ case ev, ok:=<-box.ech:
 			@<Open selected messages@>
 		}
 		if len(msgs)!=0 {
-			@<Send |msgs| to |lch|@>
+			@<Send |msgs| for viewing@>
 			continue
 		}
 	}
@@ -1152,7 +1155,7 @@ of the |box|'s window and then symbols will be read from |"xdata"| file.
 glog.V(debug).Infof("event: %v\n", ev)
 if err:=box.w.WriteAddr("#%d,#%d", ev.Begin, ev.End); err!=nil {
 	glog.Errorf("can't write to 'addr': %s\n", err)
-} else 
+} else
 	@<Read message numbers@>
 
 @
@@ -1186,20 +1189,33 @@ to separate the name and the number. In any case the message will be opened via 
 			if i>0 {
 				name=strings.Join(f[:i], "/")
 				glog.V(debug).Infof("the message number is '%d' in the '%s' mailbox\n", id, name)
-			} 
+			}
 			@<Add a |id| message to |msgs|@>
 			break
 		}
-	} 
+	}
 }
 
 @
 @<Types@>=
 msgmap map[string][]int
 
-@ A channel to open a lists of  messages for an every mailbox.
+@ Let's do an universal approach to handle actions with groups of messages
+instead of making a separate channel for every action.
+
+@<Types@>=
+action int
+
+@
+@<Constants@>=
+const (
+	view	action = iota
+	@<Other kinds of actions@>
+)
+
+@ A channel to do actions with groups of messages.
 @<Variables@>=
-lch=make(chan *msgmap, 100)
+ach=make(chan *struct{m msgmap; a action}, 100)
 
 @
 @<Create |msgs|@>=
@@ -1210,20 +1226,20 @@ msgs:=make(msgmap)
 glog.V(debug).Infof("adding the '%d' of the '%s' mailbox\n", id, name)
 msgs[name]=append(msgs[name], id)
 
-@ Let's add a processing of |lch| to the main thread
+@ Let's add a processing of |ach| to the main thread
 @<Processing of other common channels@>=
-	case d:=<-lch:
-		if d==nil {
+	case d:=<-ach:
+		if d.m==nil {
 			continue
 		}
-		for name, ids:=range *d {
+		for name, ids:=range d.m {
 			@<Looking for a |name| mailbox...@>
-			boxes[i].lch<-ids
+			boxes[i].ach<-&struct{ids []int; a action}{ids, d.a}
 		}
 
 @
-@<Send |msgs| to |lch|@>=
-lch<-&msgs
+@<Send |msgs| for viewing@>=
+ach<-&struct{m msgmap; a action}{msgs, view}
 
 @
 @<Get a pointer |msg| to current message@>=
@@ -1292,7 +1308,6 @@ if strings.HasPrefix(s, "subject ") {
 	continue
 }
 
-
 @
 @<Go to top of window |w|@>=
 glog.V(debug).Infoln("go to top of the window")
@@ -1300,87 +1315,58 @@ w.WriteAddr("#0")
 w.WriteCtl("dot=addr\nshow")
 
 @
-@<Mark to delete messages@>=
+@<Get numbers of selected messages@>=
 @<Create |msgs|@>
-if err:=box.w.WriteCtl("addr=dot"); err!=nil {
+if (ev.Type&goacme.Tag)==goacme.Tag && len(ev.Arg) > 0 {
+	s:=ev.Arg
+	@<Read a message number@>
+} else if err:=box.w.WriteCtl("addr=dot"); err!=nil {
 	glog.Errorf("can't write to 'ctl': %s\n", err)
-} else 
+} else
 	@<Read message numbers@>
+
+@
+@<Mark to delete messages@>=
+@<Get numbers of selected messages@>
 if len(msgs)!=0 {
-	@<Send |msgs| to |markch|@>
+	@<Send |msgs| to delete@>
 	continue
 }
 
 @
 @<Unmark messages@>=
-@<Create |msgs|@>
-if err:=box.w.WriteCtl("addr=dot"); err!=nil {
-	glog.Errorf("can't write to 'ctl': %s\n", err)
-} else 
-	@<Read message numbers@>
+@<Get numbers of selected messages@>
 if len(msgs)!=0 {
-	@<Send |msgs| to |unmarkch|@>
+	@<Send |msgs| to undelete@>
 	continue
 }
 
-
-@ Channels to mark/unmark a lists of messages for deletion in an every mailbox.
-@<Variables@>=
-markch=make(chan *msgmap, 100)
-unmarkch=make(chan *msgmap, 100)
-
-@ Let's add a processing of |markch| and |unmarkch| to the main thread
-@<Processing of other common channels@>=
-	case d:=<-markch:
-		if d==nil {
-			continue
-		}
-		for name, ids:=range *d {
-			@<Looking for a |name| mailbox...@>
-			boxes[i].markch<-ids
-		}
-	case d:=<-unmarkch:
-		if d==nil {
-			continue
-		}
-		for name, ids:=range *d {
-			@<Looking for a |name| mailbox...@>
-			boxes[i].unmarkch<-ids
-		}
-
+@
+@<Other kinds of actions@>=
+del
+undel
 
 @
-@<Send |msgs| to |markch|@>=
+@<Send |msgs| to delete@>=
 glog.V(debug).Infoln("sending messages to mark for deletion")
-markch<-&msgs
+ach<-&struct{m msgmap; a action}{msgs, del}
 
 @
-@<Send |msgs| to |unmarkch|@>=
+@<Send |msgs| to undelete@>=
 glog.V(debug).Infoln("sending messages to unmark for deletion")
-unmarkch<-&msgs
-
-
-@ |markch| and |unmark| are channels receive slices of messages to mark/unmark for deletion.
-@<Rest of |mailbox| members@>=
-markch		chan []int
-unmarkch	chan []int
+ach<-&struct{m msgmap; a action}{msgs, undel}
 
 @
-@<Rest of initialization of |mailbox|@>=
-markch:make(chan []int, 100),
-unmarkch:make(chan []int, 100),
-
-@
-@<Processing of other |box| channels@>=
-case ids:=<-box.markch:
+@<Handling of other types of action@>=
+case del:
 	var msgs messages
-	for _, id:=range ids {
+	for _, id:=range d.ids {
 		@<Mark to delete |id| message@>
 	}
 	@<Refresh |msgs|@>
-case ids:=<-box.unmarkch:
+case undel:
 	var msgs messages
-	for _, id:=range ids {
+	for _, id:=range d.ids {
 		@<Unmark to delete |id| message@>
 	}
 	@<Refresh |msgs|@>
@@ -1458,7 +1444,7 @@ mdch	chan messages
 @<Rest of initialization of |mailbox|@>=
 mdch:make(chan messages, 100),
 
-@ All messages from a received slice |m| will be removed from |box|'s window. In case of the thread mode 
+@ All messages from a received slice |m| will be removed from |box|'s window. In case of the thread mode
 |children| is obtained and refreshed.
 @<Processing of other |box| channels@>=
 case m:=<-box.mdch:
@@ -1488,9 +1474,61 @@ case msgs:=<-mdch:
 		boxes[i].mdch<-append(messages{}, msgs...)
 	}
 
-@ 
+@
 @<Send deleted |msgs|@>=
 mdch<-msgs
+
+@
+@<Mark messages as seen@>=
+@<Get numbers of selected messages@>
+if len(msgs)!=0 {
+	@<Send |msgs| to mark them seen@>
+	continue
+}
+
+@
+@<Other kinds of actions@>=
+seen
+
+@
+@<Send |msgs| to mark them seen@>=
+glog.V(debug).Infoln("sending messages to mark them seen")
+ach<-&struct{m msgmap; a action}{msgs, seen}
+
+@
+@<Handling of other types of action@>=
+case seen:
+	var msgs messages
+	f, err:=box.fid.Walk("ctl")
+	if err==nil {
+		err=f.Open(plan9.OWRITE)
+	}
+	if err!=nil {
+		glog.Errorf("can't open 'ctl' file of the '%s' messagebox: %v\n", box.name, err)
+		continue
+	}
+	for _, id:=range d.ids {
+		p, ok:=box.all.Search(id)
+		if !ok || !box.all[p].unread {
+			continue
+		}
+		msgs=append(msgs, box.all[p])
+	}
+	cmd:="read"
+	for _, v:=range msgs {
+		cmd+=fmt.Sprintf(" %d", v.id)
+	}
+	if _, err:=f.Write([]byte(cmd)); err!=nil {
+		glog.Errorf("can't write to 'ctl' file of the '%s' messagebox: %v\n", box.name, err)
+	}
+	for _, msg:=range msgs {
+		id:=msg.id
+		@<Remove |id| message from |unread|@>
+		@<Refresh the message's view@>
+	}
+	f.Close()
+	@<Send |box| to refresh the main window@>
+	@<Refresh |msgs|@>
 
 @* Linking of threads.
 
@@ -1651,13 +1689,13 @@ If |digest| are the same we send |false| to |ch| to inform the sender the messag
 		}
 	} else if val.msg.digest!=v.msg.digest {
 		v.msg.messageid+="_"+v.msg.digest
-		glog.V(debug).Infof("a message '%s' ('%s/%d') duplicates a message '%s' ('%s/%d'), but with different digest, a new entry with '%s' will be created\n", 
+		glog.V(debug).Infof("a message '%s' ('%s/%d') duplicates a message '%s' ('%s/%d'), but with different digest, a new entry with '%s' will be created\n",
 			v.msg.messageid, v.msg.box.name, v.msg.id,
 			val.msg.messageid, val.msg.box.name, val.msg.id, v.msg.messageid)
 		idch<-struct{msg *message; val interface{}}{v.msg, ch}
 		continue
 	} else {
-		glog.V(debug).Infof("a message '%s' ('%s/%d') duplicates a message '%s' ('%s/%d')\n", 
+		glog.V(debug).Infof("a message '%s' ('%s/%d') duplicates a message '%s' ('%s/%d')\n",
 			v.msg.messageid, v.msg.box.name, v.msg.id,
 			val.msg.messageid, val.msg.box.name, val.msg.id)
 		ch<-false
@@ -1680,8 +1718,8 @@ If |digest| are the same we send |false| to |ch| to inform the sender the messag
 	}
 }
 
-@ When we are removing a message, we have to clean an entry with |v.id| - to set |msg| to |nil|, 
-to clean |parent| for all |children| and to remove |msg| from |children| of |msg.parent|. 
+@ When we are removing a message, we have to clean an entry with |v.id| - to set |msg| to |nil|,
+to clean |parent| for all |children| and to remove |msg| from |children| of |msg.parent|.
 We leave a non-empty entry in |idmap| to store links of children.
 @<Clean an entry with |v.msg.messageid| from |idmap|@>=
 {
@@ -1788,7 +1826,7 @@ var parent *message
 				break
 			}
 		}
-		glog.V(debug).Infof("sending '%s' ('%s/%d') like a root for '%s' ('%s/%d')\n", 
+		glog.V(debug).Infof("sending '%s' ('%s/%d') like a root for '%s' ('%s/%d')\n",
 			root.messageid, root.box.name, root.id,
 			v.msg.messageid, v.msg.box.name, v.msg.id)
 		ch<-rootmsg(root)
@@ -1861,7 +1899,7 @@ A slice of messages is sent to |rfch|, the |box|'s message loop reads the slice 
 then resend the rest to |rfch|. If we need to stop printing of messages, we drop the rest
 of a printing queue by recreation of |irfch|.
 
-@ |refresh| holds flags point out how to print |msgs|: 
+@ |refresh| holds flags point out how to print |msgs|
 @<Types@>=
 refreshFlags int
 
@@ -2002,8 +2040,7 @@ box.rfch<-&refresh{0, msgs}
 	mrfch<-&refresh{seek, append(messages{}, msg)}
 }
 
-@ |msgs| will be refreshed in |box| window with setting a position for every message 
-if is found.
+@ |msgs| will be refreshed in |box| window with setting a position for every message if is found.
 @<Inform |box| to refresh |msgs|@>=
 {
 	if len(msgs)!=0 {
@@ -2091,7 +2128,7 @@ const eof="$"
 	glog.V(debug).Infof("printing of messages of the '%s' mailbox from v.msgs, len(v.msgs): %d, with flags: %v\n", box.name, len(v.msgs), v.flags)
 	f, err:=box.w.File("data")
 	if err!=nil {
-		glog.Errorf("can't open 'data' file of the '%s' messgebox: %v\n", box.name, err)
+		glog.Errorf("can't open 'data' file of the '%s' messagebox: %v\n", box.name, err)
 		continue
 	}
 	if (v.flags&seek)==seek {
@@ -2107,7 +2144,7 @@ const eof="$"
 	buf:=make([]byte, 0, 0x8000)
 	@<Compose messages of the |box|@>
 	if _, err:=f.Write(buf); err!=nil {
-		glog.Errorf("can't write to 'data' file of the '%s' messgebox: %v\n", box.name, err)
+		glog.Errorf("can't write to 'data' file of the '%s' messagebox: %v\n", box.name, err)
 	}
 	@<Go to the top of window for first 100 messages@>
 	@<Send a rest of |msgs|@>
@@ -2174,7 +2211,7 @@ pcount+=c
 }
 
 @ In case deleted message has children we should refresh views of these children.
-So we compose a list of messages and send them to refresh. But if a child is not belonged to |box| 
+So we compose a list of messages and send them to refresh. But if a child is not belonged to |box|
 we have to erase it instead of refreshing.
 @<Refresh |children|@>=
 {
@@ -2237,7 +2274,7 @@ box.writeTag(counted)
 @c
 func (box *mailbox) writeTag(counted bool) {
 	glog.V(debug).Infof("write a tag of the '%s' mailbox's window\n", box.name)
-	if err:=writeTag(box.w, fmt.Sprintf(" %sMail %s%s%s%s%sSearch ", @t\1@>@/
+	if err:=writeTag(box.w, fmt.Sprintf(" %sMail %s%s%s%s%s%sSearch ", @t\1@>@/
 		func() string {
 			if box.deleted>0 {
 				return "Put "
@@ -2286,6 +2323,12 @@ func (box *mailbox) writeTag(counted bool) {
 			} else {
 				return ""
 			}
+		}(), @/
+		func() string {
+			if len(box.all)>0 {
+				return "Seen "
+			}
+			return ""
 		}()) @t\2@>)
 		err!=nil {
 		glog.Errorf("can't set a tag of the '%s' box's window: %v\n", box.name, err)
@@ -2315,7 +2358,7 @@ const bof="#0-"
 const eol="+#0"
 
 @ For the first we try to find the message itself. If the message is new and |insert| is set in |v.flags|, we should
-find its neighbours and set address according to the position. The message should be skipped in other mailboxes 
+find its neighbours and set address according to the position. The message should be skipped in other mailboxes
 if it is not the thread mode.
 @<Trying to find a place for |msg| in the |box| window@>=
 @<Determine of |src|@>
@@ -2461,11 +2504,11 @@ func (box *mailbox) search(str string) (msgs messages) {
 
 At first let's extend |mailbox| by a |lch| channel
 @<Rest of |mailbox| members@>=
-lch chan []int
+ach chan *struct{ids []int; a action}
 
 @
 @<Rest of initialization of |mailbox|@>=
-lch:make(chan []int, 100),
+ach:make(chan *struct{ids []int; a action}, 100),
 
 @ We have to extend |message| too by |*goacme.Window|
 @<Rest of |message| members@>=
@@ -2475,31 +2518,35 @@ w *goacme.Window
 its view in all windows should be changed. The count of unread messages on the main window should be refreshed too.
 We accumulate messages with changed status in |msgs| and refresh them after all messages are opened.
 @<Processing of other |box| channels@>=
-case ids:=<-box.lch:
-	var msgs messages
-	for _, id:=range ids {
-		glog.V(debug).Infof("opening a window with the '%d' message of the '%s' mailbox\n", id, box.name)
-		p, ok:=box.all.Search(id)
-		if !ok {
-			glog.V(debug).Infof("the '%d' message of the '%s' mailbox has not found\n", id, box.name)
-			continue
-		}
-		msg:=box.all[p]
-		if msg.w==nil {
-			if msg.unread {
-				@<Remove |id| message from |unread|@>
-				@<Refresh the message's view@>
-				@<Send |box| to refresh the main window@>
+case d:=<-box.ach:
+	switch d.a {
+		case view:
+			var msgs messages
+			for _, id:=range d.ids {
+				glog.V(debug).Infof("opening a window with the '%d' message of the '%s' mailbox\n", id, box.name)
+				p, ok:=box.all.Search(id)
+				if !ok {
+					glog.V(debug).Infof("the '%d' message of the '%s' mailbox has not found\n", id, box.name)
+					continue
+				}
+				msg:=box.all[p]
+				if msg.w==nil {
+					if msg.unread {
+						@<Remove |id| message from |unread|@>
+						@<Refresh the message's view@>
+						@<Send |box| to refresh the main window@>
+					}
+					if err:=msg.open(); err!=nil {
+						continue
+					}
+				} else {
+					glog.V(debug).Infof("a window of the '%d' message of the '%s' already exists, just show it\n", id, box.name)
+					msg.w.WriteCtl("dot=addr\nshow")
+				}
 			}
-			if err:=msg.open(); err!=nil {
-				continue
-			}
-		} else {
-			glog.V(debug).Infof("a window of the '%d' message of the '%s' already exists, just show it\n", id, box.name)
-			msg.w.WriteCtl("dot=addr\nshow")
-		}
+			@<Refresh |msgs|@>
+		@<Handling of other types of action@>
 	}
-	@<Refresh |msgs|@>
 
 @
 @<Remove |id| message from |unread|@>=
@@ -2647,7 +2694,7 @@ func (this *message) prev() (pmsg *message) {
 		}
 		pmsg=v
 	}
-	return 
+	return
 }
 
 @
@@ -2699,21 +2746,21 @@ func (msg *message) writeTag() {
 				return "Up "
 			}
 			return ""
-		}(), @/ 
-		func() string { 
+		}(), @/
+		func() string {
 			@<Get |children| for |msg|@>
 			if len(children)!=0 {
 				return "Down "
 			}
 			return ""
-		}(), @/ 
-		func() string { 
+		}(), @/
+		func() string {
 			@<Get a previous |pmsg|@>
 			if pmsg!=nil {
 				return "Prev "
 			}
 			return ""
-		}(), @/ 
+		}(), @/
 		func() string {
 			@<Get a next |nmsg|@>
 			if nmsg!=nil {
@@ -2818,7 +2865,7 @@ go func() {
 						name:=parent.box.name
 						id:=parent.id
 						@<Add a |id| message to |msgs|@>
-						@<Send |msgs| to |lch|@>
+						@<Send |msgs| for viewing@>
 					}
 					continue
 				case "Down":
@@ -2828,7 +2875,7 @@ go func() {
 						name:=children[0].box.name
 						id:=children[0].id
 						@<Add a |id| message to |msgs|@>
-						@<Send |msgs| to |lch|@>
+						@<Send |msgs| for viewing@>
 					}
 					continue
 				case "Prev":
@@ -2838,7 +2885,7 @@ go func() {
 						name:=pmsg.box.name
 						id:=pmsg.id
 						@<Add a |id| message to |msgs|@>
-						@<Send |msgs| to |lch|@>
+						@<Send |msgs| for viewing@>
 					}
 					continue
 				case "Next":
@@ -2848,7 +2895,7 @@ go func() {
 						name:=nmsg.box.name
 						id:=nmsg.id
 						@<Add a |id| message to |msgs|@>
-						@<Send |msgs| to |lch|@>
+						@<Send |msgs| for viewing@>
 					}
 					continue
 			}
@@ -3555,7 +3602,7 @@ if msg!=nil {
 writeSignature(w, nil)
 
 
-@ At first we are looking for |box|-specific signature in |$HOME/mail/<mailbox>.signature| file. 
+@ At first we are looking for |box|-specific signature in |$HOME/mail/<mailbox>.signature| file.
 If the file doesn't exist, we are trying to open |$HOME/mail/<mailbox>.signature| file with common signature.
 @c
 func writeSignature(w *goacme.Window, box *mailbox) {

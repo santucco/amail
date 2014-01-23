@@ -33,6 +33,7 @@ A mailbox's tag can contain next commands:
 - "ShowNew" shows new messages only.
 - "ShowPlain" switches to plain mode.
 - "ShowThreads" switches to threaded mode.
+- "Seen" marks messages as read, messages have to be selected explicitely.
 - "Search" finds messages with specified text.
 
 A message's window tag can contain next commands:
