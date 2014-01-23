@@ -2274,6 +2274,7 @@ box.writeTag(counted)
 @c
 func (box *mailbox) writeTag(counted bool) {
 	glog.V(debug).Infof("write a tag of the '%s' mailbox's window\n", box.name)
+	@<Determine of |src|@>
 	if err:=writeTag(box.w, fmt.Sprintf(" %sMail %s%s%s%s%s%sSearch ", @t\1@>@/
 		func() string {
 			if box.deleted>0 {
@@ -2282,13 +2283,13 @@ func (box *mailbox) writeTag(counted bool) {
 			return ""
 		}(), @/
 		func() string {
-			if len(box.all)>0 {
+			if len(src)>0 {
 				return "Delmesg "
 			}
 			return ""
 		}(), @/
 		func() string {
-			if box.deleted>0 {
+			if len(src)>0 && box.deleted>0 {
 				return "UnDelmesg "
 			}
 			return ""
@@ -2325,7 +2326,7 @@ func (box *mailbox) writeTag(counted bool) {
 			}
 		}(), @/
 		func() string {
-			if len(box.all)>0 {
+			if len(src)>0 {
 				return "Seen "
 			}
 			return ""
