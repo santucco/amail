@@ -2301,7 +2301,7 @@ func (box *mailbox) writeTag(counted bool) {
 				} else {
 					return "ShowAll "
 				}
-			} else if counted && (box.shownew || !box.showthreads) {
+			} else if len(src)>0 && counted && (box.shownew || !box.showthreads) {
 				return "Thread "
 			}
 			return ""
