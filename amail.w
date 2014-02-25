@@ -865,6 +865,7 @@ func(box *mailbox) loop() {
 	ontop:=false
 	@<Count of messages in a box@>
 	counted=true
+	@<Write a tag of |box| window@>
 	if box.threadMode() {
 		@<Inform |box| to print messages@>
 	}
