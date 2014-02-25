@@ -1,7 +1,7 @@
 # This file is part of amail version 0.82
 # Author Alexander Sychev
 #
-# Copyright (c) 2013 Alexander Sychev. All rights reserved.
+# Copyright (c) 2013, 2014 Alexander Sychev. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
