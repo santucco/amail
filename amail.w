@@ -391,22 +391,23 @@ in case of a mail message is deleted - in |dch|.
 								glog.Warningln("can't find 'mailtype' attribute")
 								continue
 							}
-							b:=strings.Split(string(m.Data), "/")
-							if len(b)<3 {
-								glog.Warningln("can't read a name of mailbox and a number of message")
+							s:=strings.TrimLeft(string(m.Data), "Mail/")
+							n:=strings.LastIndex(s, "/")
+							if n==-1 {
+								glog.Warning("can't found a number of message in '%s'\n", s)
 								continue
 							}
-							num, err:=strconv.Atoi(b[2])
+							num, err:=strconv.Atoi(s[n+1:])
 							if err!=nil {
 								glog.Error(err)
 								continue
 							}
 							if v=="new" {
-								glog.V(debug).Infof("'%d' is a new message in the '%s' mailbox\n", num, b[1])
-								mch<-&struct{name string; id int}{name:b[1], id:num}
+								glog.V(debug).Infof("'%d' is a new message in the '%s' mailbox\n", num, s[:n])
+								mch<-&struct{name string; id int}{name:s[:n], id:num}
 							} else if v=="delete" {
-								glog.V(debug).Infof("'%d' is a deleted message in the '%s' mailbox\n", num, b[1])
-								dch<-&struct{name string; id int}{name:b[1], id:num}
+								glog.V(debug).Infof("'%d' is a deleted message in the '%s' mailbox\n", num, s[:n])
+								dch<-&struct{name string; id int}{name:s[:n], id:num}
 							}
 					}
 				}
