@@ -898,10 +898,10 @@ case id:=<-box.mch:
 	@<Print |msg| at exact positon@>
 	if !box.thread {
 		if box.threadMode() {
-			@<Get root of |msg|@>
+			@<Get |root| of |msg|@>
 			var msgs messages
-			src:=append(messages{}, msg)
-			@<Make a full thread in |msgs| with |msg| like a root@>
+			src:=append(messages{}, root)
+			@<Make a full thread in |msgs| for |root|@>
 			@<Inform |box| to print |msgs|@>
 		} else {
 			@<Inform |box| to print |msg|@>
@@ -1534,7 +1534,7 @@ case seen:
 
 @* Linking of threads.
 
-Here we define global map of unique message identifiers on a pointer to a message and its children.
+Here we define global map of unique message identifiers on a pointer to messages, its parents and children.
 An unique id of every message will be stored in this map.
 It will be changed in a separated goroutine, so a corresponding channel |idch| is defined too.
 |idch| operates with a pair contains a message |msg| and |val interface{}|. We can use |val| with different
@@ -1553,14 +1553,22 @@ idmessages	[]*message
 rootmsg		*message
 parentmsg	*message
 
+@ |idlinks| struct contains |msgs| slice of messages with the same |messageid|, a pointer to |idlinks| of parent and
+|children| slice of pointers to |idlinks| of children.
+@<Types@>=
+idlinks struct{
+	msgs messages
+	parent *idlinks
+	children []*idlinks
+}
+
 @
 @<Variables@>=
-idmap=make(map[string]*struct{msg *message; parent parentmsg; children idmessages})
+idmap=make(map[string]*idlinks)
 idch=make(chan struct{msg *message; val interface{}}, 100)
 
 @
 @<Rest of |message| members@>=
-digest		string
 inreplyto 	string
 messageid 	string
 
@@ -1568,13 +1576,10 @@ messageid 	string
 @<Imports@>=
 "errors"
 
-@ Here we read |inreplyto|, |messageid| and |digest|. When |messageid| is obtained, we send |msg| to |idch|.
-We assume |digest| and |inreplyto| are already filled, because they are placed above of |messageid| in the |"info"| file.
+@ Here we read |inreplyto| and |messageid|. When |messageid| is obtained, we send |msg| to |idch|.
+We assume |inreplyto| is already filled, because it is placed above of |messageid| in the |"info"| file.
 @<Read other fields of a message@>=
 {
-	if _, err:=fmt.Sscanf(s, "digest %s", &msg.digest); err==nil {
-		continue
-	}
 	if _, err:=fmt.Sscanf(s, "inreplyto %s", &msg.inreplyto); err==nil {
 		msg.inreplyto=strings.Trim(msg.inreplyto, "<>")
 		continue
@@ -1615,113 +1620,43 @@ go func() {
 }()
 
 @ When |msg| is appended we should check if |v.id| already exists. It can exist if there are
-duplicated messages or there are children for this |v.id|. For the last case an entry is added
-to |idmap| with |nil| message and |children|. Later when a message with |v.id| is added, we just
-reset the pointer to a new |msg| and set |msg| like a parent for |children|.
+duplicated messages or there are children for this |v.id|. For the latter case an entry is added
+to |idmap| with empty |msgs|. Later, when a message with |v.id| is added, we just add the new |msg| in |msgs|.
 
-If |msg| has |inreplyto| is filled, we add |msg| to |children| of |msg.inreplyto| message and
-set a parent for |msg|.
-To avoid of duplicates |children| is sorted in order of increasing of |messageid| and inserts are
-processed after the search only.
+If |msg| has |inreplyto| is filled, we add |val| pointer to |children| of |msg.inreplyto| message and
+set a parent for |val|.
 
-@ |idmessages.Search| finds a message with |id| and returns a position of the message in the list and |true| or
-a position where the message can be inserted and |false|
-@c
-func (this idmessages) Search(messageid string) (int, bool) {
-	pos:=sort.Search(len(this), func(i int) bool {return this[i].messageid<=messageid});
-	if pos!=len(this) && this[pos].messageid==messageid {
-		return pos, true
-	}
-	return pos, false
-}
-
-@ |idmessages.Insert| inserts a message |msg| in position |pos|
-@c
-func (this *idmessages) Insert(msg *message, pos int) {
-	*this=append(*this, nil)
-	copy((*this)[pos+1:], (*this)[pos:])
-	(*this)[pos]=msg
-}
-
-@ |idmessages.SearchInsert| inserts a message |msg| and returns
-a position of the message in the list and |true| or
-a position where the message already exists and |false|
-@c
-func (this *idmessages) SearchInsert(msg *message) (int, bool){
-	pos, ok:=this.Search(msg.messageid)
-	if ok {
-		return pos, false
-	}
-	this.Insert(msg, pos)
-	return pos, true
-}
-
-@
-@ |messages.Delete| deletes a message at |pos| position and returns
-a pointer to the message is removed and |true| if the message is deleted,
-|false| otherwise
-@c
-func (this *idmessages) Delete(pos int) (*message, bool) {
-	if pos<0 || pos>len(*this)-1 {
-		return nil, false
-	}
-	msg:=(*this)[pos]
-	*this=append((*this)[:pos], (*this)[pos+1:]...)
-	return msg, true
-}
-
-@ If an entry with |v.id| doesn't exist, we create a new one, otherwise we have to check if |val.msg| is nil,
-that means |msg| is not a duplicate. In case of |messageid| is duplicated we check |digest| of corresponding messages.
-If |digest| are not equal, we change |messageid| by appending of |digest| and send the message for addition again.
-If |digest| are the same we send |false| to |ch| to inform the sender the message is a duplicate and is not processed.
 @<Append a message with |v.msg.messageid| to |idmap|@>=
 {
 	glog.V(debug).Infof("appending a '%s' ('%s/%d') message to idmap\n", v.msg.messageid, v.msg.box.name, v.msg.id)
 	val, ok:=idmap[v.msg.messageid]
 	if !ok {
 		glog.V(debug).Infof("'%s' ('%s/%d') message  doesn't exist, creating\n", v.msg.messageid, v.msg.box.name, v.msg.id)
-		val=&struct{msg *message; parent parentmsg; children idmessages}{v.msg, nil, nil}
+		val=new(idlinks)
 		idmap[v.msg.messageid]=val
-	} else if val.msg==nil {
-		glog.V(debug).Infof("'%s' ('%s/%d') message exists, reseting\n", v.msg.messageid, v.msg.box.name, v.msg.id)
-		val.msg=v.msg
-		for _, c:=range val.children {
-			glog.V(debug).Infof("setting '%s' like a parent of '%s'\n", v.msg.messageid, c.messageid)
-			idmap[c.messageid].parent=parentmsg(v.msg)
+	}
+	if len(val.msgs)>0 {
+		glog.V(debug).Infof("%v(%v) is a duplicate of %v(%v)\n",
+			v.msg.id, v.msg.messageid,
+			val.msgs[0].id, val.msgs[0].messageid)
+	}
+	val.msgs=append(val.msgs, v.msg)
+
+	if len(v.msg.inreplyto)!=0 && len(val.msgs)==1 {
+		pval, ok:=idmap[v.msg.inreplyto]
+		if !ok {
+			pval=new(idlinks)
+			idmap[v.msg.inreplyto]=pval
 		}
-	} else if val.msg.digest!=v.msg.digest {
-		v.msg.messageid+="_"+v.msg.digest
-		glog.V(debug).Infof("a message '%s' ('%s/%d') duplicates a message '%s' ('%s/%d'), but with different digest, a new entry with '%s' will be created\n",
-			v.msg.messageid, v.msg.box.name, v.msg.id,
-			val.msg.messageid, val.msg.box.name, val.msg.id, v.msg.messageid)
-		idch<-struct{msg *message; val interface{}}{v.msg, ch}
-		continue
-	} else {
-		glog.V(debug).Infof("a message '%s' ('%s/%d') duplicates a message '%s' ('%s/%d')\n",
-			v.msg.messageid, v.msg.box.name, v.msg.id,
-			val.msg.messageid, val.msg.box.name, val.msg.id)
-		ch<-false
-		continue
+		
+		pval.children=append(pval.children, val)
+		val.parent=pval
 	}
 	ch<-true
-
-	if len(v.msg.inreplyto)==0 {
-		continue
-	}
-	if pval, ok:=idmap[v.msg.inreplyto]; !ok {
-		glog.V(debug).Infof("'%s' message (parent of '%s') doesn't exist, creating\n", v.msg.inreplyto, v.msg.messageid)
-		idmap[v.msg.inreplyto]=&struct{msg *message; parent parentmsg; children idmessages}{nil, nil, append(idmessages{}, v.msg)}
-	} else {
-		glog.V(debug).Infof("'%s' message exists, appending the '%s' like a child\n", v.msg.inreplyto, v.msg.messageid)
-		if _, ok:=pval.children.SearchInsert(v.msg); ok && pval.msg!=nil{
-			glog.V(debug).Infof("setting '%s' like a parent of '%s'\n", pval.msg.messageid, v.msg.messageid)
-			val.parent=pval.msg
-		}
-	}
 }
 
-@ When we are removing a message, we have to clean an entry with |v.id| - to set |msg| to |nil|,
-to clean |parent| for all |children| and to remove |msg| from |children| of |msg.parent|.
+@ When we are removing a message, we just remove |msg| from |msgs| slice.
+But if |msgs| slice is empty, we have to clean pointer to the entry in a parent and chindren entries.
 We leave a non-empty entry in |idmap| to store links of children.
 @<Clean an entry with |v.msg.messageid| from |idmap|@>=
 {
@@ -1729,25 +1664,32 @@ We leave a non-empty entry in |idmap| to store links of children.
 	if !ok {
 		continue
 	}
+	for i, _:=range val.msgs {
+		if val.msgs[i]==v.msg {
+			val.msgs.Delete(i)
+			break
+		}
+	}
+	if len(val.msgs)>0 {
+		continue
+	}
 	if val.parent!=nil {
-		if p, ok:=idmap[val.parent.messageid]; ok {
-			for i, _:=range p.children {
-				if p.children[i]==val.msg {
-					glog.V(debug).Infof("removing the '%d' message from the children of the message '%d'\n", @t\1@>@/
-						 val.msg.id, val.parent.id@t\2@>)
-					p.children.Delete(i)
-					break
-				}
+		for i, _:=range val.parent.children {
+			if val.parent.children[i]==val {
+				val.parent.children=append(val.parent.children[:i], val.parent.children[i+1:]...)
+				break
 			}
 		}
 	}
-	val.msg=nil
+	for _, ch:=range val.children {
+		ch.parent=nil
+	}
 	if len(val.children)==0 {
 		delete(idmap, v.msg.messageid)
 	}
 }
 
-@ A few methods have to be implemented for |ismessages| to have an ability to sort of them in order of increasing of date.
+@ A few methods have to be implemented for |idmessages| to have an ability to sort of them in order of increasing of date.
 @c
 func (this idmessages) Len() int {
 	return len(this)
@@ -1764,12 +1706,15 @@ func (this idmessages) Swap(i, j int) {
 } @#
 
 
-@ If there is |v.msg.messageid| in |idmap|, we make a copy of correspinding children and sort them in order of increasing of date
+@ If there is |v.msg.messageid| in |idmap|, we fill |children| with correspinding children and sort them in order of increasing of date
 @<Send |children|@>=
 {
-	if val, ok:=idmap[v.msg.messageid]; ok {
-		children:=make(idmessages, len(val.children), len(val.children))
-		copy(children, val.children)
+	if m, ok:=idmap[v.msg.messageid]; ok {
+		var children idmessages
+		for _, val:=range m.children {
+			@<Get |mgs| with the same box like |v.msg.box| or the first one@>
+			children=append(children, msg)		
+		}
 		sort.Sort(children)
 		glog.V(debug).Infof("sending %d children for '%s'\n", len(children), v.msg.messageid)
 		ch<-children
@@ -1792,12 +1737,32 @@ var children idmessages
 @
 @<Send |parent|@>=
 {
-	if val, ok:=idmap[v.msg.messageid]; ok {
-		glog.V(debug).Infof("sending parent for '%s'\n", v.msg.messageid)
-		ch<-val.parent
-	} else {
+	val, ok:=idmap[v.msg.messageid]
+	if !ok {
 		glog.V(debug).Infof("'%s' is not found\n", v.msg.messageid)
 		ch<-nil
+	}
+	if val.parent==nil || len(val.parent.msgs)==0 {
+		glog.V(debug).Infof("'%s' hasn't got a parent\n", v.msg.messageid)
+		ch<-nil
+	} else {
+		val=val.parent
+		@<Get |mgs| with the same box like |v.msg.box| or the first one@>
+		glog.V(debug).Infof("sending parent '%s' for '%s'\n", msg.messageid, v.msg.messageid)
+		ch<-msg
+	}
+}
+
+@ We are looking for a message with the same |box|.
+@<Get |mgs| with the same box like |v.msg.box| or the first one@>=
+var msg *message
+if val!=nil && len(val.msgs)>0 {
+	msg=val.msgs[0]
+	for i, _:=range val.msgs {
+		if val.msgs[i].box==v.msg.box {
+			msg=val.msgs[i]
+			break
+		}
 	}
 }
 
@@ -1815,23 +1780,14 @@ var parent *message
 @<Send |root|@>=
 {
 	if val, ok:=idmap[v.msg.messageid]; ok {
-		root:=val.msg
-		for {
-			if len(root.inreplyto)==0 {
-				break
-			}
-			if val, ok:=idmap[root.inreplyto]; !ok {
-				break
-			} else if val.msg!=nil {
-				root=val.msg
-			} else {
-				break
-			}
+		for val.parent!=nil && len(val.parent.msgs)>0 {
+			val=val.parent
 		}
-		glog.V(debug).Infof("sending '%s' ('%s/%d') like a root for '%s' ('%s/%d')\n",
-			root.messageid, root.box.name, root.id,
-			v.msg.messageid, v.msg.box.name, v.msg.id)
-		ch<-rootmsg(root)
+		@<Get |mgs| with the same box like |v.msg.box| or the first one@>
+		if msg==nil {
+			msg=v.msg
+		}
+		ch<-rootmsg(msg)
 	} else {
 		glog.V(debug).Infof("'%s' is not found\n", v.msg.messageid)
 		ch<-nil
@@ -1839,12 +1795,13 @@ var parent *message
 }
 
 @
-@<Get root of |msg|@>=
+@<Get |root| of |msg|@>=
+root:=msg
 {
 	ch:=make(chan rootmsg)
 	glog.V(debug).Infof("getting root for '%s' ('%s/%d')\n", msg.messageid, msg.box.name, msg.id)
 	idch<-struct{msg *message; val interface{}}{msg, ch}
-	msg=<-ch
+	root=<-ch
 }
 
 @
@@ -1852,19 +1809,9 @@ var parent *message
 {
 	if val, ok:=idmap[v.msg.messageid]; ok {
 		level:=0
-		root:=val.msg
-		for root!=nil{
-			if len(root.inreplyto)==0 {
-				break
-			}
-			if val, ok:=idmap[root.inreplyto]; !ok {
-				break
-			} else if val.msg!=nil{
-				root=val.msg
-				level++
-			} else {
-				break
-			}
+		for val.parent!=nil && len(val.parent.msgs)>0 {
+			val=val.parent
+			level++
 		}
 		glog.V(debug).Infof("sending level '%d' for '%s' ('%s/%d')\n", level, v.msg.messageid, v.msg.box.name, v.msg.id)
 		ch<-level
@@ -1963,8 +1910,25 @@ if box.shownew {
 	src=box.all
 }
 
+@ |messages.Check| checks for message with |messageid| is already exists in |this|
+If it doesn't exist it is added and |true| is returned, |false| otherwise.
+@c
+func (this *messages) Check(msg *message) bool {
+	pos:=sort.Search(len(*this), func(i int) bool {return (*this)[i].messageid<=msg.messageid});
+	if pos!=len(*this) && (*this)[pos].messageid==msg.messageid {
+		return false
+	}
+	*this=append(*this, nil)
+	copy((*this)[pos+1:], (*this)[pos:])
+	(*this)[pos]=msg
+	return true
+}
+
+
 @ All enumerated messages should be printed according to the options.
 In case of the thread mode sequences of full threads should be made.
+To avoid of duplicating of threads roots of threads are accumulated and every
+new root is checked for an existance.
 @<Inform |box| to print messages@>=
 {
 	glog.V(debug).Infof("inform the '%s' mailbox to print messages\n", box.name)
@@ -1973,11 +1937,16 @@ In case of the thread mode sequences of full threads should be made.
 	if box.threadMode() {
 		src=msgs
 		msgs=make(messages, 0, len(src))
+		var roots messages
 		for len(src)>0 {
 			msg:=src[0]
-			@<Get root of |msg|@>
-			glog.V(debug).Infof("root of thread: '%s/%d'\n", msg.box.name, msg.id)
-			@<Make a full thread in |msgs| with |msg| like a root@>
+			@<Get |root| of |msg|@>
+			if !roots.Check(root) {
+				@<Remove |msg| from |src|@>
+				continue
+			}
+			glog.V(debug).Infof("root of thread: '%s/%d'\n", root.box.name, root.id)
+			@<Make a full thread in |msgs| for |root|@>
 		}
 	} else {
 		@<Set |pos| of |box|@>
@@ -1987,10 +1956,10 @@ In case of the thread mode sequences of full threads should be made.
 
 @ |msg| is added to the |msgs| list and all its children are processed.
 To avoid duplicates |msg| has to be removed from |src|.
-@<Make a full thread in |msgs| with |msg| like a root@>=
-msgs=append(msgs, msg)
+@<Make a full thread in |msgs| for |root|@>=
+msgs=append(msgs, root)
 @<Remove |msg| from |src|@>
-msgs, src=getchildren(msg, msgs, src)
+msgs, src=getchildren(root, msgs, src)
 
 @
 @<Remove |msg| from |src|@>=
@@ -1998,7 +1967,6 @@ if p, ok:=src.Search(msg.id); ok {
 	glog.V(debug).Infof("removing '%d' from src\n", src[p].id)
 	src.Delete(p)
 }
-
 
 @ |getchildren| gets children for |msg|, removes |msg| from |src| and does the same
 for all children recursively.
@@ -2013,12 +1981,12 @@ func getchildren(msg *message, dst messages, src messages) (messages, messages) 
 	return dst, src
 }
 
-@ A list with full thread of messages is made for |msg| and s
+@ A list with full thread of messages is made for |msg|
 @<Inform |box| to print a full thread with |msg|@>=
-@<Get root of |msg|@>
+@<Get |root| of |msg|@>
 var msgs messages
-src:=append(messages{}, msg)
-@<Make a full thread in |msgs| with |msg| like a root@>
+src:=append(messages{}, root)
+@<Make a full thread in |msgs| for |root|@>
 box.rfch<-&refresh{0, msgs}
 
 @ Only |msg| should be printed.
@@ -2224,7 +2192,8 @@ we have to erase it instead of refreshing.
 			if msg.box!=box {
 				@<Erase the message@>
 			} else {
-				@<Make a full thread in |msgs| with |msg| like a root@>
+				root:=msg
+				@<Make a full thread in |msgs| for |root|@>
 			}
 		}
 		@<Inform |box| to refresh |msgs|@>
