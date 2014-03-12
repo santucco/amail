@@ -1497,10 +1497,10 @@ seen
 glog.V(debug).Infoln("sending messages to mark them seen")
 ach<-&struct{m msgmap; a action}{msgs, seen}
 
-@
+@ We open |"ctl"| file of the window and write the command |"read"| with |id| of messages.
+To avoid of reaching of limits we break the full list down into pieces by 50 messages. 
 @<Handling of other types of action@>=
 case seen:
-	var msgs messages
 	f, err:=box.fid.Walk("ctl")
 	if err==nil {
 		err=f.Open(plan9.OWRITE)
@@ -1509,28 +1509,40 @@ case seen:
 		glog.Errorf("can't open 'ctl' file of the '%s' messagebox: %v\n", box.name, err)
 		continue
 	}
-	for _, id:=range d.ids {
-		p, ok:=box.all.Search(id)
-		if !ok || !box.all[p].unread {
-			continue
+	for {
+		c:=len(d.ids)
+		if c==0 {
+			break
+		} else if c>50 {
+			c=50
 		}
-		msgs=append(msgs, box.all[p])
-	}
-	cmd:="read"
-	for _, v:=range msgs {
-		cmd+=fmt.Sprintf(" %d", v.id)
-	}
-	if _, err:=f.Write([]byte(cmd)); err!=nil {
-		glog.Errorf("can't write to 'ctl' file of the '%s' messagebox: %v\n", box.name, err)
-	}
-	for _, msg:=range msgs {
-		id:=msg.id
-		@<Remove |id| message from |unread|@>
-		@<Refresh the message's view@>
+		ids:=d.ids[0:c]
+		d.ids=d.ids[c:]
+		var ms messages
+		for _, id:=range ids {
+			p, ok:=box.all.Search(id)
+			if !ok || !box.all[p].unread {
+				continue
+			}
+			ms=append(ms, box.all[p])
+		}
+		cmd:="read"
+		for _, v:=range ms {
+			cmd+=fmt.Sprintf(" %d", v.id)
+		}
+		if _, err:=f.Write([]byte(cmd)); err!=nil {
+			glog.Errorf("can't write to 'ctl' file of the '%s' messagebox: %v\n", box.name, err)
+		}
+		var msgs messages
+		for _, msg:=range ms {
+			id:=msg.id
+			@<Remove |id| message from |unread|@>
+			@<Refresh the message's view@>
+		}
+		@<Send |box| to refresh the main window@>
+		@<Refresh |msgs|@>
 	}
 	f.Close()
-	@<Send |box| to refresh the main window@>
-	@<Refresh |msgs|@>
 
 @* Linking of threads.
 
@@ -3574,8 +3586,8 @@ if msg!=nil {
 writeSignature(w, nil)
 
 
-@ At first we are looking for |box|-specific signature in |$HOME/mail/<mailbox>.signature| file.
-If the file doesn't exist, we are trying to open |$HOME/mail/<mailbox>.signature| file with common signature.
+@ At first we are looking for |box|-specific signature in |\$HOME/mail/<mailbox>.signature| file.
+If the file doesn't exist, we are trying to open |\$HOME/mail/<mailbox>.signature| file with common signature.
 @c
 func writeSignature(w *goacme.Window, box *mailbox) {
 	@<Get |home| enviroment variable@>

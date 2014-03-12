@@ -1,4 +1,4 @@
-# This file is part of amail version 0.9
+# This file is part of amail version 0.91
 # Author Alexander Sychev
 #
 # Copyright (c) 2013, 2014 Alexander Sychev. All rights reserved.
