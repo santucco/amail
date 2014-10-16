@@ -1749,12 +1749,10 @@ var children idmessages
 @
 @<Send |parent|@>=
 {
-	val, ok:=idmap[v.msg.messageid]
-	if !ok {
+	if val, ok:=idmap[v.msg.messageid]; !ok {
 		glog.V(debug).Infof("'%s' is not found\n", v.msg.messageid)
 		ch<-nil
-	}
-	if val.parent==nil || len(val.parent.msgs)==0 {
+	} else if val.parent==nil || len(val.parent.msgs)==0 {
 		glog.V(debug).Infof("'%s' hasn't got a parent\n", v.msg.messageid)
 		ch<-nil
 	} else {
