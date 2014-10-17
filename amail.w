@@ -31,6 +31,9 @@ I have some doubts \.{Amail} will work in \.{Plan9} without changes.
 @** Implementation.
 @c
 @i license
+
+package main
+
 import (
 	@<Imports@>
 )@#
@@ -1426,16 +1429,28 @@ for i:=0; i<len(box.all);{
 	msgs=append(msgs, box.all[i])
 	@<Delete a message at position |i|@>
 }
-cmd:=fmt.Sprintf("delete %s", box.name)
-for _, msg:=range msgs {
-	cmd=fmt.Sprintf("%s %d ", cmd, msg.id)
+dmsgs:=msgs
+for {
+	cmd:=fmt.Sprintf("delete %s", box.name)
+	c:=len(dmsgs)
+	if c==0 {
+		break
+	} else if c>50 {
+		c=50
+	}
+	for _, msg:=range dmsgs[:c] {
+		cmd=fmt.Sprintf("%s %d ", cmd, msg.id)
+	}
+	glog.V(debug).Infof("command to delete messages: '%s'\n", cmd)
+	if _, err:=f.Write([]byte(cmd)); err!=nil{
+		glog.Errorf("can't delete messages: %v\n", err)
+	}
+	dmsgs=dmsgs[c:]
 }
-glog.V(debug).Infof("command to delete messages: '%s'\n", cmd)
-if _, err:=f.Write([]byte(cmd)); err!=nil{
-	glog.Errorf("can't delete messages: %v\n", err)
-}
-f.Close()
 @<Send deleted |msgs|@>
+
+f.Close()
+
 
 
 @ |mdch| is a channel receives slices of messages to delete.
@@ -1725,7 +1740,9 @@ func (this idmessages) Swap(i, j int) {
 		var children idmessages
 		for _, val:=range m.children {
 			@<Get |mgs| with the same box like |v.msg.box| or the first one@>
-			children=append(children, msg)		
+			if msg!=nil {
+				children=append(children, msg)
+			}		
 		}
 		sort.Sort(children)
 		glog.V(debug).Infof("sending %d children for '%s'\n", len(children), v.msg.messageid)
@@ -1758,7 +1775,9 @@ var children idmessages
 	} else {
 		val=val.parent
 		@<Get |mgs| with the same box like |v.msg.box| or the first one@>
-		glog.V(debug).Infof("sending parent '%s' for '%s'\n", msg.messageid, v.msg.messageid)
+		if msg!=nil {
+			glog.V(debug).Infof("sending parent '%s' for '%s'\n", msg.messageid, v.msg.messageid)
+		}
 		ch<-msg
 	}
 }
