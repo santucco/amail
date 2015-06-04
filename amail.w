@@ -3321,7 +3321,7 @@ once.Do(func() {@<Get it at once@>})
 			buf=append(buf, fmt.Sprintf("To: %s\n", v)...)
 		}
 		for _, v:=range msg.cc {
-			buf=append(buf, fmt.Sprintf("To: %s\n", v)...)
+			buf=append(buf, fmt.Sprintf("CC: %s\n", v)...)
 		}
 	}
 	buf=append(buf, fmt.Sprintf("Subject: %s%s\n", @t\1@>@/

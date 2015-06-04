@@ -14196,7 +14196,7 @@ for _,v:=range msg.to{
 buf= append(buf,fmt.Sprintf("To: %s\n",v)...)
 }
 for _,v:=range msg.cc{
-buf= append(buf,fmt.Sprintf("To: %s\n",v)...)
+buf= append(buf,fmt.Sprintf("CC: %s\n",v)...)
 }
 }
 buf= append(buf,fmt.Sprintf("Subject: %s%s\n",
