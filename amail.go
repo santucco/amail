@@ -4053,7 +4053,7 @@ root= <-ch
 
 //line amail.w:1972
 
-if!roots.Check(root){
+if root==nil||!roots.Check(root){
 
 
 /*147:*/
@@ -5900,7 +5900,7 @@ root= <-ch
 
 //line amail.w:1972
 
-if!roots.Check(root){
+if root==nil||!roots.Check(root){
 
 
 /*147:*/
@@ -8308,7 +8308,7 @@ root= <-ch
 
 //line amail.w:1972
 
-if!roots.Check(root){
+if root==nil||!roots.Check(root){
 
 
 /*147:*/
@@ -8880,7 +8880,7 @@ root= <-ch
 
 //line amail.w:1972
 
-if!roots.Check(root){
+if root==nil||!roots.Check(root){
 
 
 /*147:*/
@@ -10727,7 +10727,7 @@ root= <-ch
 
 //line amail.w:1972
 
-if!roots.Check(root){
+if root==nil||!roots.Check(root){
 
 
 /*147:*/

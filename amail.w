@@ -1970,7 +1970,7 @@ new root is checked for an existance.
 		for len(src)>0 {
 			msg:=src[0]
 			@<Get |root| of |msg|@>
-			if !roots.Check(root) {
+			if root==nil || !roots.Check(root) {
 				@<Remove |msg| from |src|@>
 				continue
 			}
