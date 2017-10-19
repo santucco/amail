@@ -3388,7 +3388,7 @@ if len(msg.text)!=0 {
 		err=f.Open(plan9.OREAD)
 	}
 	if err!=nil {
-		glog.Errorf("can't open '%s/%s/%s': %v\n", srv, msg.box.name, fn)
+		glog.Errorf("can't open '%s/%s/%s': %v\n", srv, msg.box.name, fn, err)
 		continue
 	}
 	@<Quote a message@>
