@@ -155,7 +155,10 @@ skipboxes	[]string
 	flag.Parse()
 	@<Check |levelmark| and |newmark|@>
 	if len(skip)>0 {
-		skipboxes=strings.Split(skip, ", ")
+		skipboxes=strings.Split(skip, ",")
+		for i,v:=range skipboxes {
+			skipboxes[i]=strings.TrimSpace(v)
+		}
 		sort.Strings(skipboxes)
 		glog.V(debug).Infof("these mailboxes will be skipped: %v\n", skipboxes)
 
