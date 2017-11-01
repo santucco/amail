@@ -1678,9 +1678,11 @@ set a parent for |val|.
 			pval=new(idlinks)
 			idmap[v.msg.inreplyto]=pval
 		}
-		
-		pval.children=append(pval.children, val)
-		val.parent=pval
+		// to avoid reverence to itself
+		if val!=pval {
+			pval.children=append(pval.children, val)
+			val.parent=pval
+		}
 	}
 	ch<-true
 }
