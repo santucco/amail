@@ -577,6 +577,14 @@ const mailboxfmt="%-30s\t%10d\t%10d\n"
 const mailboxfmtprc="%-30s\t%10d\t%10d\t%d%%\n"
 const wholefile="0,$"
 
+@
+@<Quote name of mailbox if it is necessary@>=
+name:=b.name
+if strings.IndexFunc(name, unicode.IsSpace)!=-1 {
+	name="'"+name+"'"
+}
+
+
 @ Here we clean up the main window and print states of all mailboxes.
 @<Print all mailboxes@>=
 if mw!=nil {
@@ -586,13 +594,14 @@ if mw!=nil {
 	} else if data, err:=mw.File("data"); err!=nil {
 		glog.Errorf("can't open 'data' file: %s\n", err)
 	} else {
-		for _, v:=range boxes {
-			if v.total==len(v.all) {
-				data.Write([]byte(fmt.Sprintf(mailboxfmt, v.name, len(v.unread), len(v.all))))
-			} else if v.total!=0 && len(v.all)*100/v.total>0 {
-				data.Write([]byte(fmt.Sprintf(mailboxfmtprc, v.name, len(v.unread), len(v.all), len(v.all)*100/v.total)))
+		for _, b:=range boxes {
+			@<Quote name of mailbox if it is necessary@>
+			if b.total==len(b.all) {
+				data.Write([]byte(fmt.Sprintf(mailboxfmt, name, len(b.unread), len(b.all))))
+			} else if b.total!=0 && len(b.all)*100/b.total>0 {
+				data.Write([]byte(fmt.Sprintf(mailboxfmtprc, name, len(b.unread), len(b.all), len(b.all)*100/b.total)))
 			} else {
-				data.Write([]byte(fmt.Sprintf(mailboxfmt, v.name, 0, 0)))
+				data.Write([]byte(fmt.Sprintf(mailboxfmt, name, 0, 0)))
 			}
 		}
 	}
@@ -646,7 +655,7 @@ case ev, ok:=<-ech:
 		if len(ev.Arg)>0 {
 			name+=" "+ev.Arg
 		}
-		name=strings.TrimSpace(name)
+		name=strings.TrimLeft(strings.TrimRight(strings.TrimSpace(name), "'"), "'")
 		if i, ok:=boxes.Search(name); ok {
 			box:=boxes[i]
 			@<Inform |box| to create a window@>
@@ -665,16 +674,15 @@ if mw!=nil {
 	if len(b.all)!=b.total && b.total/100!=0 && len(b.all)%(b.total/100)!=0 {
 		continue
 	}
-
-	if err:=mw.WriteAddr("0/^%s.*\\n/", escape(b.name)); err!=nil {
+	@<Quote name of mailbox if it is necessary@>
+	if err:=mw.WriteAddr("0/^%s.*\\n/", escape(name)); err!=nil {
 		glog.V(debug).Infof("can't write to 'addr' file: %s\n", err)
 		continue
 	}
-
 	if data, err:=mw.File("data"); err !=nil {
 		glog.Errorf("can't open 'data' file: %s\n", err)
 	} else if len(b.all)==b.total {
-		if _, err:=data.Write([]byte(fmt.Sprintf(mailboxfmt, b.name, len(b.unread), len(b.all))));
+		if _, err:=data.Write([]byte(fmt.Sprintf(mailboxfmt, name, len(b.unread), len(b.all))));
 			err!=nil {
 			glog.Errorf("can't write to 'data' file: %s\n", err)
 			continue
@@ -683,7 +691,7 @@ if mw!=nil {
 		@<Set window |w| to clean state@>
 		@<Go to top of window |w|@>
 	} else if _, err:=data.Write([]byte(fmt.Sprintf(mailboxfmtprc,
-													b.name,
+													name,
 													len(b.unread),
 													len(b.all),
 													len(b.all)*100/b.total)));err!=nil {
