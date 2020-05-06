@@ -79,7 +79,7 @@ import(
 
 //line amail.w:187
 
-"bitbucket.org/santucco/goplan9-clone/plan9/client"
+"github.com/santucco/goplan9-clone/plan9/client"
 "github.com/golang/glog"
 
 
@@ -107,8 +107,8 @@ import(
 
 //line amail.w:361
 
-"bitbucket.org/santucco/goplumb"
-"bitbucket.org/santucco/goplan9-clone/plan9"
+"github.com/santucco/goplumb"
+"github.com/santucco/goplan9-clone/plan9"
 
 
 
@@ -121,7 +121,7 @@ import(
 
 //line amail.w:546
 
-"bitbucket.org/santucco/goacme"
+"github.com/santucco/goacme"
 
 
 

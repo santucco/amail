@@ -185,7 +185,7 @@ if r, _:=utf8.DecodeRuneInString(newmark); unicode.IsDigit(r) {
 
 @* Mounting of the \.{Acme} filesystem.
 @<Imports@>=
-"bitbucket.org/santucco/goplan9-clone/plan9/client"
+"github.com/santucco/goplan9-clone/plan9/client"
 "github.com/golang/glog"
 
 @
@@ -359,8 +359,8 @@ func (this *mailbox) newMessage(id int) (msg *message, unread bool, err error) {
 @* Subscription on notifications about new messages.
 
 @<Imports@>=
-"bitbucket.org/santucco/goplumb"
-"bitbucket.org/santucco/goplan9-clone/plan9"
+"github.com/santucco/goplumb"
+"github.com/santucco/goplan9-clone/plan9"
 
 @ Here a subscription on |"seemail"| port of \.{plumber} is made. The messages is checked for |filetype=="mail"| and
 |"mailtype"| are existing. In case a new mail message we send a name of a mailbox an an id of the message in |mch|,
@@ -544,7 +544,7 @@ if !ok {
 
 @* The main window.
 @<Imports@>=
-"bitbucket.org/santucco/goacme"
+"github.com/santucco/goacme"
 
 @
 @<Variables@>=
