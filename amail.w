@@ -17,7 +17,7 @@ I had known about \.{Mail} - a mail client for \.{Acme}, and a time to try it ha
 I have found \.{Mail} has some disadvantages (at least for me):
 \yskip\item{$\bullet$}it doesn't have a support of threads
 \yskip\item{$\bullet$}it doesn't have a support for read/unread messages
-\yskip\item{$\bullet$}it doesn't have a navigation though mailboxes
+\yskip\item{$\bullet$}it doesn't have a navigation through mailboxes
 \yskip\item{$\bullet$}it has a quite big loading time with big mailboxes.
 
 I also prefer to view some messages in \.{html}-form (if any) with a possibility to open them in a web browser.
@@ -1084,12 +1084,14 @@ case ev, ok:=<-box.ech:
 					continue
 				}
 				box.showthreads=true
+				box.thread=false
 				if box.shownew==true {
 					@<Write a tag of |box| window@>
 					continue
 				}
 			case "ShowPlain":
 				box.showthreads=false
+				box.thread=false
 				if box.shownew==true {
 					@<Write a tag of |box| window@>
 					continue
@@ -2361,23 +2363,19 @@ func (box *mailbox) writeTag(counted bool) {
 	add=append(add, "Mail")
 
 	if box.thread {
-		if box.shownew {
-			add=append(add, "ShowNew")
-		} else {
-			add=append(add, "ShowAll")
-		}
-	}
-
-	if box.shownew {
-		add=append(add, "ShowAll")
+		add=append(add, "ShowNew", "ShowAll", "ShowPlain", "ShowThreads")
 	} else {
-		add=append(add, "ShowNew")
-	}
+		if box.shownew {
+			add=append(add, "ShowAll")
+		} else {
+			add=append(add, "ShowNew")
+		}
 
-	if box.showthreads {
-		add=append(add, "ShowPlain")
-	} else if counted {
-		add=append(add, "ShowThreads")
+		if box.showthreads {
+			add=append(add, "ShowPlain")
+		} else if counted {
+			add=append(add, "ShowThreads")
+		}
 	}
 
 	if len(src)>0 && box.deleted>0 {
