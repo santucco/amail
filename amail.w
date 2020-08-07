@@ -2245,27 +2245,104 @@ we have to erase it instead of refreshing.
 @
 @<Write a tag of main window@>=
 glog.V(debug).Infoln("writing a tag of the main window")
-if err:=writeTag(mw, fmt.Sprintf(" %s %s ", @t\1@>@/
-	func() string {if shownew {return "ShowAll"} else {return "ShowNew"}}(), @/
-	func() string {if showthreads {return "ShowPlain"} else {return "ShowThreads"}}()) @t\2@>);
+del:=[]string {"ShowNew", "ShowAll", "ShowThreads", "ShowPlain"}
+var add []string
+if shownew {
+	add=append(add, "ShowAll")
+} else {
+	add=append(add, "ShowNew")
+}
+if showthreads {
+	add=append(add, "ShowPlain")
+} else {
+	add=append(add, "ShowThreads")
+}
+
+if err:=writeTag(mw, del, add)
 	err!=nil {
 	glog.Errorf("can't set a tag of the main window: %v", err)
 }
 
 @
 @c
-func writeTag(w *goacme.Window, t string) error {
-	if w==nil {
+func writeTag(w *goacme.Window, del []string, add []string) error {
+	if w==nil || del==nil && add==nil {
 		return nil
 	}
-	tag, err:=w.File("tag")
-	if err!=nil {
-		return err
+	@<Read a tag of |w| into |s|@>
+	@<Split the tag into |tag| fields after the pipe symbol@>
+	@<Compose |newtag|@>
+	@<Clear the tag and write |newtag| to the tag@>
+	return nil
+}
+
+@
+@<Read a tag of |w| into |s|@>=
+f, err:=w.File("tag")
+if err!=nil {
+	return err
+}
+if _, err:=f.Seek(0, 0); err!=nil {
+	return err
+}
+var b [1000]byte
+n, err:=f.Read(b[:])
+if err!=nil {
+	return err
+}
+s:=string(b[:n])
+
+@
+@<Split the tag into |tag| fields after the pipe symbol@>=
+if n=strings.LastIndex(s, "|"); n==-1 {
+	n=0
+} else {
+	n++
+}
+s=s[n:]
+s=strings.TrimLeft(s, " ")
+tag:=strings.Split(s, " ")
+
+@
+@<Compose |newtag|@>=
+newtag:=append([]string{}, "")
+@<Every part is contained in |del| we remove from |tag|@>
+newtag=append(newtag, add...)
+newtag=append(newtag, tag...)
+
+@
+@<Every part is contained in |del| we remove from |tag|@>=
+for _, v:=range del {
+	for i:=0; i<len(tag); {
+		if tag[i]!=v {
+			i++
+			continue
+		}
+		copy(tag[i:], tag[i+1:])
+		tag=tag[:len(tag)-1]
 	}
-	if err:=w.WriteCtl("cleartag"); err!=nil {
-		return err
+}
+
+@
+@<Every part is contained in |add| we remove from |tag|@>=
+for _, v:=range add {
+	for i:=0; i<len(tag); {
+		if tag[i]!=v {
+			i++
+			continue
+		}
+		copy(tag[i:], tag[i+1:])
+		tag=tag[:len(tag)-1]
 	}
-	_, err=tag.Write([]byte(t))
+}
+
+@
+@<Clear the tag and write |newtag| to the tag@>=
+s=strings.Join(newtag, " ")
+if err:=w.WriteCtl("cleartag"); err!=nil {
+	return err
+}
+if _, err:=f.Write([]byte(s)); err!=nil {
 	return err
 }
 
@@ -2288,63 +2365,51 @@ box.writeTag(counted)
 func (box *mailbox) writeTag(counted bool) {
 	glog.V(debug).Infof("write a tag of the '%s' mailbox's window\n", box.name)
 	@<Determine of |src|@>
-	if err:=writeTag(box.w, fmt.Sprintf(" %sMail %s%s%s%s%s%sSearch ", @t\1@>@/
-		func() string {
-			if box.deleted>0 {
-				return "Put "
-			}
-			return ""
-		}(), @/
-		func() string {
-			if len(src)>0 {
-				return "Delmesg "
-			}
-			return ""
-		}(), @/
-		func() string {
-			if len(src)>0 && box.deleted>0 {
-				return "UnDelmesg "
-			}
-			return ""
-		}(), @/
-		func() string {
-			if box.thread {
-				if box.shownew {
-					return "ShowNew "
-				} else {
-					return "ShowAll "
-				}
-			} else if len(src)>0 && counted && (box.shownew || !box.showthreads) {
-				return "Thread "
-			}
-			return ""
-		}(), @/
-		func() string {
-			if box.showthreads && !counted {
-				return ""
-			}
-			if box.shownew {
-				return "ShowAll "
-			} else {
-				return "ShowNew "
-			}
-		}(), @/
-		func() string {
-			if box.showthreads {
-				return "ShowPlain "
-			} else if counted {
-				return "ShowThreads "
-			} else {
-				return ""
-			}
-		}(), @/
-		func() string {
-			if len(src)>0 {
-				return "Seen "
-			}
-			return ""
-		}()) @t\2@>)
-		err!=nil {
+	del:=[]string {"Put", "Mail", "ShowNew", "ShowAll", "ShowPlain", "ShowThreads", "Delmesg", "UnDelmesg", "Thread", "Seen", "Search"}
+	var add []string
+	if box.deleted>0 {
+		add=append(add, "Put")
+	}
+
+	add=append(add, "Mail")
+
+	if box.thread {
+		if box.shownew {
+			add=append(add, "ShowNew")
+		} else {
+			add=append(add, "ShowAll")
+		}
+	}
+
+	if box.shownew {
+		add=append(add, "ShowAll")
+	} else {
+		add=append(add, "ShowNew")
+	}
+
+	if box.showthreads {
+		add=append(add, "ShowPlain")
+	} else if counted {
+		add=append(add, "ShowThreads")
+	}
+
+	if len(src)>0 && box.deleted>0 {
+		add=append(add, "UnDelmesg")
+	}
+
+	if len(src)>0 {
+		add=append(add, "Delmesg")
+	}
+
+	if !box.thread && len(src)>0 && counted && (box.shownew || !box.showthreads) {
+		add=append(add, "Thread")
+	}
+
+	if len(src)>0 {
+		add=append(add, "Seen")
+	}
+
+	if err:=writeTag(box.w, del, add); err!=nil {
 		glog.Errorf("can't set a tag of the '%s' box's window: %v\n", box.name, err)
 	}
 }
@@ -2413,7 +2478,6 @@ glog.V(debug).Infof("the '%d' message won't be inserted in the '%s' mailbox's wi
 v.msgs=v.msgs[1:]
 @<Send a rest of |msgs|@>
 continue
-
 
 @
 @<Compose |addr|@>=
@@ -2742,47 +2806,46 @@ func (this *message) next() (nmsg *message) {
 @c
 func (msg *message) writeTag() {
 	glog.V(debug).Infof("writing a tag of the '%d' message's window\n", msg.id)
-	if err:=writeTag(msg.w, fmt.Sprintf(" Q Reply all %s %s%s%s%s%s%sSave ", @t\1@>@/
-		func() string {if msg.deleted {return "UnDelmesg"} else {return "Delmesg"}}(),
-		func() string {
-			if len(msg.text)==0 || len(msg.html)==0 {
-				return ""
-			} else if msg.showhtml {
-				return "Text "
-			} else {
-				return "Html "
-			}
-		}(), @/
-		func() string {if len(msg.html)!=0 {return "Browser "}; return ""}(), @/
-		func() string {
-			@<Get |parent| for |msg|@>
-			if parent!=nil {
-				return "Up "
-			}
-			return ""
-		}(), @/
-		func() string {
-			@<Get |children| for |msg|@>
-			if len(children)!=0 {
-				return "Down "
-			}
-			return ""
-		}(), @/
-		func() string {
-			@<Get a previous |pmsg|@>
-			if pmsg!=nil {
-				return "Prev "
-			}
-			return ""
-		}(), @/
-		func() string {
-			@<Get a next |nmsg|@>
-			if nmsg!=nil {
-				return "Next "
-			}
-			return ""
-		}() @t\2@>));
-		err!=nil {
+	del:=[]string {"Q", "Reply", "all", "Delmesg", "UnDelmesg", "Text", "Html", "Browser", "Up", "Down", "Prev", "Next", "Save"}
+	add:=append([]string{}, "Q", "Reply", "all")
+	if msg.deleted {
+		add=append(add, "UnDelmesg")
+	} else {
+		add=append(add, "Delmesg")
+	}
+
+	if msg.showhtml {
+		add=append(add, "Text")
+	} else {
+		add=append(add, "Html")
+	}
+
+	if len(msg.html)!=0 {
+		add=append(add, "Browser")
+	}
+
+	@<Get |parent| for |msg|@>
+	if parent!=nil {
+		add=append(add, "Up")
+	}
+
+	@<Get |children| for |msg|@>
+	if len(children)!=0 {
+		add=append(add, "Down")
+	}
+
+	@<Get a previous |pmsg|@>
+	if pmsg!=nil {
+		add=append(add, "Prev")
+	}
+
+	@<Get a next |nmsg|@>
+	if nmsg!=nil {
+		add=append(add, "Next")
+	}
+	add=append(add, "Save")
+
+	if err:=writeTag(msg.w, del, add); err!=nil {
 		glog.Errorf("can't set a tag of the message window: %v", err)
 	}
 }
@@ -3364,7 +3427,8 @@ if err!=nil {
 	glog.Errorf("can't create a window: %v\n", err)
 	continue
 }
-if err:=writeTag(w, " Look Post Undo "); err!=nil {
+l:=[]string{"Look", "Post", "Undo"}
+if err:=writeTag(w, l, l); err!=nil {
 	glog.Errorf("can't write a tag for a new message window: %v\n", err)
 }
 @<Start a goroutine to process events from a composed mail window@>
