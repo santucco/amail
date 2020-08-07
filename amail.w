@@ -2324,19 +2324,6 @@ for _, v:=range del {
 }
 
 @
-@<Every part is contained in |add| we remove from |tag|@>=
-for _, v:=range add {
-	for i:=0; i<len(tag); {
-		if tag[i]!=v {
-			i++
-			continue
-		}
-		copy(tag[i:], tag[i+1:])
-		tag=tag[:len(tag)-1]
-	}
-}
-
-@
 @<Clear the tag and write |newtag| to the tag@>=
 s=strings.Join(newtag, " ")
 if err:=w.WriteCtl("cleartag"); err!=nil {
