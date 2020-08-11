@@ -2382,7 +2382,7 @@ func (box *mailbox) writeTag(counted bool) {
 		add=append(add, "UnDelmesg")
 	}
 
-	if len(src)>0 {
+	if len(src)>box.deleted {
 		add=append(add, "Delmesg")
 	}
 

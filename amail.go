@@ -13269,7 +13269,7 @@ if len(src)> 0&&box.deleted> 0{
 add= append(add,"UnDelmesg")
 }
 
-if len(src)> 0{
+if len(src)> box.deleted{
 add= append(add,"Delmesg")
 }
 
