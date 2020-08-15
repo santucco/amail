@@ -6,8 +6,7 @@
 //line amail.w:32
 
 //line license:1
-
-// This file is part of Amail
+// This file is part of amail
 //
 // Copyright (c) 2013, 2014, 2020 Alexander Sychev. All rights reserved.
 //

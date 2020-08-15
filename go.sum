@@ -1,0 +1,10 @@
+9fans.net/go v0.0.2 h1:RYM6lWITV8oADrwLfdzxmt8ucfW6UtP9v1jg4qAbqts=
+9fans.net/go v0.0.2/go.mod h1:lfPdxjq9v8pVQXUMBCx5EO5oLXWQFlKRQgs1kEkjoIM=
+github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b h1:VKtxabqXZkF25pY9ekfRL6a582T4P37/31XEstQ5p58=
+github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
+github.com/santucco/goacme v0.8.0 h1:OJEmFv03ev79p5f/4QRhY/aQTGNYgkMgTog3DnIM25E=
+github.com/santucco/goacme v0.8.0/go.mod h1:Xb7Jlmoa/kv7ZoGLdmQU/jE4IZHBi73ss+Iq61pdwjo=
+github.com/santucco/goplan9-clone v0.0.0-20150604062029-5bf170b6a5bc h1:m8xhdqXCri2hHqD01V1yLq6r5v0EpBwVGdcliQXsyx8=
+github.com/santucco/goplan9-clone v0.0.0-20150604062029-5bf170b6a5bc/go.mod h1:yXfVxz3HSsiSHe59lMgE4UE09Yry1LrwaZkANXOHpfk=
+github.com/santucco/goplumb v0.4.0 h1:q0Vx7u+WY6e+8k2s1S5BX4OVGsrnKCb7g/Rdbk5kjb8=
+github.com/santucco/goplumb v0.4.0/go.mod h1:JE+/KEW4gqYmIc53ZbEY5PX3PXUXpeujFG9a0rIwXOw=

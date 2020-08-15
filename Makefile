@@ -27,22 +27,23 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+target=amail
+
 IFILES= \
-	amail.idx amail.log amail.toc amail.tex amail.scn
+	$(target).idx $(target).log $(target).toc $(target).tex $(target).scn
 
 .INTERMEDIATE: $(IFILES)
 
 TEXP?=xetex
 gcflags=-gcflags '-N -l'
 
-all: amail 
-#doc
+all: $(target)
 
-amail: amail.go
+$(target): $(target).go
 	go build $(gcflags)
 	@echo done
 
-doc: amail.pdf
+doc: $(target).pdf
 
 %.go: %.w
 	gotangle $< - $@
@@ -53,10 +54,8 @@ doc: amail.pdf
 %.tex %.scn: %.w
 	goweave  $<
 
-install: amail
+install: $(target)
 	go install
 
 clean:
-	rm -rf *.go *.pdf amail  $(IFILES)
-
-
+	rm -rf *.go *.pdf $(target)  $(IFILES)
