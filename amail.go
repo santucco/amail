@@ -169,7 +169,7 @@ import(
 /*214:*/
 
 
-//line amail.w:2977
+//line amail.w:2994
 
 "os/exec"
 
@@ -182,7 +182,7 @@ import(
 /*229:*/
 
 
-//line amail.w:3311
+//line amail.w:3327
 
 "os/user"
 
@@ -195,7 +195,7 @@ import(
 /*233:*/
 
 
-//line amail.w:3332
+//line amail.w:3348
 
 "sync"
 
@@ -337,7 +337,7 @@ deleted int
 /*192:*/
 
 
-//line amail.w:2569
+//line amail.w:2586
 
 ach chan*struct{ids[]int;a action}
 
@@ -415,7 +415,7 @@ messageid string
 /*194:*/
 
 
-//line amail.w:2577
+//line amail.w:2594
 
 w*goacme.Window
 
@@ -428,7 +428,7 @@ w*goacme.Window
 /*201:*/
 
 
-//line amail.w:2667
+//line amail.w:2684
 
 to[]string
 cc[]string
@@ -442,7 +442,7 @@ cc[]string
 /*216:*/
 
 
-//line amail.w:2999
+//line amail.w:3016
 
 text string
 html string
@@ -547,7 +547,7 @@ msgs messages
 /*215:*/
 
 
-//line amail.w:2981
+//line amail.w:2998
 
 file struct{
 name string
@@ -659,7 +659,7 @@ const eof= "$"
 /*185:*/
 
 
-//line amail.w:2420
+//line amail.w:2437
 
 const bof= "#0-"
 const eol= "+#0"
@@ -846,7 +846,7 @@ mrfch chan*refresh= make(chan*refresh)
 /*221:*/
 
 
-//line amail.w:3145
+//line amail.w:3162
 
 home string
 
@@ -859,7 +859,7 @@ home string
 /*230:*/
 
 
-//line amail.w:3315
+//line amail.w:3331
 
 cuser string
 
@@ -872,7 +872,7 @@ cuser string
 /*234:*/
 
 
-//line amail.w:3336
+//line amail.w:3352
 
 once sync.Once
 
@@ -885,7 +885,7 @@ once sync.Once
 /*245:*/
 
 
-//line amail.w:3637
+//line amail.w:3653
 
 plan9dir string
 
@@ -1126,7 +1126,7 @@ var msg*message
 /*238:*/
 
 
-//line amail.w:3409
+//line amail.w:3425
 
 w,err:=goacme.New()
 if err!=nil{
@@ -1142,7 +1142,7 @@ glog.Errorf("can't write a tag for a new message window: %v\n",err)
 /*239:*/
 
 
-//line amail.w:3422
+//line amail.w:3438
 
 go func(msg*message){
 glog.V(debug).Infoln("starting a goroutine to process events from a composed mail window")
@@ -1163,7 +1163,7 @@ case"Post":
 /*243:*/
 
 
-//line amail.w:3513
+//line amail.w:3529
 
 {
 
@@ -1171,21 +1171,21 @@ case"Post":
 /*246:*/
 
 
-//line amail.w:3641
+//line amail.w:3657
 
 
 
 /*235:*/
 
 
-//line amail.w:3340
+//line amail.w:3356
 
 once.Do(func(){
 
 /*223:*/
 
 
-//line amail.w:3153
+//line amail.w:3170
 
 if home= os.Getenv("home");len(home)==0{
 if home= os.Getenv("HOME");len(home)==0{
@@ -1204,7 +1204,7 @@ home= "/"
 /*232:*/
 
 
-//line amail.w:3323
+//line amail.w:3339
 
 if u,err:=user.Current();err!=nil{
 glog.Errorf("can't get a name of the current user: %v\n",err)
@@ -1222,7 +1222,7 @@ cuser= u.Username
 /*247:*/
 
 
-//line amail.w:3645
+//line amail.w:3661
 
 if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
 glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
@@ -1234,7 +1234,7 @@ plan9dir= "/usr/local/plan9"
 /*:247*/
 
 
-//line amail.w:3341
+//line amail.w:3357
 })
 
 
@@ -1242,7 +1242,7 @@ plan9dir= "/usr/local/plan9"
 /*:235*/
 
 
-//line amail.w:3642
+//line amail.w:3658
 
 
 
@@ -1250,7 +1250,7 @@ plan9dir= "/usr/local/plan9"
 /*:246*/
 
 
-//line amail.w:3515
+//line amail.w:3531
 
 w.Seek(0,0)
 w.WriteAddr(wholefile)
@@ -1281,7 +1281,7 @@ case"to":
 /*244:*/
 
 
-//line amail.w:3627
+//line amail.w:3643
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -1296,7 +1296,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:244*/
 
 
-//line amail.w:3540
+//line amail.w:3556
 
 to= append(to,f...)
 case"cc":
@@ -1305,7 +1305,7 @@ case"cc":
 /*244:*/
 
 
-//line amail.w:3627
+//line amail.w:3643
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -1320,7 +1320,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:244*/
 
 
-//line amail.w:3543
+//line amail.w:3559
 
 cc= append(cc,f...)
 case"bcc":
@@ -1329,7 +1329,7 @@ case"bcc":
 /*244:*/
 
 
-//line amail.w:3627
+//line amail.w:3643
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -1344,7 +1344,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:244*/
 
 
-//line amail.w:3546
+//line amail.w:3562
 
 bcc= append(bcc,f...)
 case"attach":
@@ -1365,7 +1365,7 @@ f[i]= strings.TrimSpace(f[i])
 /*244:*/
 
 
-//line amail.w:3627
+//line amail.w:3643
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -1380,7 +1380,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:244*/
 
 
-//line amail.w:3561
+//line amail.w:3577
 
 to= append(to,f...)
 }
@@ -1451,7 +1451,7 @@ w.Close()
 /*:243*/
 
 
-//line amail.w:3437
+//line amail.w:3453
 
 }
 }
@@ -1464,7 +1464,7 @@ w.UnreadEvent(ev)
 /*:239*/
 
 
-//line amail.w:3419
+//line amail.w:3435
 
 
 
@@ -1501,7 +1501,7 @@ w.Write([]byte(addr))
 /*250:*/
 
 
-//line amail.w:3664
+//line amail.w:3680
 
 writeSignature(w,nil)
 
@@ -2337,7 +2337,7 @@ irfch:make(chan*refresh,100),
 /*193:*/
 
 
-//line amail.w:2573
+//line amail.w:2590
 
 ach:make(chan*struct{ids[]int;a action},100),
 
@@ -3060,7 +3060,7 @@ irfch:make(chan*refresh,100),
 /*193:*/
 
 
-//line amail.w:2573
+//line amail.w:2590
 
 ach:make(chan*struct{ids[]int;a action},100),
 
@@ -3402,7 +3402,7 @@ msg= &message{id:id,box:this,
 /*217:*/
 
 
-//line amail.w:3007
+//line amail.w:3024
 
 cids:make(map[string]*file),
 
@@ -3484,7 +3484,7 @@ continue
 /*202:*/
 
 
-//line amail.w:2672
+//line amail.w:2689
 
 if strings.HasPrefix(s,"to "){
 msg.to= split(s[len("to "):])
@@ -4479,7 +4479,7 @@ box.writeTag(counted)
 /*183:*/
 
 
-//line amail.w:2403
+//line amail.w:2420
 
 glog.V(debug).Infof("clean the '%s' mailbox's window\n",box.name)
 clean(box.w)
@@ -5143,7 +5143,7 @@ var msg*message
 /*238:*/
 
 
-//line amail.w:3409
+//line amail.w:3425
 
 w,err:=goacme.New()
 if err!=nil{
@@ -5159,7 +5159,7 @@ glog.Errorf("can't write a tag for a new message window: %v\n",err)
 /*239:*/
 
 
-//line amail.w:3422
+//line amail.w:3438
 
 go func(msg*message){
 glog.V(debug).Infoln("starting a goroutine to process events from a composed mail window")
@@ -5180,7 +5180,7 @@ case"Post":
 /*243:*/
 
 
-//line amail.w:3513
+//line amail.w:3529
 
 {
 
@@ -5188,21 +5188,21 @@ case"Post":
 /*246:*/
 
 
-//line amail.w:3641
+//line amail.w:3657
 
 
 
 /*235:*/
 
 
-//line amail.w:3340
+//line amail.w:3356
 
 once.Do(func(){
 
 /*223:*/
 
 
-//line amail.w:3153
+//line amail.w:3170
 
 if home= os.Getenv("home");len(home)==0{
 if home= os.Getenv("HOME");len(home)==0{
@@ -5221,7 +5221,7 @@ home= "/"
 /*232:*/
 
 
-//line amail.w:3323
+//line amail.w:3339
 
 if u,err:=user.Current();err!=nil{
 glog.Errorf("can't get a name of the current user: %v\n",err)
@@ -5239,7 +5239,7 @@ cuser= u.Username
 /*247:*/
 
 
-//line amail.w:3645
+//line amail.w:3661
 
 if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
 glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
@@ -5251,7 +5251,7 @@ plan9dir= "/usr/local/plan9"
 /*:247*/
 
 
-//line amail.w:3341
+//line amail.w:3357
 })
 
 
@@ -5259,7 +5259,7 @@ plan9dir= "/usr/local/plan9"
 /*:235*/
 
 
-//line amail.w:3642
+//line amail.w:3658
 
 
 
@@ -5267,7 +5267,7 @@ plan9dir= "/usr/local/plan9"
 /*:246*/
 
 
-//line amail.w:3515
+//line amail.w:3531
 
 w.Seek(0,0)
 w.WriteAddr(wholefile)
@@ -5298,7 +5298,7 @@ case"to":
 /*244:*/
 
 
-//line amail.w:3627
+//line amail.w:3643
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -5313,7 +5313,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:244*/
 
 
-//line amail.w:3540
+//line amail.w:3556
 
 to= append(to,f...)
 case"cc":
@@ -5322,7 +5322,7 @@ case"cc":
 /*244:*/
 
 
-//line amail.w:3627
+//line amail.w:3643
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -5337,7 +5337,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:244*/
 
 
-//line amail.w:3543
+//line amail.w:3559
 
 cc= append(cc,f...)
 case"bcc":
@@ -5346,7 +5346,7 @@ case"bcc":
 /*244:*/
 
 
-//line amail.w:3627
+//line amail.w:3643
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -5361,7 +5361,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:244*/
 
 
-//line amail.w:3546
+//line amail.w:3562
 
 bcc= append(bcc,f...)
 case"attach":
@@ -5382,7 +5382,7 @@ f[i]= strings.TrimSpace(f[i])
 /*244:*/
 
 
-//line amail.w:3627
+//line amail.w:3643
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -5397,7 +5397,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:244*/
 
 
-//line amail.w:3561
+//line amail.w:3577
 
 to= append(to,f...)
 }
@@ -5468,7 +5468,7 @@ w.Close()
 /*:243*/
 
 
-//line amail.w:3437
+//line amail.w:3453
 
 }
 }
@@ -5481,7 +5481,7 @@ w.UnreadEvent(ev)
 /*:239*/
 
 
-//line amail.w:3419
+//line amail.w:3435
 
 
 
@@ -5516,7 +5516,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*248:*/
 
 
-//line amail.w:3652
+//line amail.w:3668
 
 writeSignature(w,box)
 
@@ -5734,7 +5734,7 @@ glog.V(debug).Infof("search argument: '%s'\n",ev.Arg)
 /*190:*/
 
 
-//line amail.w:2517
+//line amail.w:2534
 
 {
 msgs:=box.search(ev.Arg)
@@ -5743,7 +5743,7 @@ msgs:=box.search(ev.Arg)
 /*183:*/
 
 
-//line amail.w:2403
+//line amail.w:2420
 
 glog.V(debug).Infof("clean the '%s' mailbox's window\n",box.name)
 clean(box.w)
@@ -5753,7 +5753,7 @@ clean(box.w)
 /*:183*/
 
 
-//line amail.w:2520
+//line amail.w:2537
 
 
 
@@ -5789,7 +5789,7 @@ ontop= false
 /*:169*/
 
 
-//line amail.w:2521
+//line amail.w:2538
 
 name:=fmt.Sprintf("Amail/%s/Search(%s)",box.name,strings.Replace(ev.Arg," ","␣",-1))
 w:=box.w
@@ -5813,7 +5813,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:53*/
 
 
-//line amail.w:2527
+//line amail.w:2544
 
 glog.V(debug).Infof("len of msgs: %v\n",len(msgs))
 box.rfch<-&refresh{0,msgs}
@@ -5888,7 +5888,7 @@ box.writeTag(counted)
 /*183:*/
 
 
-//line amail.w:2403
+//line amail.w:2420
 
 glog.V(debug).Infof("clean the '%s' mailbox's window\n",box.name)
 clean(box.w)
@@ -6315,7 +6315,7 @@ for _,msg:=range m{
 /*199:*/
 
 
-//line amail.w:2644
+//line amail.w:2661
 
 box.eraseMessage(msg)
 
@@ -6368,7 +6368,7 @@ if msg.box!=box{
 /*199:*/
 
 
-//line amail.w:2644
+//line amail.w:2661
 
 box.eraseMessage(msg)
 
@@ -6458,7 +6458,7 @@ box.rfch<-&refresh{seek,msgs}
 /*198:*/
 
 
-//line amail.w:2631
+//line amail.w:2648
 
 {
 glog.V(debug).Infof("box.deleted:%d\n",box.deleted)
@@ -6476,7 +6476,7 @@ box.writeTag(counted)
 /*:181*/
 
 
-//line amail.w:2634
+//line amail.w:2651
 
 w:=box.w
 if box.deleted==0{
@@ -6499,7 +6499,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:50*/
 
 
-//line amail.w:2637
+//line amail.w:2654
 
 }else{
 
@@ -6521,7 +6521,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:51*/
 
 
-//line amail.w:2639
+//line amail.w:2656
 
 }
 }
@@ -6595,7 +6595,7 @@ msg:=v.msgs[0]
 /*186:*/
 
 
-//line amail.w:2427
+//line amail.w:2444
 
 
 
@@ -6616,14 +6616,14 @@ src= box.all
 /*:144*/
 
 
-//line amail.w:2428
+//line amail.w:2445
 
 
 
 /*188:*/
 
 
-//line amail.w:2468
+//line amail.w:2485
 
 addr:=fmt.Sprintf("0/^[%s]*(%s)?%s%d(%s)?\\/.*\\n.*\\n/",
 escape(levelmark),
@@ -6637,7 +6637,7 @@ escape(newmark))
 /*:188*/
 
 
-//line amail.w:2429
+//line amail.w:2446
 
 glog.V(debug).Infof("composed message addr '%s' in the '%s' mailbox\n",addr,box.name)
 if err:=box.w.WriteAddr(addr);err!=nil{
@@ -6648,7 +6648,7 @@ if(v.flags&insert)==0{
 /*187:*/
 
 
-//line amail.w:2461
+//line amail.w:2478
 
 glog.V(debug).Infof("the '%d' message won't be inserted in the '%s' mailbox's window\n",v.msgs[0].id,box.name)
 v.msgs= v.msgs[1:]
@@ -6667,7 +6667,7 @@ box.rfch<-&refresh{v.flags,v.msgs}
 /*198:*/
 
 
-//line amail.w:2631
+//line amail.w:2648
 
 {
 glog.V(debug).Infof("box.deleted:%d\n",box.deleted)
@@ -6685,7 +6685,7 @@ box.writeTag(counted)
 /*:181*/
 
 
-//line amail.w:2634
+//line amail.w:2651
 
 w:=box.w
 if box.deleted==0{
@@ -6708,7 +6708,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:50*/
 
 
-//line amail.w:2637
+//line amail.w:2654
 
 }else{
 
@@ -6730,7 +6730,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:51*/
 
 
-//line amail.w:2639
+//line amail.w:2656
 
 }
 }
@@ -6749,7 +6749,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:166*/
 
 
-//line amail.w:2464
+//line amail.w:2481
 
 continue
 
@@ -6758,7 +6758,7 @@ continue
 /*:187*/
 
 
-//line amail.w:2434
+//line amail.w:2451
 
 }
 if box.threadMode(){
@@ -6767,7 +6767,7 @@ if box.threadMode(){
 /*189:*/
 
 
-//line amail.w:2479
+//line amail.w:2496
 
 
 
@@ -6789,7 +6789,7 @@ parent= <-ch
 /*:132*/
 
 
-//line amail.w:2480
+//line amail.w:2497
 
 if parent!=nil{
 glog.V(debug).Infof("msg '%d' has a parent, looking for a position to print\n",msg.id)
@@ -6817,7 +6817,7 @@ children= <-ch
 /*:129*/
 
 
-//line amail.w:2487
+//line amail.w:2504
 
 if len(children)==0{
 break
@@ -6838,7 +6838,7 @@ glog.V(debug).Infof("the '%d' message will be printed after the '%d' message\n",
 /*188:*/
 
 
-//line amail.w:2468
+//line amail.w:2485
 
 addr:=fmt.Sprintf("0/^[%s]*(%s)?%s%d(%s)?\\/.*\\n.*\\n/",
 escape(levelmark),
@@ -6852,7 +6852,7 @@ escape(newmark))
 /*:188*/
 
 
-//line amail.w:2502
+//line amail.w:2519
 
 addr+= eol
 if err:=box.w.WriteAddr(addr);err!=nil{
@@ -6863,7 +6863,7 @@ if(v.flags&exact)==exact{
 /*187:*/
 
 
-//line amail.w:2461
+//line amail.w:2478
 
 glog.V(debug).Infof("the '%d' message won't be inserted in the '%s' mailbox's window\n",v.msgs[0].id,box.name)
 v.msgs= v.msgs[1:]
@@ -6882,7 +6882,7 @@ box.rfch<-&refresh{v.flags,v.msgs}
 /*198:*/
 
 
-//line amail.w:2631
+//line amail.w:2648
 
 {
 glog.V(debug).Infof("box.deleted:%d\n",box.deleted)
@@ -6900,7 +6900,7 @@ box.writeTag(counted)
 /*:181*/
 
 
-//line amail.w:2634
+//line amail.w:2651
 
 w:=box.w
 if box.deleted==0{
@@ -6923,7 +6923,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:50*/
 
 
-//line amail.w:2637
+//line amail.w:2654
 
 }else{
 
@@ -6945,7 +6945,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:51*/
 
 
-//line amail.w:2639
+//line amail.w:2656
 
 }
 }
@@ -6964,7 +6964,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:166*/
 
 
-//line amail.w:2464
+//line amail.w:2481
 
 continue
 
@@ -6973,7 +6973,7 @@ continue
 /*:187*/
 
 
-//line amail.w:2507
+//line amail.w:2524
 
 }
 }
@@ -6983,7 +6983,7 @@ continue
 /*187:*/
 
 
-//line amail.w:2461
+//line amail.w:2478
 
 glog.V(debug).Infof("the '%d' message won't be inserted in the '%s' mailbox's window\n",v.msgs[0].id,box.name)
 v.msgs= v.msgs[1:]
@@ -7002,7 +7002,7 @@ box.rfch<-&refresh{v.flags,v.msgs}
 /*198:*/
 
 
-//line amail.w:2631
+//line amail.w:2648
 
 {
 glog.V(debug).Infof("box.deleted:%d\n",box.deleted)
@@ -7020,7 +7020,7 @@ box.writeTag(counted)
 /*:181*/
 
 
-//line amail.w:2634
+//line amail.w:2651
 
 w:=box.w
 if box.deleted==0{
@@ -7043,7 +7043,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:50*/
 
 
-//line amail.w:2637
+//line amail.w:2654
 
 }else{
 
@@ -7065,7 +7065,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:51*/
 
 
-//line amail.w:2639
+//line amail.w:2656
 
 }
 }
@@ -7084,7 +7084,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:166*/
 
 
-//line amail.w:2464
+//line amail.w:2481
 
 continue
 
@@ -7093,7 +7093,7 @@ continue
 /*:187*/
 
 
-//line amail.w:2511
+//line amail.w:2528
 
 }else if err:=box.w.WriteAddr(bof);err!=nil{
 glog.Errorf("can't write '%s' to 'addr' file of the '%s' mailbox's window: %v\n",bof,box.name,err)
@@ -7104,7 +7104,7 @@ glog.Errorf("can't write '%s' to 'addr' file of the '%s' mailbox's window: %v\n"
 /*:189*/
 
 
-//line amail.w:2437
+//line amail.w:2454
 
 }else if msg.box!=box{
 
@@ -7112,7 +7112,7 @@ glog.Errorf("can't write '%s' to 'addr' file of the '%s' mailbox's window: %v\n"
 /*187:*/
 
 
-//line amail.w:2461
+//line amail.w:2478
 
 glog.V(debug).Infof("the '%d' message won't be inserted in the '%s' mailbox's window\n",v.msgs[0].id,box.name)
 v.msgs= v.msgs[1:]
@@ -7131,7 +7131,7 @@ box.rfch<-&refresh{v.flags,v.msgs}
 /*198:*/
 
 
-//line amail.w:2631
+//line amail.w:2648
 
 {
 glog.V(debug).Infof("box.deleted:%d\n",box.deleted)
@@ -7149,7 +7149,7 @@ box.writeTag(counted)
 /*:181*/
 
 
-//line amail.w:2634
+//line amail.w:2651
 
 w:=box.w
 if box.deleted==0{
@@ -7172,7 +7172,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:50*/
 
 
-//line amail.w:2637
+//line amail.w:2654
 
 }else{
 
@@ -7194,7 +7194,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:51*/
 
 
-//line amail.w:2639
+//line amail.w:2656
 
 }
 }
@@ -7213,7 +7213,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:166*/
 
 
-//line amail.w:2464
+//line amail.w:2481
 
 continue
 
@@ -7222,7 +7222,7 @@ continue
 /*:187*/
 
 
-//line amail.w:2439
+//line amail.w:2456
 
 }else if p,ok:=src.Search(msg.id);!ok{
 glog.V(debug).Infof("the '%d' message is not found in  the '%s' mailbox's window\n",msg.id,box.name)
@@ -7241,7 +7241,7 @@ msg:=src[p-1]
 /*188:*/
 
 
-//line amail.w:2468
+//line amail.w:2485
 
 addr:=fmt.Sprintf("0/^[%s]*(%s)?%s%d(%s)?\\/.*\\n.*\\n/",
 escape(levelmark),
@@ -7255,7 +7255,7 @@ escape(newmark))
 /*:188*/
 
 
-//line amail.w:2452
+//line amail.w:2469
 
 addr+= eol
 if err:=box.w.WriteAddr(addr);err!=nil{
@@ -7431,7 +7431,7 @@ box.rfch<-&refresh{v.flags,v.msgs}
 /*198:*/
 
 
-//line amail.w:2631
+//line amail.w:2648
 
 {
 glog.V(debug).Infof("box.deleted:%d\n",box.deleted)
@@ -7449,7 +7449,7 @@ box.writeTag(counted)
 /*:181*/
 
 
-//line amail.w:2634
+//line amail.w:2651
 
 w:=box.w
 if box.deleted==0{
@@ -7472,7 +7472,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:50*/
 
 
-//line amail.w:2637
+//line amail.w:2654
 
 }else{
 
@@ -7494,7 +7494,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:51*/
 
 
-//line amail.w:2639
+//line amail.w:2656
 
 }
 }
@@ -7535,7 +7535,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*195:*/
 
 
-//line amail.w:2583
+//line amail.w:2600
 
 case d:=<-box.ach:
 switch d.a{
@@ -7556,7 +7556,7 @@ if msg.unread{
 /*196:*/
 
 
-//line amail.w:2615
+//line amail.w:2632
 
 msg.unread= false
 box.unread.DeleteById(id)
@@ -7566,14 +7566,14 @@ box.unread.DeleteById(id)
 /*:196*/
 
 
-//line amail.w:2598
+//line amail.w:2615
 
 
 
 /*197:*/
 
 
-//line amail.w:2621
+//line amail.w:2638
 
 if!box.thread&&box.shownew{
 
@@ -7581,7 +7581,7 @@ if!box.thread&&box.shownew{
 /*199:*/
 
 
-//line amail.w:2644
+//line amail.w:2661
 
 box.eraseMessage(msg)
 
@@ -7591,14 +7591,14 @@ box.eraseMessage(msg)
 /*:199*/
 
 
-//line amail.w:2623
+//line amail.w:2640
 
 
 
 /*198:*/
 
 
-//line amail.w:2631
+//line amail.w:2648
 
 {
 glog.V(debug).Infof("box.deleted:%d\n",box.deleted)
@@ -7616,7 +7616,7 @@ box.writeTag(counted)
 /*:181*/
 
 
-//line amail.w:2634
+//line amail.w:2651
 
 w:=box.w
 if box.deleted==0{
@@ -7639,7 +7639,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:50*/
 
 
-//line amail.w:2637
+//line amail.w:2654
 
 }else{
 
@@ -7661,7 +7661,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:51*/
 
 
-//line amail.w:2639
+//line amail.w:2656
 
 }
 }
@@ -7671,7 +7671,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:198*/
 
 
-//line amail.w:2624
+//line amail.w:2641
 
 }
 msgs= append(msgs,msg)
@@ -7683,7 +7683,7 @@ msgs= append(msgs,msg)
 /*:197*/
 
 
-//line amail.w:2599
+//line amail.w:2616
 
 
 
@@ -7701,7 +7701,7 @@ rfch<-&b
 /*:70*/
 
 
-//line amail.w:2600
+//line amail.w:2617
 
 }
 if err:=msg.open();err!=nil{
@@ -7731,7 +7731,7 @@ mrfch<-&refresh{seek,msgs}
 /*:155*/
 
 
-//line amail.w:2610
+//line amail.w:2627
 
 
 
@@ -7764,7 +7764,7 @@ msg:=box.all[p]
 /*205:*/
 
 
-//line amail.w:2737
+//line amail.w:2754
 
 msg.writeTag()
 
@@ -7832,7 +7832,7 @@ msg:=box.all[p]
 /*205:*/
 
 
-//line amail.w:2737
+//line amail.w:2754
 
 msg.writeTag()
 
@@ -7930,7 +7930,7 @@ id:=msg.id
 /*196:*/
 
 
-//line amail.w:2615
+//line amail.w:2632
 
 msg.unread= false
 box.unread.DeleteById(id)
@@ -7947,7 +7947,7 @@ box.unread.DeleteById(id)
 /*197:*/
 
 
-//line amail.w:2621
+//line amail.w:2638
 
 if!box.thread&&box.shownew{
 
@@ -7955,7 +7955,7 @@ if!box.thread&&box.shownew{
 /*199:*/
 
 
-//line amail.w:2644
+//line amail.w:2661
 
 box.eraseMessage(msg)
 
@@ -7965,14 +7965,14 @@ box.eraseMessage(msg)
 /*:199*/
 
 
-//line amail.w:2623
+//line amail.w:2640
 
 
 
 /*198:*/
 
 
-//line amail.w:2631
+//line amail.w:2648
 
 {
 glog.V(debug).Infof("box.deleted:%d\n",box.deleted)
@@ -7990,7 +7990,7 @@ box.writeTag(counted)
 /*:181*/
 
 
-//line amail.w:2634
+//line amail.w:2651
 
 w:=box.w
 if box.deleted==0{
@@ -8013,7 +8013,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:50*/
 
 
-//line amail.w:2637
+//line amail.w:2654
 
 }else{
 
@@ -8035,7 +8035,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:51*/
 
 
-//line amail.w:2639
+//line amail.w:2656
 
 }
 }
@@ -8045,7 +8045,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:198*/
 
 
-//line amail.w:2624
+//line amail.w:2641
 
 }
 msgs= append(msgs,msg)
@@ -8107,7 +8107,7 @@ f.Close()
 /*:116*/
 
 
-//line amail.w:2611
+//line amail.w:2628
 
 }
 
@@ -9305,7 +9305,7 @@ box.writeTag(counted)
 /*183:*/
 
 
-//line amail.w:2403
+//line amail.w:2420
 
 glog.V(debug).Infof("clean the '%s' mailbox's window\n",box.name)
 clean(box.w)
@@ -9969,7 +9969,7 @@ var msg*message
 /*238:*/
 
 
-//line amail.w:3409
+//line amail.w:3425
 
 w,err:=goacme.New()
 if err!=nil{
@@ -9985,7 +9985,7 @@ glog.Errorf("can't write a tag for a new message window: %v\n",err)
 /*239:*/
 
 
-//line amail.w:3422
+//line amail.w:3438
 
 go func(msg*message){
 glog.V(debug).Infoln("starting a goroutine to process events from a composed mail window")
@@ -10006,7 +10006,7 @@ case"Post":
 /*243:*/
 
 
-//line amail.w:3513
+//line amail.w:3529
 
 {
 
@@ -10014,21 +10014,21 @@ case"Post":
 /*246:*/
 
 
-//line amail.w:3641
+//line amail.w:3657
 
 
 
 /*235:*/
 
 
-//line amail.w:3340
+//line amail.w:3356
 
 once.Do(func(){
 
 /*223:*/
 
 
-//line amail.w:3153
+//line amail.w:3170
 
 if home= os.Getenv("home");len(home)==0{
 if home= os.Getenv("HOME");len(home)==0{
@@ -10047,7 +10047,7 @@ home= "/"
 /*232:*/
 
 
-//line amail.w:3323
+//line amail.w:3339
 
 if u,err:=user.Current();err!=nil{
 glog.Errorf("can't get a name of the current user: %v\n",err)
@@ -10065,7 +10065,7 @@ cuser= u.Username
 /*247:*/
 
 
-//line amail.w:3645
+//line amail.w:3661
 
 if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
 glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
@@ -10077,7 +10077,7 @@ plan9dir= "/usr/local/plan9"
 /*:247*/
 
 
-//line amail.w:3341
+//line amail.w:3357
 })
 
 
@@ -10085,7 +10085,7 @@ plan9dir= "/usr/local/plan9"
 /*:235*/
 
 
-//line amail.w:3642
+//line amail.w:3658
 
 
 
@@ -10093,7 +10093,7 @@ plan9dir= "/usr/local/plan9"
 /*:246*/
 
 
-//line amail.w:3515
+//line amail.w:3531
 
 w.Seek(0,0)
 w.WriteAddr(wholefile)
@@ -10124,7 +10124,7 @@ case"to":
 /*244:*/
 
 
-//line amail.w:3627
+//line amail.w:3643
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -10139,7 +10139,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:244*/
 
 
-//line amail.w:3540
+//line amail.w:3556
 
 to= append(to,f...)
 case"cc":
@@ -10148,7 +10148,7 @@ case"cc":
 /*244:*/
 
 
-//line amail.w:3627
+//line amail.w:3643
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -10163,7 +10163,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:244*/
 
 
-//line amail.w:3543
+//line amail.w:3559
 
 cc= append(cc,f...)
 case"bcc":
@@ -10172,7 +10172,7 @@ case"bcc":
 /*244:*/
 
 
-//line amail.w:3627
+//line amail.w:3643
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -10187,7 +10187,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:244*/
 
 
-//line amail.w:3546
+//line amail.w:3562
 
 bcc= append(bcc,f...)
 case"attach":
@@ -10208,7 +10208,7 @@ f[i]= strings.TrimSpace(f[i])
 /*244:*/
 
 
-//line amail.w:3627
+//line amail.w:3643
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -10223,7 +10223,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:244*/
 
 
-//line amail.w:3561
+//line amail.w:3577
 
 to= append(to,f...)
 }
@@ -10294,7 +10294,7 @@ w.Close()
 /*:243*/
 
 
-//line amail.w:3437
+//line amail.w:3453
 
 }
 }
@@ -10307,7 +10307,7 @@ w.UnreadEvent(ev)
 /*:239*/
 
 
-//line amail.w:3419
+//line amail.w:3435
 
 
 
@@ -10342,7 +10342,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*248:*/
 
 
-//line amail.w:3652
+//line amail.w:3668
 
 writeSignature(w,box)
 
@@ -10560,7 +10560,7 @@ glog.V(debug).Infof("search argument: '%s'\n",ev.Arg)
 /*190:*/
 
 
-//line amail.w:2517
+//line amail.w:2534
 
 {
 msgs:=box.search(ev.Arg)
@@ -10569,7 +10569,7 @@ msgs:=box.search(ev.Arg)
 /*183:*/
 
 
-//line amail.w:2403
+//line amail.w:2420
 
 glog.V(debug).Infof("clean the '%s' mailbox's window\n",box.name)
 clean(box.w)
@@ -10579,7 +10579,7 @@ clean(box.w)
 /*:183*/
 
 
-//line amail.w:2520
+//line amail.w:2537
 
 
 
@@ -10615,7 +10615,7 @@ ontop= false
 /*:169*/
 
 
-//line amail.w:2521
+//line amail.w:2538
 
 name:=fmt.Sprintf("Amail/%s/Search(%s)",box.name,strings.Replace(ev.Arg," ","␣",-1))
 w:=box.w
@@ -10639,7 +10639,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:53*/
 
 
-//line amail.w:2527
+//line amail.w:2544
 
 glog.V(debug).Infof("len of msgs: %v\n",len(msgs))
 box.rfch<-&refresh{0,msgs}
@@ -10714,7 +10714,7 @@ box.writeTag(counted)
 /*183:*/
 
 
-//line amail.w:2403
+//line amail.w:2420
 
 glog.V(debug).Infof("clean the '%s' mailbox's window\n",box.name)
 clean(box.w)
@@ -11141,7 +11141,7 @@ for _,msg:=range m{
 /*199:*/
 
 
-//line amail.w:2644
+//line amail.w:2661
 
 box.eraseMessage(msg)
 
@@ -11194,7 +11194,7 @@ if msg.box!=box{
 /*199:*/
 
 
-//line amail.w:2644
+//line amail.w:2661
 
 box.eraseMessage(msg)
 
@@ -11284,7 +11284,7 @@ box.rfch<-&refresh{seek,msgs}
 /*198:*/
 
 
-//line amail.w:2631
+//line amail.w:2648
 
 {
 glog.V(debug).Infof("box.deleted:%d\n",box.deleted)
@@ -11302,7 +11302,7 @@ box.writeTag(counted)
 /*:181*/
 
 
-//line amail.w:2634
+//line amail.w:2651
 
 w:=box.w
 if box.deleted==0{
@@ -11325,7 +11325,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:50*/
 
 
-//line amail.w:2637
+//line amail.w:2654
 
 }else{
 
@@ -11347,7 +11347,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:51*/
 
 
-//line amail.w:2639
+//line amail.w:2656
 
 }
 }
@@ -11421,7 +11421,7 @@ msg:=v.msgs[0]
 /*186:*/
 
 
-//line amail.w:2427
+//line amail.w:2444
 
 
 
@@ -11442,14 +11442,14 @@ src= box.all
 /*:144*/
 
 
-//line amail.w:2428
+//line amail.w:2445
 
 
 
 /*188:*/
 
 
-//line amail.w:2468
+//line amail.w:2485
 
 addr:=fmt.Sprintf("0/^[%s]*(%s)?%s%d(%s)?\\/.*\\n.*\\n/",
 escape(levelmark),
@@ -11463,7 +11463,7 @@ escape(newmark))
 /*:188*/
 
 
-//line amail.w:2429
+//line amail.w:2446
 
 glog.V(debug).Infof("composed message addr '%s' in the '%s' mailbox\n",addr,box.name)
 if err:=box.w.WriteAddr(addr);err!=nil{
@@ -11474,7 +11474,7 @@ if(v.flags&insert)==0{
 /*187:*/
 
 
-//line amail.w:2461
+//line amail.w:2478
 
 glog.V(debug).Infof("the '%d' message won't be inserted in the '%s' mailbox's window\n",v.msgs[0].id,box.name)
 v.msgs= v.msgs[1:]
@@ -11493,7 +11493,7 @@ box.rfch<-&refresh{v.flags,v.msgs}
 /*198:*/
 
 
-//line amail.w:2631
+//line amail.w:2648
 
 {
 glog.V(debug).Infof("box.deleted:%d\n",box.deleted)
@@ -11511,7 +11511,7 @@ box.writeTag(counted)
 /*:181*/
 
 
-//line amail.w:2634
+//line amail.w:2651
 
 w:=box.w
 if box.deleted==0{
@@ -11534,7 +11534,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:50*/
 
 
-//line amail.w:2637
+//line amail.w:2654
 
 }else{
 
@@ -11556,7 +11556,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:51*/
 
 
-//line amail.w:2639
+//line amail.w:2656
 
 }
 }
@@ -11575,7 +11575,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:166*/
 
 
-//line amail.w:2464
+//line amail.w:2481
 
 continue
 
@@ -11584,7 +11584,7 @@ continue
 /*:187*/
 
 
-//line amail.w:2434
+//line amail.w:2451
 
 }
 if box.threadMode(){
@@ -11593,7 +11593,7 @@ if box.threadMode(){
 /*189:*/
 
 
-//line amail.w:2479
+//line amail.w:2496
 
 
 
@@ -11615,7 +11615,7 @@ parent= <-ch
 /*:132*/
 
 
-//line amail.w:2480
+//line amail.w:2497
 
 if parent!=nil{
 glog.V(debug).Infof("msg '%d' has a parent, looking for a position to print\n",msg.id)
@@ -11643,7 +11643,7 @@ children= <-ch
 /*:129*/
 
 
-//line amail.w:2487
+//line amail.w:2504
 
 if len(children)==0{
 break
@@ -11664,7 +11664,7 @@ glog.V(debug).Infof("the '%d' message will be printed after the '%d' message\n",
 /*188:*/
 
 
-//line amail.w:2468
+//line amail.w:2485
 
 addr:=fmt.Sprintf("0/^[%s]*(%s)?%s%d(%s)?\\/.*\\n.*\\n/",
 escape(levelmark),
@@ -11678,7 +11678,7 @@ escape(newmark))
 /*:188*/
 
 
-//line amail.w:2502
+//line amail.w:2519
 
 addr+= eol
 if err:=box.w.WriteAddr(addr);err!=nil{
@@ -11689,7 +11689,7 @@ if(v.flags&exact)==exact{
 /*187:*/
 
 
-//line amail.w:2461
+//line amail.w:2478
 
 glog.V(debug).Infof("the '%d' message won't be inserted in the '%s' mailbox's window\n",v.msgs[0].id,box.name)
 v.msgs= v.msgs[1:]
@@ -11708,7 +11708,7 @@ box.rfch<-&refresh{v.flags,v.msgs}
 /*198:*/
 
 
-//line amail.w:2631
+//line amail.w:2648
 
 {
 glog.V(debug).Infof("box.deleted:%d\n",box.deleted)
@@ -11726,7 +11726,7 @@ box.writeTag(counted)
 /*:181*/
 
 
-//line amail.w:2634
+//line amail.w:2651
 
 w:=box.w
 if box.deleted==0{
@@ -11749,7 +11749,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:50*/
 
 
-//line amail.w:2637
+//line amail.w:2654
 
 }else{
 
@@ -11771,7 +11771,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:51*/
 
 
-//line amail.w:2639
+//line amail.w:2656
 
 }
 }
@@ -11790,7 +11790,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:166*/
 
 
-//line amail.w:2464
+//line amail.w:2481
 
 continue
 
@@ -11799,7 +11799,7 @@ continue
 /*:187*/
 
 
-//line amail.w:2507
+//line amail.w:2524
 
 }
 }
@@ -11809,7 +11809,7 @@ continue
 /*187:*/
 
 
-//line amail.w:2461
+//line amail.w:2478
 
 glog.V(debug).Infof("the '%d' message won't be inserted in the '%s' mailbox's window\n",v.msgs[0].id,box.name)
 v.msgs= v.msgs[1:]
@@ -11828,7 +11828,7 @@ box.rfch<-&refresh{v.flags,v.msgs}
 /*198:*/
 
 
-//line amail.w:2631
+//line amail.w:2648
 
 {
 glog.V(debug).Infof("box.deleted:%d\n",box.deleted)
@@ -11846,7 +11846,7 @@ box.writeTag(counted)
 /*:181*/
 
 
-//line amail.w:2634
+//line amail.w:2651
 
 w:=box.w
 if box.deleted==0{
@@ -11869,7 +11869,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:50*/
 
 
-//line amail.w:2637
+//line amail.w:2654
 
 }else{
 
@@ -11891,7 +11891,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:51*/
 
 
-//line amail.w:2639
+//line amail.w:2656
 
 }
 }
@@ -11910,7 +11910,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:166*/
 
 
-//line amail.w:2464
+//line amail.w:2481
 
 continue
 
@@ -11919,7 +11919,7 @@ continue
 /*:187*/
 
 
-//line amail.w:2511
+//line amail.w:2528
 
 }else if err:=box.w.WriteAddr(bof);err!=nil{
 glog.Errorf("can't write '%s' to 'addr' file of the '%s' mailbox's window: %v\n",bof,box.name,err)
@@ -11930,7 +11930,7 @@ glog.Errorf("can't write '%s' to 'addr' file of the '%s' mailbox's window: %v\n"
 /*:189*/
 
 
-//line amail.w:2437
+//line amail.w:2454
 
 }else if msg.box!=box{
 
@@ -11938,7 +11938,7 @@ glog.Errorf("can't write '%s' to 'addr' file of the '%s' mailbox's window: %v\n"
 /*187:*/
 
 
-//line amail.w:2461
+//line amail.w:2478
 
 glog.V(debug).Infof("the '%d' message won't be inserted in the '%s' mailbox's window\n",v.msgs[0].id,box.name)
 v.msgs= v.msgs[1:]
@@ -11957,7 +11957,7 @@ box.rfch<-&refresh{v.flags,v.msgs}
 /*198:*/
 
 
-//line amail.w:2631
+//line amail.w:2648
 
 {
 glog.V(debug).Infof("box.deleted:%d\n",box.deleted)
@@ -11975,7 +11975,7 @@ box.writeTag(counted)
 /*:181*/
 
 
-//line amail.w:2634
+//line amail.w:2651
 
 w:=box.w
 if box.deleted==0{
@@ -11998,7 +11998,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:50*/
 
 
-//line amail.w:2637
+//line amail.w:2654
 
 }else{
 
@@ -12020,7 +12020,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:51*/
 
 
-//line amail.w:2639
+//line amail.w:2656
 
 }
 }
@@ -12039,7 +12039,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:166*/
 
 
-//line amail.w:2464
+//line amail.w:2481
 
 continue
 
@@ -12048,7 +12048,7 @@ continue
 /*:187*/
 
 
-//line amail.w:2439
+//line amail.w:2456
 
 }else if p,ok:=src.Search(msg.id);!ok{
 glog.V(debug).Infof("the '%d' message is not found in  the '%s' mailbox's window\n",msg.id,box.name)
@@ -12067,7 +12067,7 @@ msg:=src[p-1]
 /*188:*/
 
 
-//line amail.w:2468
+//line amail.w:2485
 
 addr:=fmt.Sprintf("0/^[%s]*(%s)?%s%d(%s)?\\/.*\\n.*\\n/",
 escape(levelmark),
@@ -12081,7 +12081,7 @@ escape(newmark))
 /*:188*/
 
 
-//line amail.w:2452
+//line amail.w:2469
 
 addr+= eol
 if err:=box.w.WriteAddr(addr);err!=nil{
@@ -12257,7 +12257,7 @@ box.rfch<-&refresh{v.flags,v.msgs}
 /*198:*/
 
 
-//line amail.w:2631
+//line amail.w:2648
 
 {
 glog.V(debug).Infof("box.deleted:%d\n",box.deleted)
@@ -12275,7 +12275,7 @@ box.writeTag(counted)
 /*:181*/
 
 
-//line amail.w:2634
+//line amail.w:2651
 
 w:=box.w
 if box.deleted==0{
@@ -12298,7 +12298,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:50*/
 
 
-//line amail.w:2637
+//line amail.w:2654
 
 }else{
 
@@ -12320,7 +12320,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:51*/
 
 
-//line amail.w:2639
+//line amail.w:2656
 
 }
 }
@@ -12361,7 +12361,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*195:*/
 
 
-//line amail.w:2583
+//line amail.w:2600
 
 case d:=<-box.ach:
 switch d.a{
@@ -12382,7 +12382,7 @@ if msg.unread{
 /*196:*/
 
 
-//line amail.w:2615
+//line amail.w:2632
 
 msg.unread= false
 box.unread.DeleteById(id)
@@ -12392,14 +12392,14 @@ box.unread.DeleteById(id)
 /*:196*/
 
 
-//line amail.w:2598
+//line amail.w:2615
 
 
 
 /*197:*/
 
 
-//line amail.w:2621
+//line amail.w:2638
 
 if!box.thread&&box.shownew{
 
@@ -12407,7 +12407,7 @@ if!box.thread&&box.shownew{
 /*199:*/
 
 
-//line amail.w:2644
+//line amail.w:2661
 
 box.eraseMessage(msg)
 
@@ -12417,14 +12417,14 @@ box.eraseMessage(msg)
 /*:199*/
 
 
-//line amail.w:2623
+//line amail.w:2640
 
 
 
 /*198:*/
 
 
-//line amail.w:2631
+//line amail.w:2648
 
 {
 glog.V(debug).Infof("box.deleted:%d\n",box.deleted)
@@ -12442,7 +12442,7 @@ box.writeTag(counted)
 /*:181*/
 
 
-//line amail.w:2634
+//line amail.w:2651
 
 w:=box.w
 if box.deleted==0{
@@ -12465,7 +12465,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:50*/
 
 
-//line amail.w:2637
+//line amail.w:2654
 
 }else{
 
@@ -12487,7 +12487,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:51*/
 
 
-//line amail.w:2639
+//line amail.w:2656
 
 }
 }
@@ -12497,7 +12497,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:198*/
 
 
-//line amail.w:2624
+//line amail.w:2641
 
 }
 msgs= append(msgs,msg)
@@ -12509,7 +12509,7 @@ msgs= append(msgs,msg)
 /*:197*/
 
 
-//line amail.w:2599
+//line amail.w:2616
 
 
 
@@ -12527,7 +12527,7 @@ rfch<-&b
 /*:70*/
 
 
-//line amail.w:2600
+//line amail.w:2617
 
 }
 if err:=msg.open();err!=nil{
@@ -12557,7 +12557,7 @@ mrfch<-&refresh{seek,msgs}
 /*:155*/
 
 
-//line amail.w:2610
+//line amail.w:2627
 
 
 
@@ -12590,7 +12590,7 @@ msg:=box.all[p]
 /*205:*/
 
 
-//line amail.w:2737
+//line amail.w:2754
 
 msg.writeTag()
 
@@ -12658,7 +12658,7 @@ msg:=box.all[p]
 /*205:*/
 
 
-//line amail.w:2737
+//line amail.w:2754
 
 msg.writeTag()
 
@@ -12756,7 +12756,7 @@ id:=msg.id
 /*196:*/
 
 
-//line amail.w:2615
+//line amail.w:2632
 
 msg.unread= false
 box.unread.DeleteById(id)
@@ -12773,7 +12773,7 @@ box.unread.DeleteById(id)
 /*197:*/
 
 
-//line amail.w:2621
+//line amail.w:2638
 
 if!box.thread&&box.shownew{
 
@@ -12781,7 +12781,7 @@ if!box.thread&&box.shownew{
 /*199:*/
 
 
-//line amail.w:2644
+//line amail.w:2661
 
 box.eraseMessage(msg)
 
@@ -12791,14 +12791,14 @@ box.eraseMessage(msg)
 /*:199*/
 
 
-//line amail.w:2623
+//line amail.w:2640
 
 
 
 /*198:*/
 
 
-//line amail.w:2631
+//line amail.w:2648
 
 {
 glog.V(debug).Infof("box.deleted:%d\n",box.deleted)
@@ -12816,7 +12816,7 @@ box.writeTag(counted)
 /*:181*/
 
 
-//line amail.w:2634
+//line amail.w:2651
 
 w:=box.w
 if box.deleted==0{
@@ -12839,7 +12839,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:50*/
 
 
-//line amail.w:2637
+//line amail.w:2654
 
 }else{
 
@@ -12861,7 +12861,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:51*/
 
 
-//line amail.w:2639
+//line amail.w:2656
 
 }
 }
@@ -12871,7 +12871,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:198*/
 
 
-//line amail.w:2624
+//line amail.w:2641
 
 }
 msgs= append(msgs,msg)
@@ -12933,7 +12933,7 @@ f.Close()
 /*:116*/
 
 
-//line amail.w:2611
+//line amail.w:2628
 
 }
 
@@ -13264,20 +13264,37 @@ add= append(add,"ShowThreads")
 }
 }
 
-if len(src)> 0&&box.deleted> 0{
+if len(src)> 0{
+if box.shownew{
+c:=0
+for _,v:=range src{
+if v.deleted{
+c++
+}
+}
+if c!=0{
+add= append(add,"UnDelmesg")
+}
+if len(src)> c{
+add= append(add,"Delmesg")
+}
+}else{
+if box.deleted> 0{
 add= append(add,"UnDelmesg")
 }
 
 if len(src)> box.deleted{
 add= append(add,"Delmesg")
 }
+}
 
-if!box.thread&&len(src)> 0&&counted&&(box.shownew||!box.showthreads){
+if!box.thread&&counted&&(box.shownew||!box.showthreads){
 add= append(add,"Thread")
 }
 
-if len(src)> 0{
+if len(box.unread)> 0{
 add= append(add,"Seen")
+}
 }
 
 if err:=writeTag(box.w,del,add);err!=nil{
@@ -13294,7 +13311,7 @@ glog.Errorf("can't set a tag of the '%s' box's window: %v\n",box.name,err)
 /*184:*/
 
 
-//line amail.w:2408
+//line amail.w:2425
 
 func clean(w*goacme.Window){
 if err:=w.WriteAddr(wholefile);err!=nil{
@@ -13315,7 +13332,7 @@ glog.Errorf("can't write to 'data' file: %s\n",err)
 /*191:*/
 
 
-//line amail.w:2533
+//line amail.w:2550
 
 func(box*mailbox)search(str string)(msgs messages){
 if len(str)==0{
@@ -13358,7 +13375,7 @@ return
 /*200:*/
 
 
-//line amail.w:2649
+//line amail.w:2666
 
 func(box*mailbox)eraseMessage(msg*message){
 if box.w==nil{
@@ -13371,7 +13388,7 @@ msg.id,msg.box.name,box.name)
 /*188:*/
 
 
-//line amail.w:2468
+//line amail.w:2485
 
 addr:=fmt.Sprintf("0/^[%s]*(%s)?%s%d(%s)?\\/.*\\n.*\\n/",
 escape(levelmark),
@@ -13385,7 +13402,7 @@ escape(newmark))
 /*:188*/
 
 
-//line amail.w:2656
+//line amail.w:2673
 
 if err:=box.w.WriteAddr(addr);err!=nil{
 glog.V(debug).Infof("can't write '%s' to 'addr' of the '%s' mailbox's window: %v\n",addr,box.name,err)
@@ -13405,7 +13422,7 @@ glog.Errorf("can't write to 'data' file of the box '%s': %s\n",box.name,err)
 /*203:*/
 
 
-//line amail.w:2685
+//line amail.w:2702
 
 func split(s string)(strs[]string){
 f:=strings.Fields(s)
@@ -13431,7 +13448,7 @@ return
 /*204:*/
 
 
-//line amail.w:2702
+//line amail.w:2719
 
 func(msg*message)open()(err error){
 glog.V(debug).Infof("open: trying to open '%d' directory\n",msg.id)
@@ -13453,7 +13470,7 @@ return err
 /*213:*/
 
 
-//line amail.w:2972
+//line amail.w:2989
 
 glog.V(debug).Infof("clean the '%s/%d' message's window\n",msg.box.name,msg.id)
 clean(msg.w)
@@ -13463,7 +13480,7 @@ clean(msg.w)
 /*:213*/
 
 
-//line amail.w:2718
+//line amail.w:2735
 
 }
 buf:=make([]byte,0,0x8000)
@@ -13472,7 +13489,7 @@ buf:=make([]byte,0,0x8000)
 /*211:*/
 
 
-//line amail.w:2839
+//line amail.w:2856
 
 {
 glog.V(debug).Infof("composing a header of the '%d' message\n",msg.id)
@@ -13487,14 +13504,14 @@ msg.subject)...)
 /*:211*/
 
 
-//line amail.w:2721
+//line amail.w:2738
 
 
 
 /*218:*/
 
 
-//line amail.w:3013
+//line amail.w:3030
 
 {
 if len(msg.text)==0&&len(msg.html)==0{
@@ -13542,21 +13559,21 @@ return
 /*222:*/
 
 
-//line amail.w:3149
+//line amail.w:3166
 
 
 
 /*235:*/
 
 
-//line amail.w:3340
+//line amail.w:3356
 
 once.Do(func(){
 
 /*223:*/
 
 
-//line amail.w:3153
+//line amail.w:3170
 
 if home= os.Getenv("home");len(home)==0{
 if home= os.Getenv("HOME");len(home)==0{
@@ -13575,7 +13592,7 @@ home= "/"
 /*232:*/
 
 
-//line amail.w:3323
+//line amail.w:3339
 
 if u,err:=user.Current();err!=nil{
 glog.Errorf("can't get a name of the current user: %v\n",err)
@@ -13593,7 +13610,7 @@ cuser= u.Username
 /*247:*/
 
 
-//line amail.w:3645
+//line amail.w:3661
 
 if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
 glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
@@ -13605,7 +13622,7 @@ plan9dir= "/usr/local/plan9"
 /*:247*/
 
 
-//line amail.w:3341
+//line amail.w:3357
 })
 
 
@@ -13613,7 +13630,7 @@ plan9dir= "/usr/local/plan9"
 /*:235*/
 
 
-//line amail.w:3150
+//line amail.w:3167
 
 
 
@@ -13621,7 +13638,7 @@ plan9dir= "/usr/local/plan9"
 /*:222*/
 
 
-//line amail.w:3055
+//line amail.w:3072
 
 for _,v:=range msg.files{
 buf= append(buf,fmt.Sprintf("\n===> %s (%s)\n",v.path,v.mimetype)...)
@@ -13634,7 +13651,7 @@ buf= append(buf,fmt.Sprintf("\t9p read %s/%s/%d/%sbody > '%s/%s'\n",srv,msg.box.
 /*:218*/
 
 
-//line amail.w:2722
+//line amail.w:2739
 
 w:=msg.w
 name:=fmt.Sprintf("Amail/%s/%d",msg.box.name,msg.id)
@@ -13655,14 +13672,14 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:53*/
 
 
-//line amail.w:2725
+//line amail.w:2742
 
 
 
 /*205:*/
 
 
-//line amail.w:2737
+//line amail.w:2754
 
 msg.writeTag()
 
@@ -13671,7 +13688,7 @@ msg.writeTag()
 /*:205*/
 
 
-//line amail.w:2726
+//line amail.w:2743
 
 w.Write(buf)
 
@@ -13693,7 +13710,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:50*/
 
 
-//line amail.w:2728
+//line amail.w:2745
 
 
 
@@ -13711,7 +13728,7 @@ w.WriteCtl("dot=addr\nshow")
 /*:96*/
 
 
-//line amail.w:2729
+//line amail.w:2746
 
 if isnew{
 
@@ -13719,7 +13736,7 @@ if isnew{
 /*212:*/
 
 
-//line amail.w:2849
+//line amail.w:2866
 
 go func(){
 glog.V(debug).Infof("starting a goroutine to process events from the '%d' message's window\n",msg.id)
@@ -13761,7 +13778,7 @@ mrfch<-&refresh{seek,append(messages{},msg)}
 /*:153*/
 
 
-//line amail.w:2873
+//line amail.w:2890
 
 return
 }
@@ -13775,7 +13792,7 @@ msg.box.deleted--
 /*205:*/
 
 
-//line amail.w:2737
+//line amail.w:2754
 
 msg.writeTag()
 
@@ -13784,7 +13801,7 @@ msg.writeTag()
 /*:205*/
 
 
-//line amail.w:2881
+//line amail.w:2898
 
 
 
@@ -13803,7 +13820,7 @@ mrfch<-&refresh{seek,append(messages{},msg)}
 /*:153*/
 
 
-//line amail.w:2882
+//line amail.w:2899
 
 }
 continue
@@ -13825,7 +13842,7 @@ case"Browser":
 /*226:*/
 
 
-//line amail.w:3212
+//line amail.w:3229
 
 {
 
@@ -13833,21 +13850,21 @@ case"Browser":
 /*231:*/
 
 
-//line amail.w:3319
+//line amail.w:3335
 
 
 
 /*235:*/
 
 
-//line amail.w:3340
+//line amail.w:3356
 
 once.Do(func(){
 
 /*223:*/
 
 
-//line amail.w:3153
+//line amail.w:3170
 
 if home= os.Getenv("home");len(home)==0{
 if home= os.Getenv("HOME");len(home)==0{
@@ -13866,7 +13883,7 @@ home= "/"
 /*232:*/
 
 
-//line amail.w:3323
+//line amail.w:3339
 
 if u,err:=user.Current();err!=nil{
 glog.Errorf("can't get a name of the current user: %v\n",err)
@@ -13884,7 +13901,7 @@ cuser= u.Username
 /*247:*/
 
 
-//line amail.w:3645
+//line amail.w:3661
 
 if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
 glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
@@ -13896,7 +13913,7 @@ plan9dir= "/usr/local/plan9"
 /*:247*/
 
 
-//line amail.w:3341
+//line amail.w:3357
 })
 
 
@@ -13904,7 +13921,7 @@ plan9dir= "/usr/local/plan9"
 /*:235*/
 
 
-//line amail.w:3320
+//line amail.w:3336
 
 
 
@@ -13912,9 +13929,9 @@ plan9dir= "/usr/local/plan9"
 /*:231*/
 
 
-//line amail.w:3214
+//line amail.w:3231
 
-dir:=fmt.Sprintf("%s/amail-%s/%s/%d",os.TempDir(),cuser,msg.box.name,msg.id)
+dir:=fmt.Sprintf("%s/amail-%s/%s/%d",os.TempDir(),cuser,strings.Replace(msg.box.name," ","",-1),msg.id)
 if err:=os.MkdirAll(dir,0700);err!=nil{
 glog.Errorf("can't create a directory '%s': %v\n",dir,err)
 continue
@@ -13933,7 +13950,6 @@ for _,v:=range msg.files{
 saveFile(fmt.Sprintf("%s/%s/%d/%s/body",srv,msg.box.name,msg.id,v.path),
 fmt.Sprintf("%s/%s",dir,v.name))
 }
-
 }
 
 if p,err:=goplumb.Open("send",plan9.OWRITE);err!=nil{
@@ -13948,7 +13964,7 @@ glog.Errorf("can't plumb a message '%s': %v\n",fmt.Sprintf("file://%s/%d.html",d
 /*:226*/
 
 
-//line amail.w:2898
+//line amail.w:2915
 
 continue
 case"Save":
@@ -13957,7 +13973,7 @@ case"Save":
 /*236:*/
 
 
-//line amail.w:3344
+//line amail.w:3360
 
 {
 if len(ev.Arg)==0{
@@ -13987,7 +14003,7 @@ f.Close()
 /*:236*/
 
 
-//line amail.w:2901
+//line amail.w:2918
 
 continue
 case"Q":
@@ -14013,7 +14029,7 @@ replyall= true
 /*237:*/
 
 
-//line amail.w:3369
+//line amail.w:3385
 
 {
 
@@ -14021,7 +14037,7 @@ replyall= true
 /*238:*/
 
 
-//line amail.w:3409
+//line amail.w:3425
 
 w,err:=goacme.New()
 if err!=nil{
@@ -14037,7 +14053,7 @@ glog.Errorf("can't write a tag for a new message window: %v\n",err)
 /*239:*/
 
 
-//line amail.w:3422
+//line amail.w:3438
 
 go func(msg*message){
 glog.V(debug).Infoln("starting a goroutine to process events from a composed mail window")
@@ -14058,7 +14074,7 @@ case"Post":
 /*243:*/
 
 
-//line amail.w:3513
+//line amail.w:3529
 
 {
 
@@ -14066,21 +14082,21 @@ case"Post":
 /*246:*/
 
 
-//line amail.w:3641
+//line amail.w:3657
 
 
 
 /*235:*/
 
 
-//line amail.w:3340
+//line amail.w:3356
 
 once.Do(func(){
 
 /*223:*/
 
 
-//line amail.w:3153
+//line amail.w:3170
 
 if home= os.Getenv("home");len(home)==0{
 if home= os.Getenv("HOME");len(home)==0{
@@ -14099,7 +14115,7 @@ home= "/"
 /*232:*/
 
 
-//line amail.w:3323
+//line amail.w:3339
 
 if u,err:=user.Current();err!=nil{
 glog.Errorf("can't get a name of the current user: %v\n",err)
@@ -14117,7 +14133,7 @@ cuser= u.Username
 /*247:*/
 
 
-//line amail.w:3645
+//line amail.w:3661
 
 if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
 glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
@@ -14129,7 +14145,7 @@ plan9dir= "/usr/local/plan9"
 /*:247*/
 
 
-//line amail.w:3341
+//line amail.w:3357
 })
 
 
@@ -14137,7 +14153,7 @@ plan9dir= "/usr/local/plan9"
 /*:235*/
 
 
-//line amail.w:3642
+//line amail.w:3658
 
 
 
@@ -14145,7 +14161,7 @@ plan9dir= "/usr/local/plan9"
 /*:246*/
 
 
-//line amail.w:3515
+//line amail.w:3531
 
 w.Seek(0,0)
 w.WriteAddr(wholefile)
@@ -14176,7 +14192,7 @@ case"to":
 /*244:*/
 
 
-//line amail.w:3627
+//line amail.w:3643
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -14191,7 +14207,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:244*/
 
 
-//line amail.w:3540
+//line amail.w:3556
 
 to= append(to,f...)
 case"cc":
@@ -14200,7 +14216,7 @@ case"cc":
 /*244:*/
 
 
-//line amail.w:3627
+//line amail.w:3643
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -14215,7 +14231,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:244*/
 
 
-//line amail.w:3543
+//line amail.w:3559
 
 cc= append(cc,f...)
 case"bcc":
@@ -14224,7 +14240,7 @@ case"bcc":
 /*244:*/
 
 
-//line amail.w:3627
+//line amail.w:3643
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -14239,7 +14255,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:244*/
 
 
-//line amail.w:3546
+//line amail.w:3562
 
 bcc= append(bcc,f...)
 case"attach":
@@ -14260,7 +14276,7 @@ f[i]= strings.TrimSpace(f[i])
 /*244:*/
 
 
-//line amail.w:3627
+//line amail.w:3643
 
 for i,_:=range f{
 f[i]= strings.TrimSpace(f[i])
@@ -14275,7 +14291,7 @@ f[i]= strings.TrimSpace(sf[len(sf)-1])
 /*:244*/
 
 
-//line amail.w:3561
+//line amail.w:3577
 
 to= append(to,f...)
 }
@@ -14346,7 +14362,7 @@ w.Close()
 /*:243*/
 
 
-//line amail.w:3437
+//line amail.w:3453
 
 }
 }
@@ -14359,7 +14375,7 @@ w.UnreadEvent(ev)
 /*:239*/
 
 
-//line amail.w:3419
+//line amail.w:3435
 
 
 
@@ -14367,7 +14383,7 @@ w.UnreadEvent(ev)
 /*:238*/
 
 
-//line amail.w:3371
+//line amail.w:3387
 
 name:=fmt.Sprintf("Amail/%s/%d/%sReply%s",
 msg.box.name,
@@ -14391,7 +14407,7 @@ glog.Errorf("can't write to 'ctl' file: %s\n",err)
 /*:53*/
 
 
-//line amail.w:3377
+//line amail.w:3393
 
 buf:=make([]byte,0,0x8000)
 buf= append(buf,fmt.Sprintf("To: %s\n",msg.from)...)
@@ -14418,7 +14434,7 @@ buf= append(buf,'\n')
 /*240:*/
 
 
-//line amail.w:3445
+//line amail.w:3461
 
 if len(msg.text)!=0{
 fn:=fmt.Sprintf("%d/%s",msg.id,msg.text)
@@ -14435,7 +14451,7 @@ continue
 /*241:*/
 
 
-//line amail.w:3463
+//line amail.w:3479
 
 {
 b:=bufio.NewReader(f)
@@ -14457,7 +14473,7 @@ break
 /*:241*/
 
 
-//line amail.w:3456
+//line amail.w:3472
 
 f.Close()
 }else if len(msg.html)!=0{
@@ -14466,7 +14482,7 @@ f.Close()
 /*242:*/
 
 
-//line amail.w:3480
+//line amail.w:3496
 
 {
 c1:=exec.Command("9p","read",fmt.Sprintf("%s/%s/%d/%s",srv,msg.box.name,msg.id,msg.html))
@@ -14497,7 +14513,7 @@ continue
 /*241:*/
 
 
-//line amail.w:3463
+//line amail.w:3479
 
 {
 b:=bufio.NewReader(f)
@@ -14519,7 +14535,7 @@ break
 /*:241*/
 
 
-//line amail.w:3505
+//line amail.w:3521
 
 c1.Wait()
 c2.Wait()
@@ -14531,7 +14547,7 @@ f.(io.Closer).Close()
 /*:242*/
 
 
-//line amail.w:3459
+//line amail.w:3475
 
 }
 
@@ -14540,7 +14556,7 @@ f.(io.Closer).Close()
 /*:240*/
 
 
-//line amail.w:3398
+//line amail.w:3414
 
 }else{
 buf= append(buf,fmt.Sprintf("Include: Mail/%s/%d/raw\n",msg.box.name,msg.id)...)
@@ -14553,7 +14569,7 @@ w.Write(buf)
 /*249:*/
 
 
-//line amail.w:3656
+//line amail.w:3672
 
 if msg!=nil{
 writeSignature(w,msg.box)
@@ -14566,7 +14582,7 @@ writeSignature(w,nil)
 /*:249*/
 
 
-//line amail.w:3405
+//line amail.w:3421
 
 }
 
@@ -14575,7 +14591,7 @@ writeSignature(w,nil)
 /*:237*/
 
 
-//line amail.w:2921
+//line amail.w:2938
 
 continue
 case"Up":
@@ -14599,7 +14615,7 @@ parent= <-ch
 /*:132*/
 
 
-//line amail.w:2924
+//line amail.w:2941
 
 if parent!=nil{
 
@@ -14616,7 +14632,7 @@ msgs:=make(msgmap)
 /*:86*/
 
 
-//line amail.w:2926
+//line amail.w:2943
 
 name:=parent.box.name
 id:=parent.id
@@ -14635,7 +14651,7 @@ msgs[name]= append(msgs[name],id)
 /*:87*/
 
 
-//line amail.w:2929
+//line amail.w:2946
 
 
 
@@ -14651,7 +14667,7 @@ ach<-&struct{m msgmap;a action}{msgs,view}
 /*:89*/
 
 
-//line amail.w:2930
+//line amail.w:2947
 
 }
 continue
@@ -14676,7 +14692,7 @@ children= <-ch
 /*:129*/
 
 
-//line amail.w:2934
+//line amail.w:2951
 
 if len(children)!=0{
 
@@ -14693,7 +14709,7 @@ msgs:=make(msgmap)
 /*:86*/
 
 
-//line amail.w:2936
+//line amail.w:2953
 
 name:=children[0].box.name
 id:=children[0].id
@@ -14712,7 +14728,7 @@ msgs[name]= append(msgs[name],id)
 /*:87*/
 
 
-//line amail.w:2939
+//line amail.w:2956
 
 
 
@@ -14728,7 +14744,7 @@ ach<-&struct{m msgmap;a action}{msgs,view}
 /*:89*/
 
 
-//line amail.w:2940
+//line amail.w:2957
 
 }
 continue
@@ -14738,7 +14754,7 @@ case"Prev":
 /*206:*/
 
 
-//line amail.w:2741
+//line amail.w:2758
 
 pmsg:=msg.prev()
 
@@ -14747,7 +14763,7 @@ pmsg:=msg.prev()
 /*:206*/
 
 
-//line amail.w:2944
+//line amail.w:2961
 
 if pmsg!=nil{
 
@@ -14764,7 +14780,7 @@ msgs:=make(msgmap)
 /*:86*/
 
 
-//line amail.w:2946
+//line amail.w:2963
 
 name:=pmsg.box.name
 id:=pmsg.id
@@ -14783,7 +14799,7 @@ msgs[name]= append(msgs[name],id)
 /*:87*/
 
 
-//line amail.w:2949
+//line amail.w:2966
 
 
 
@@ -14799,7 +14815,7 @@ ach<-&struct{m msgmap;a action}{msgs,view}
 /*:89*/
 
 
-//line amail.w:2950
+//line amail.w:2967
 
 }
 continue
@@ -14809,7 +14825,7 @@ case"Next":
 /*208:*/
 
 
-//line amail.w:2764
+//line amail.w:2781
 
 nmsg:=msg.next()
 
@@ -14818,7 +14834,7 @@ nmsg:=msg.next()
 /*:208*/
 
 
-//line amail.w:2954
+//line amail.w:2971
 
 if nmsg!=nil{
 
@@ -14835,7 +14851,7 @@ msgs:=make(msgmap)
 /*:86*/
 
 
-//line amail.w:2956
+//line amail.w:2973
 
 name:=nmsg.box.name
 id:=nmsg.id
@@ -14854,7 +14870,7 @@ msgs[name]= append(msgs[name],id)
 /*:87*/
 
 
-//line amail.w:2959
+//line amail.w:2976
 
 
 
@@ -14870,7 +14886,7 @@ ach<-&struct{m msgmap;a action}{msgs,view}
 /*:89*/
 
 
-//line amail.w:2960
+//line amail.w:2977
 
 }
 continue
@@ -14887,7 +14903,7 @@ msg.w.UnreadEvent(ev)
 /*:212*/
 
 
-//line amail.w:2731
+//line amail.w:2748
 
 }
 return
@@ -14902,7 +14918,7 @@ return
 /*207:*/
 
 
-//line amail.w:2745
+//line amail.w:2762
 
 func(this*message)prev()(pmsg*message){
 msg:=this
@@ -14926,7 +14942,7 @@ parent= <-ch
 /*:132*/
 
 
-//line amail.w:2748
+//line amail.w:2765
 
 if parent==nil{
 return
@@ -14952,7 +14968,7 @@ children= <-ch
 /*:129*/
 
 
-//line amail.w:2753
+//line amail.w:2770
 
 for _,v:=range children{
 if v==this{
@@ -14972,7 +14988,7 @@ return
 /*209:*/
 
 
-//line amail.w:2768
+//line amail.w:2785
 
 func(this*message)next()(nmsg*message){
 msg:=this
@@ -14996,7 +15012,7 @@ parent= <-ch
 /*:132*/
 
 
-//line amail.w:2771
+//line amail.w:2788
 
 if parent==nil{
 return
@@ -15022,7 +15038,7 @@ children= <-ch
 /*:129*/
 
 
-//line amail.w:2776
+//line amail.w:2793
 
 for i:=0;i<len(children);i++{
 if children[i]!=this{
@@ -15046,7 +15062,7 @@ return
 /*210:*/
 
 
-//line amail.w:2791
+//line amail.w:2808
 
 func(msg*message)writeTag(){
 glog.V(debug).Infof("writing a tag of the '%d' message's window\n",msg.id)
@@ -15088,7 +15104,7 @@ parent= <-ch
 /*:132*/
 
 
-//line amail.w:2812
+//line amail.w:2829
 
 if parent!=nil{
 add= append(add,"Up")
@@ -15114,7 +15130,7 @@ children= <-ch
 /*:129*/
 
 
-//line amail.w:2817
+//line amail.w:2834
 
 if len(children)!=0{
 add= append(add,"Down")
@@ -15125,7 +15141,7 @@ add= append(add,"Down")
 /*206:*/
 
 
-//line amail.w:2741
+//line amail.w:2758
 
 pmsg:=msg.prev()
 
@@ -15134,7 +15150,7 @@ pmsg:=msg.prev()
 /*:206*/
 
 
-//line amail.w:2822
+//line amail.w:2839
 
 if pmsg!=nil{
 add= append(add,"Prev")
@@ -15145,7 +15161,7 @@ add= append(add,"Prev")
 /*208:*/
 
 
-//line amail.w:2764
+//line amail.w:2781
 
 nmsg:=msg.next()
 
@@ -15154,7 +15170,7 @@ nmsg:=msg.next()
 /*:208*/
 
 
-//line amail.w:2827
+//line amail.w:2844
 
 if nmsg!=nil{
 add= append(add,"Next")
@@ -15175,7 +15191,7 @@ glog.Errorf("can't set a tag of the message window: %v",err)
 /*219:*/
 
 
-//line amail.w:3063
+//line amail.w:3080
 
 func(msg*message)bodyPath(bfid*client.Fid,path string)error{
 glog.V(debug).Infof("getting a path for a body of the '%d' message\n",msg.id)
@@ -15234,7 +15250,7 @@ return nil
 /*220:*/
 
 
-//line amail.w:3113
+//line amail.w:3130
 
 func(msg*message)getCID(path string)(string,bool){
 src:=fmt.Sprintf("%d/%smimeheader",msg.id,path)
@@ -15275,7 +15291,7 @@ return"",false
 /*224:*/
 
 
-//line amail.w:3163
+//line amail.w:3180
 
 func readString(pfid*client.Fid,name string)(str string,err error){
 glog.V(debug).Infof("readString: trying to open '%s'\n",name)
@@ -15303,7 +15319,7 @@ return str,nil
 /*225:*/
 
 
-//line amail.w:3182
+//line amail.w:3199
 
 func readAll(pfid*client.Fid,name string,buf[]byte)([]byte,error){
 glog.V(debug).Infof("readAll: trying to open '%s'\n",name)
@@ -15339,7 +15355,7 @@ return buf,nil
 /*227:*/
 
 
-//line amail.w:3245
+//line amail.w:3261
 
 func saveFile(src,dst string)error{
 var err error
@@ -15366,7 +15382,7 @@ return err
 /*228:*/
 
 
-//line amail.w:3263
+//line amail.w:3279
 
 func(msg*message)fixFile(dir string)error{
 src:=fmt.Sprintf("%d/%s",msg.id,msg.html)
@@ -15423,7 +15439,7 @@ return err
 /*251:*/
 
 
-//line amail.w:3670
+//line amail.w:3686
 
 func writeSignature(w*goacme.Window,box*mailbox){
 
@@ -15431,21 +15447,21 @@ func writeSignature(w*goacme.Window,box*mailbox){
 /*222:*/
 
 
-//line amail.w:3149
+//line amail.w:3166
 
 
 
 /*235:*/
 
 
-//line amail.w:3340
+//line amail.w:3356
 
 once.Do(func(){
 
 /*223:*/
 
 
-//line amail.w:3153
+//line amail.w:3170
 
 if home= os.Getenv("home");len(home)==0{
 if home= os.Getenv("HOME");len(home)==0{
@@ -15464,7 +15480,7 @@ home= "/"
 /*232:*/
 
 
-//line amail.w:3323
+//line amail.w:3339
 
 if u,err:=user.Current();err!=nil{
 glog.Errorf("can't get a name of the current user: %v\n",err)
@@ -15482,7 +15498,7 @@ cuser= u.Username
 /*247:*/
 
 
-//line amail.w:3645
+//line amail.w:3661
 
 if plan9dir= os.Getenv("PLAN9");len(plan9dir)==0{
 glog.Errorln("can't get PLAN9 directory from the environment, the plan9dir is assumed '/usr/local/plan9'")
@@ -15494,7 +15510,7 @@ plan9dir= "/usr/local/plan9"
 /*:247*/
 
 
-//line amail.w:3341
+//line amail.w:3357
 })
 
 
@@ -15502,7 +15518,7 @@ plan9dir= "/usr/local/plan9"
 /*:235*/
 
 
-//line amail.w:3150
+//line amail.w:3167
 
 
 
@@ -15510,7 +15526,7 @@ plan9dir= "/usr/local/plan9"
 /*:222*/
 
 
-//line amail.w:3672
+//line amail.w:3688
 
 var f io.ReadCloser
 var err error
@@ -15547,7 +15563,7 @@ w.WriteCtl("dot=addr\nshow")
 /*:96*/
 
 
-//line amail.w:3692
+//line amail.w:3708
 
 }
 

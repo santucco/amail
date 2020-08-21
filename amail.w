@@ -2378,20 +2378,37 @@ func (box *mailbox) writeTag(counted bool) {
 		}
 	}
 
-	if len(src)>0 && box.deleted>0 {
-		add=append(add, "UnDelmesg")
-	}
-
-	if len(src)>box.deleted {
-		add=append(add, "Delmesg")
-	}
-
-	if !box.thread && len(src)>0 && counted && (box.shownew || !box.showthreads) {
-		add=append(add, "Thread")
-	}
-
 	if len(src)>0 {
-		add=append(add, "Seen")
+		if box.shownew {
+			c:=0
+			for _,v:=range src {
+				if v.deleted {
+					c++
+				}
+			}
+			if c!=0 {
+				add=append(add, "UnDelmesg")
+			}
+			if len(src)>c {
+				add=append(add, "Delmesg")
+			}
+		} else {
+			if box.deleted>0 {
+				add=append(add, "UnDelmesg")
+			}
+
+			if len(src)>box.deleted {
+				add=append(add, "Delmesg")
+			}
+		}
+
+		if !box.thread && counted && (box.shownew || !box.showthreads) {
+			add=append(add, "Thread")
+		}
+
+		if len(box.unread)>0 {
+			add=append(add, "Seen")
+		}
 	}
 
 	if err:=writeTag(box.w, del, add); err!=nil {
@@ -3212,7 +3229,7 @@ to help a browser to find the images.
 @<Save stuff on disk and plumb a message to a web browser@>=
 {
 	@<Get current |user|@>
-	dir:=fmt.Sprintf("%s/amail-%s/%s/%d", os.TempDir(), cuser, msg.box.name, msg.id)
+	dir:=fmt.Sprintf("%s/amail-%s/%s/%d", os.TempDir(), cuser, strings.Replace(msg.box.name, " ", "", -1), msg.id)
 	if err:=os.MkdirAll(dir, 0700); err!=nil {
 		glog.Errorf("can't create a directory '%s': %v\n", dir, err)
 		continue
@@ -3229,9 +3246,8 @@ to help a browser to find the images.
 		}
 		for _, v:=range msg.files {
  			saveFile(fmt.Sprintf("%s/%s/%d/%s/body", srv, msg.box.name, msg.id, v.path),
- 						fmt.Sprintf("%s/%s", dir, v.name))
+						fmt.Sprintf("%s/%s", dir, v.name))
 		}
-
 	}
 
 	if p, err:=goplumb.Open("send", plan9.OWRITE); err!=nil {
